@@ -10,7 +10,8 @@ import { FiMail, FiLock, FiUser, FiBriefcase } from 'react-icons/fi';
 const Register = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, isAuthenticated } = useSelector((state) => state.auth);
+  const { loading, isAuthenticated, user } = useSelector((state) => state.auth);
+  
 
   const [formData, setFormData] = useState({
     email: '',
@@ -26,14 +27,26 @@ const Register = () => {
   const { email, password, confirmPassword, role, fullName, companyName } = formData;
 
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/login');
+    if (isAuthenticated && user) {
+      // Check user status and redirect accordingly
+      if (user.status === 'pending') {
+        navigate('/pending-approval');
+      } else if (user.status === 'approved') {
+        // Redirect based on role for approved users
+        if (user.role === 'worker') {
+          navigate('/worker/dashboard');
+        } else if (user.role === 'company') {
+          navigate('/company/dashboard');
+        } else if (user.role === 'admin') {
+          navigate('/admin/dashboard');
+        }
+      }
     }
 
     return () => {
       dispatch(clearError());
     };
-  }, [isAuthenticated, navigate, dispatch]);
+  }, [isAuthenticated, user, navigate, dispatch]);
 
   const handleChange = (e) => {
     setFormData({

@@ -127,12 +127,17 @@ const authSlice = createSlice({
       .addCase(getMe.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
+        // Update localStorage with the latest user data
+        localStorage.setItem('user', JSON.stringify(action.payload.user));
       })
       .addCase(getMe.rejected, (state) => {
         state.loading = false;
         state.isAuthenticated = false;
         state.user = null;
         state.token = null;
+        // Clear localStorage on rejection
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
       })
       // Logout
       .addCase(logout.fulfilled, (state) => {

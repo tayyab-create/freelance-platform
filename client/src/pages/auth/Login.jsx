@@ -21,13 +21,21 @@ const Login = () => {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      // Redirect based on role
-      if (user.role === 'admin') {
-        navigate('/admin/dashboard');
-      } else if (user.role === 'worker') {
-        navigate('/worker/dashboard');
-      } else if (user.role === 'company') {
-        navigate('/company/dashboard');
+      // Check if user is pending approval
+      if (user.status === 'pending') {
+        navigate('/pending-approval');
+        return;
+      }
+      
+      // Redirect approved users based on role
+      if (user.status === 'approved') {
+        if (user.role === 'admin') {
+          navigate('/admin/dashboard');
+        } else if (user.role === 'worker') {
+          navigate('/worker/dashboard');
+        } else if (user.role === 'company') {
+          navigate('/company/dashboard');
+        }
       }
     }
 

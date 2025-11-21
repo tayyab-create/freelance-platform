@@ -191,149 +191,203 @@ const WorkerProfile = () => {
                     )}
                 </div>
 
-                {/* Basic Information */}
+                {/* Profile Picture & Basic Info */}
                 <div className="card">
-                    <h2 className="text-xl font-bold mb-4">Basic Information</h2>
-                    {/* Profile Picture */}
-                    {editing && (
-                        <div className="mb-6">
-                            <FileUpload
-                                label="Profile Picture"
-                                accept="image/*"
-                                preview={true}
-                                currentImage={profile?.profilePicture}
-                                onFileSelect={handleImageUpload}
-                                maxSize={5}
-                            />
-                            {uploadingImage && (
-                                <p className="text-sm text-primary-600 mt-2">Uploading...</p>
-                            )}
-                        </div>
-                    )}
-
-                    {!editing && profile?.profilePicture && (
-                        <div className="mb-6">
-                            <label className="label">Profile Picture</label>
-                            <img
-                                src={profile.profilePicture}
-                                alt="Profile"
-                                className="h-32 w-32 object-cover rounded-lg border-2 border-gray-300"
-                            />
-                        </div>
-                    )}
-                    <div className="space-y-4">
-                        <Input
-                            label="Full Name"
-                            name="fullName"
-                            value={basicInfo.fullName}
-                            onChange={handleBasicInfoChange}
-                            disabled={!editing}
-                            required
-                        />
-
-                        <Input
-                            label="Phone Number"
-                            name="phone"
-                            type="tel"
-                            value={basicInfo.phone}
-                            onChange={handleBasicInfoChange}
-                            disabled={!editing}
-                        />
-
-                        <div>
-                            <label className="label">Bio</label>
-                            <textarea
-                                name="bio"
-                                value={basicInfo.bio}
-                                onChange={handleBasicInfoChange}
-                                disabled={!editing}
-                                rows="4"
-                                className="input-field"
-                                placeholder="Tell us about yourself..."
-                            />
-                        </div>
-
-                        <Input
-                            label="GitHub Profile"
-                            name="githubProfile"
-                            value={basicInfo.githubProfile}
-                            onChange={handleBasicInfoChange}
-                            disabled={!editing}
-                            placeholder="https://github.com/username"
-                        />
-
-                        <Input
-                            label="LinkedIn Profile"
-                            name="linkedinProfile"
-                            value={basicInfo.linkedinProfile}
-                            onChange={handleBasicInfoChange}
-                            disabled={!editing}
-                            placeholder="https://linkedin.com/in/username"
-                        />
-
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <Input
-                                label="Hourly Rate ($)"
-                                name="hourlyRate"
-                                type="number"
-                                value={basicInfo.hourlyRate}
-                                onChange={handleBasicInfoChange}
-                                disabled={!editing}
-                            />
-
-                            <div>
-                                <label className="label">Availability</label>
-                                <select
-                                    name="availability"
-                                    value={basicInfo.availability}
-                                    onChange={handleBasicInfoChange}
-                                    disabled={!editing}
-                                    className="input-field"
-                                >
-                                    <option value="available">Available</option>
-                                    <option value="busy">Busy</option>
-                                    <option value="not-available">Not Available</option>
-                                </select>
+                    <div className="flex flex-col md:flex-row gap-6">
+                        {/* Profile Picture */}
+                        <div className="flex-shrink-0">
+                            <div className="relative">
+                                <img
+                                    src={profile?.profilePicture || 'https://via.placeholder.com/150'}
+                                    alt="Profile"
+                                    className="h-32 w-32 rounded-full object-cover border-4 border-gray-100"
+                                />
+                                {editing && (
+                                    <div className="mt-3">
+                                        <FileUpload
+                                            onFileSelect={handleImageUpload}
+                                            accept="image/*"
+                                            loading={uploadingImage}
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </div>
 
-                        <div>
-                            <label className="label">Skills (comma-separated)</label>
-                            <input
-                                type="text"
-                                value={skills}
-                                onChange={(e) => setSkills(e.target.value)}
-                                disabled={!editing}
-                                className="input-field"
-                                placeholder="React, Node.js, MongoDB, etc."
-                            />
+                        {/* Basic Info */}
+                        <div className="flex-1 space-y-4">
+                            {editing ? (
+                                <>
+                                    <Input
+                                        label="Full Name"
+                                        name="fullName"
+                                        value={basicInfo.fullName}
+                                        onChange={handleBasicInfoChange}
+                                    />
+                                    <Input
+                                        label="Phone"
+                                        name="phone"
+                                        value={basicInfo.phone}
+                                        onChange={handleBasicInfoChange}
+                                        placeholder="+1234567890"
+                                    />
+                                    <div>
+                                        <label className="label">Bio</label>
+                                        <textarea
+                                            name="bio"
+                                            value={basicInfo.bio}
+                                            onChange={handleBasicInfoChange}
+                                            className="input-field"
+                                            rows="3"
+                                            placeholder="Tell us about yourself..."
+                                        />
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div>
+                                        <h2 className="text-2xl font-bold">{profile?.fullName}</h2>
+                                        {profile?.phone && <p className="text-gray-600">{profile.phone}</p>}
+                                    </div>
+                                    {profile?.bio && (
+                                        <p className="text-gray-700">{profile.bio}</p>
+                                    )}
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
 
-                {/* Skills Display */}
-                {profile?.skills && profile.skills.length > 0 && (
-                    <div className="card">
-                        <h2 className="text-xl font-bold mb-4">Skills</h2>
+                {/* Skills */}
+                <div className="card">
+                    <h2 className="text-xl font-bold mb-4">Skills</h2>
+                    {editing ? (
+                        <Input
+                            label="Skills (comma-separated)"
+                            value={skills}
+                            onChange={(e) => setSkills(e.target.value)}
+                            placeholder="React, Node.js, MongoDB, etc."
+                        />
+                    ) : (
                         <div className="flex flex-wrap gap-2">
-                            {profile.skills.map((skill, index) => (
-                                <span key={index} className="badge badge-info">
-                                    {skill}
-                                </span>
-                            ))}
+                            {profile?.skills?.length > 0 ? (
+                                profile.skills.map((skill, index) => (
+                                    <span key={index} className="badge badge-primary">
+                                        {skill}
+                                    </span>
+                                ))
+                            ) : (
+                                <p className="text-gray-500">No skills added yet</p>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* Hourly Rate & Availability */}
+                <div className="grid md:grid-cols-2 gap-6">
+                    <div className="card">
+                        <h3 className="font-bold mb-2">Hourly Rate</h3>
+                        {editing ? (
+                            <Input
+                                type="number"
+                                name="hourlyRate"
+                                value={basicInfo.hourlyRate}
+                                onChange={handleBasicInfoChange}
+                                placeholder="50"
+                            />
+                        ) : (
+                            <p className="text-2xl font-bold text-primary-600">
+                                ${profile?.hourlyRate || 0}/hr
+                            </p>
+                        )}
+                    </div>
+                    <div className="card">
+                        <h3 className="font-bold mb-2">Availability</h3>
+                        {editing ? (
+                            <select
+                                name="availability"
+                                value={basicInfo.availability}
+                                onChange={handleBasicInfoChange}
+                                className="input-field"
+                            >
+                                <option value="available">Available</option>
+                                <option value="busy">Busy</option>
+                                <option value="unavailable">Unavailable</option>
+                            </select>
+                        ) : (
+                            <span
+                                className={`badge ${profile?.availability === 'available'
+                                    ? 'badge-success'
+                                    : profile?.availability === 'busy'
+                                        ? 'badge-warning'
+                                        : 'badge-error'
+                                    }`}
+                            >
+                                {profile?.availability || 'Not set'}
+                            </span>
+                        )}
+                    </div>
+                </div>
+
+                {/* Social Links */}
+                {editing && (
+                    <div className="card">
+                        <h2 className="text-xl font-bold mb-4">Social Links</h2>
+                        <div className="space-y-4">
+                            <Input
+                                label="GitHub Profile"
+                                name="githubProfile"
+                                value={basicInfo.githubProfile}
+                                onChange={handleBasicInfoChange}
+                                placeholder="https://github.com/username"
+                            />
+                            <Input
+                                label="LinkedIn Profile"
+                                name="linkedinProfile"
+                                value={basicInfo.linkedinProfile}
+                                onChange={handleBasicInfoChange}
+                                placeholder="https://linkedin.com/in/username"
+                            />
                         </div>
                     </div>
                 )}
 
-                {/* Experience Section */}
+                {!editing && (profile?.githubProfile || profile?.linkedinProfile) && (
+                    <div className="card">
+                        <h2 className="text-xl font-bold mb-4">Social Links</h2>
+                        <div className="flex gap-4">
+                            {profile?.githubProfile && (
+                                <a
+                                    href={profile.githubProfile}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-primary-600 hover:underline"
+                                >
+                                    GitHub →
+                                </a>
+                            )}
+                            {profile?.linkedinProfile && (
+                                <a
+                                    href={profile.linkedinProfile}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-primary-600 hover:underline"
+                                >
+                                    LinkedIn →
+                                </a>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* Experience */}
                 <div className="card">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-bold">Experience</h2>
-                        <Button variant="primary" icon={FiPlus} onClick={() => setShowExpModal(true)}>
+                        <Button variant="primary" size="sm" icon={FiPlus} onClick={() => setShowExpModal(true)}>
                             Add Experience
                         </Button>
                     </div>
-
                     {profile?.experience && profile.experience.length > 0 ? (
                         <div className="space-y-4">
                             {profile.experience.map((exp, index) => (
@@ -341,12 +395,10 @@ const WorkerProfile = () => {
                                     <h3 className="font-bold text-lg">{exp.title}</h3>
                                     <p className="text-gray-600">{exp.company}</p>
                                     <p className="text-sm text-gray-500">
-                                        {new Date(exp.startDate).toLocaleDateString()} -
-                                        {exp.current ? ' Present' : ` ${new Date(exp.endDate).toLocaleDateString()}`}
+                                        {new Date(exp.startDate).toLocaleDateString()} -{' '}
+                                        {exp.current ? 'Present' : new Date(exp.endDate).toLocaleDateString()}
                                     </p>
-                                    {exp.description && (
-                                        <p className="text-gray-700 mt-2">{exp.description}</p>
-                                    )}
+                                    {exp.description && <p className="text-gray-700 mt-2">{exp.description}</p>}
                                 </div>
                             ))}
                         </div>
@@ -355,26 +407,25 @@ const WorkerProfile = () => {
                     )}
                 </div>
 
-                {/* Certifications Section */}
+                {/* Certifications */}
                 <div className="card">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-bold">Certifications</h2>
-                        <Button variant="primary" icon={FiPlus} onClick={() => setShowCertModal(true)}>
+                        <Button variant="primary" size="sm" icon={FiPlus} onClick={() => setShowCertModal(true)}>
                             Add Certification
                         </Button>
                     </div>
-
                     {profile?.certifications && profile.certifications.length > 0 ? (
-                        <div className="space-y-4">
+                        <div className="grid md:grid-cols-2 gap-4">
                             {profile.certifications.map((cert, index) => (
-                                <div key={index} className="border rounded-lg p-4">
+                                <div key={index} className="border border-gray-200 rounded-lg p-4">
                                     <h3 className="font-bold text-lg">{cert.title}</h3>
                                     <p className="text-gray-600">{cert.issuedBy}</p>
                                     <p className="text-sm text-gray-500">
                                         Issued: {new Date(cert.issuedDate).toLocaleDateString()}
                                     </p>
                                     {cert.certificateUrl && (
-                                        <a
+                                        <a  // <--- You are missing this opening tag in your screenshot
                                             href={cert.certificateUrl}
                                             target="_blank"
                                             rel="noopener noreferrer"
@@ -407,6 +458,153 @@ const WorkerProfile = () => {
                         <p className="text-gray-600">Total Reviews</p>
                         <p className="text-3xl font-bold text-primary-600">{profile?.totalReviews || 0}</p>
                     </div>
+                </div>
+
+                {/* Reviews Section - FIXED VERSION */}
+                <div className="card">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-xl font-bold">Recent Reviews</h2>
+                        <Link to="/worker/reviews" className="text-primary-600 hover:text-primary-700 text-sm font-medium">
+                            View All Reviews →
+                        </Link>
+                    </div>
+
+                    {profile?.totalReviews > 0 && profile?.recentReviews && profile.recentReviews.length > 0 ? (
+                        <div className="space-y-6">
+                            {/* Overall Rating Summary */}
+                            <div className="flex flex-col md:flex-row items-start md:items-center gap-6 pb-6 border-b border-gray-200">
+                                <div className="text-center md:text-left">
+                                    <p className="text-5xl font-bold text-primary-600 mb-2">
+                                        {profile.averageRating?.toFixed(1) || '0.0'}
+                                    </p>
+                                    <div className="flex items-center gap-1 justify-center md:justify-start mb-1">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <FiStar
+                                                key={star}
+                                                className={`h-5 w-5 ${star <= Math.round(profile.averageRating)
+                                                        ? 'text-yellow-400 fill-current'
+                                                        : 'text-gray-300'
+                                                    }`}
+                                            />
+                                        ))}
+                                    </div>
+                                    <p className="text-sm text-gray-600">{profile.totalReviews} reviews</p>
+                                </div>
+
+                                <div className="flex-1 w-full">
+                                    <p className="text-gray-700 mb-3 text-sm font-medium">Rating Distribution</p>
+                                    {[5, 4, 3, 2, 1].map((rating) => {
+                                        const count = profile.recentReviews.filter(r => r.rating === rating).length;
+                                        const percentage = profile.totalReviews > 0 ? (count / profile.totalReviews) * 100 : 0;
+                                        return (
+                                            <div key={rating} className="flex items-center gap-3 mb-2">
+                                                <div className="flex items-center gap-1 w-16">
+                                                    <span className="text-sm font-medium text-gray-700">{rating}</span>
+                                                    <FiStar className="h-3 w-3 text-yellow-400 fill-current" />
+                                                </div>
+                                                <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
+                                                    <div
+                                                        className="bg-primary-600 h-full rounded-full transition-all"
+                                                        style={{ width: `${percentage}%` }}
+                                                    ></div>
+                                                </div>
+                                                <span className="text-xs text-gray-600 w-8 text-right">{count}</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* Recent Reviews List */}
+                            <div className="space-y-4">
+                                {profile.recentReviews.slice(0, 3).map((review, index) => (
+                                    <div key={index} className="border-b border-gray-100 last:border-0 pb-4 last:pb-0">
+                                        {/* Review Header */}
+                                        <div className="flex justify-between items-start mb-3">
+                                            <div className="flex items-center gap-3">
+                                                {review.companyLogo ? (
+                                                    <img
+                                                        src={review.companyLogo}
+                                                        alt={review.companyName}
+                                                        className="h-10 w-10 rounded-full object-cover flex-shrink-0"
+                                                    />
+                                                ) : (
+                                                    <div className="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
+                                                        <span className="text-primary-600 font-semibold text-sm">
+                                                            {review.companyName?.charAt(0) || 'C'}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <h4 className="font-semibold text-gray-900">
+                                                        {review.companyName || 'Anonymous Client'}
+                                                    </h4>
+                                                    <p className="text-xs text-gray-500">
+                                                        {new Date(review.createdAt).toLocaleDateString('en-US', {
+                                                            month: 'short',
+                                                            day: 'numeric',
+                                                            year: 'numeric'
+                                                        })}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                {[1, 2, 3, 4, 5].map((star) => (
+                                                    <FiStar
+                                                        key={star}
+                                                        className={`h-4 w-4 ${star <= review.rating
+                                                                ? 'text-yellow-400 fill-current'
+                                                                : 'text-gray-300'
+                                                            }`}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Job Title */}
+                                        {review.jobTitle && review.jobTitle !== 'N/A' && (
+                                            <p className="text-sm text-gray-600 mb-2">
+                                                Project: <span className="font-medium text-gray-900">{review.jobTitle}</span>
+                                            </p>
+                                        )}
+
+                                        {/* Review Text */}
+                                        <p className="text-gray-700 text-sm leading-relaxed mb-3">
+                                            {review.reviewText}
+                                        </p>
+
+                                        {/* Tags and Badges */}
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            {review.tags && review.tags.length > 0 && (
+                                                <>
+                                                    {review.tags.slice(0, 3).map((tag, idx) => (
+                                                        <span key={idx} className="badge badge-info text-xs">
+                                                            {tag.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                                                        </span>
+                                                    ))}
+                                                </>
+                                            )}
+                                            {review.wouldHireAgain && (
+                                                <span className="inline-flex items-center gap-1 text-green-700 bg-green-50 px-2 py-1 rounded-full text-xs font-medium">
+                                                    ✓ Would hire again
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="text-center py-12">
+                            <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-gray-100 mb-4">
+                                <FiStar className="h-8 w-8 text-gray-400" />
+                            </div>
+                            <p className="text-gray-600 mb-2 font-medium">No reviews yet</p>
+                            <p className="text-sm text-gray-500">
+                                Complete jobs to receive reviews from clients
+                            </p>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -516,40 +714,6 @@ const WorkerProfile = () => {
                     </div>
                 </div>
             )}
-            {/* Reviews Section */}
-<div className="card">
-  <div className="flex justify-between items-center mb-4">
-    <h2 className="text-xl font-bold">Recent Reviews</h2>
-    <Link to="/worker/reviews" className="text-primary-600 hover:text-primary-700 text-sm">
-      View All →
-    </Link>
-  </div>
-  
-  {profile?.totalReviews > 0 ? (
-    <div className="flex items-center gap-4 mb-4">
-      <div className="text-center">
-        <p className="text-4xl font-bold text-primary-600">
-          {profile.averageRating?.toFixed(1)}
-        </p>
-        <div className="flex items-center gap-1 mt-1">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <FiStar
-              key={star}
-              className={`h-4 w-4 ${
-                star <= Math.round(profile.averageRating)
-                  ? 'text-yellow-400 fill-current'
-                  : 'text-gray-300'
-              }`}
-            />
-          ))}
-        </div>
-        <p className="text-sm text-gray-500 mt-1">{profile.totalReviews} reviews</p>
-      </div>
-    </div>
-  ) : (
-    <p className="text-gray-500 text-center py-8">No reviews yet</p>
-  )}
-</div>
         </DashboardLayout>
     );
 };

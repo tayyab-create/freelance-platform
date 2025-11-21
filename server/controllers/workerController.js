@@ -5,6 +5,7 @@ const { WorkerProfile, Job, Application, Submission, CompanyProfile, Review } = 
 // @access  Private/Worker
 exports.getProfile = async (req, res) => {
   try {
+    // 1️⃣ Fetch worker profile
     const profile = await WorkerProfile.findOne({ user: req.user._id });
 
     if (!profile) {
@@ -14,19 +15,64 @@ exports.getProfile = async (req, res) => {
       });
     }
 
+    // 2️⃣ Fetch all reviews for this worker
+    const reviews = await Review.find({ worker: req.user._id })
+      .populate("job", "title")
+      .populate("company", "email")
+      .sort({ createdAt: -1 });
+
+    // 3️⃣ Add company profile info (name & logo)
+    const formattedReviews = await Promise.all(
+      reviews.map(async (rev) => {
+        const companyProfile = await CompanyProfile.findOne({ user: rev.company._id });
+
+        return {
+          rating: rev.rating,
+          reviewText: rev.reviewText,
+          tags: rev.tags,
+          wouldHireAgain: rev.wouldHireAgain,
+          createdAt: rev.createdAt,
+          jobTitle: rev.job?.title || "N/A",
+
+          // WHAT YOUR UI EXPECTS
+          companyName: companyProfile?.companyName || "Client",
+          companyLogo: companyProfile?.logo || null,
+        };
+      })
+    );
+
+    // 4️⃣ Calculate total & average rating
+    const totalReviews = formattedReviews.length;
+
+    const averageRating =
+      totalReviews > 0
+        ? formattedReviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews
+        : 0;
+
+    // 5️⃣ Get ONLY the recent 3 reviews for frontend
+    const recentReviews = formattedReviews.slice(0, 3);
+
+    // 6️⃣ Send all data to frontend
     res.status(200).json({
       success: true,
-      data: profile
+      data: {
+        ...profile.toObject(),
+        totalReviews,
+        averageRating,
+        recentReviews
+      }
     });
+
   } catch (error) {
-    console.error('Get Profile Error:', error);
+    console.error("Get Profile Error:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error',
+      message: "Server error",
       error: error.message
     });
   }
 };
+
 
 // @desc    Update worker profile
 // @route   PUT /api/workers/profile
