@@ -5,6 +5,7 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
 import { FiBriefcase, FiCheckCircle, FiClock, FiStar, FiUser } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { calculateWorkerProfileCompletion } from '../../utils/profileCompletion';
 
 const WorkerDashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
@@ -19,7 +20,7 @@ const WorkerDashboard = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await workerAPI.getDashboard();
       console.log('Dashboard response:', response.data);
       setDashboardData(response.data.data);
@@ -147,23 +148,25 @@ const WorkerDashboard = () => {
         </div>
 
         {/* Profile Status */}
-        <div className="card">
-          <h2 className="text-xl font-bold mb-4">Profile Status</h2>
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-600">Profile Completion</span>
-                <span className="text-sm font-medium">75%</span>
+        {calculateWorkerProfileCompletion(dashboardData.profile) < 100 && (
+          <div className="card">
+            <h2 className="text-xl font-bold mb-4">Profile Status</h2>
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-600">Profile Completion</span>
+                  <span className="text-sm font-medium">{calculateWorkerProfileCompletion(dashboardData.profile)}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-primary-600 h-2 rounded-full" style={{ width: `${calculateWorkerProfileCompletion(dashboardData.profile)}%` }}></div>
+                </div>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-primary-600 h-2 rounded-full" style={{ width: '75%' }}></div>
-              </div>
+              <Link to="/worker/profile" className="btn-primary">
+                Complete Profile
+              </Link>
             </div>
-            <Link to="/worker/profile" className="btn-primary">
-              Complete Profile
-            </Link>
           </div>
-        </div>
+        )}
 
         {/* Quick Actions & Rating */}
         <div className="grid md:grid-cols-2 gap-6">
@@ -186,11 +189,10 @@ const WorkerDashboard = () => {
                 {[1, 2, 3, 4, 5].map((star) => (
                   <FiStar
                     key={star}
-                    className={`h-6 w-6 ${
-                      star <= Math.round(dashboardData.profile?.rating || 0)
+                    className={`h-6 w-6 ${star <= Math.round(dashboardData.profile?.rating || 0)
                         ? 'text-yellow-400 fill-current'
                         : 'text-gray-300'
-                    }`}
+                      }`}
                   />
                 ))}
               </div>

@@ -80,7 +80,7 @@ exports.getProfile = async (req, res) => {
 exports.updateProfile = async (req, res) => {
   try {
     const allowedFields = [
-      'fullName', 'phone', 'bio', 'skills', 'githubProfile', 
+      'fullName', 'phone', 'bio', 'skills', 'githubProfile',
       'linkedinProfile', 'hourlyRate', 'availability', 'profilePicture'
     ];
 
@@ -310,7 +310,7 @@ exports.getMyApplications = async (req, res) => {
 // @access  Private/Worker
 exports.getAssignedJobs = async (req, res) => {
   try {
-    const jobs = await Job.find({ 
+    const jobs = await Job.find({
       assignedWorker: req.user._id,
       status: { $in: ['assigned', 'in-progress'] }
     })
@@ -398,7 +398,7 @@ exports.getDashboard = async (req, res) => {
   try {
     // Get or create profile if it doesn't exist
     let profile = await WorkerProfile.findOne({ user: req.user._id });
-    
+
     if (!profile) {
       // Create default profile
       profile = await WorkerProfile.create({
@@ -406,23 +406,23 @@ exports.getDashboard = async (req, res) => {
         fullName: req.user.email.split('@')[0]
       });
     }
-    
+
     const totalApplications = await Application.countDocuments({ worker: req.user._id });
-    const pendingApplications = await Application.countDocuments({ 
-      worker: req.user._id, 
-      status: 'pending' 
+    const pendingApplications = await Application.countDocuments({
+      worker: req.user._id,
+      status: 'pending'
     });
-    const acceptedApplications = await Application.countDocuments({ 
-      worker: req.user._id, 
-      status: 'accepted' 
+    const acceptedApplications = await Application.countDocuments({
+      worker: req.user._id,
+      status: 'accepted'
     });
-    
-    const activeJobs = await Job.countDocuments({ 
+
+    const activeJobs = await Job.countDocuments({
       assignedWorker: req.user._id,
       status: { $in: ['assigned', 'in-progress'] }
     });
-    
-    const completedJobs = await Job.countDocuments({ 
+
+    const completedJobs = await Job.countDocuments({
       assignedWorker: req.user._id,
       status: 'completed'
     });
@@ -431,6 +431,7 @@ exports.getDashboard = async (req, res) => {
       success: true,
       data: {
         profile: {
+          ...profile.toObject(),
           name: profile.fullName,
           rating: profile.averageRating || 0,
           totalReviews: profile.totalReviews || 0,
@@ -456,7 +457,6 @@ exports.getDashboard = async (req, res) => {
     });
   }
 };
-
 
 // @desc    Get worker's reviews
 // @route   GET /api/workers/reviews

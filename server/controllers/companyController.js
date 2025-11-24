@@ -522,6 +522,7 @@ exports.getDashboard = async (req, res) => {
       success: true,
       data: {
         profile: {
+          ...profile.toObject(),
           name: profile.companyName,
           rating: profile.averageRating,
         },

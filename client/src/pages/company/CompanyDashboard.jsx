@@ -5,6 +5,7 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
 import { FiBriefcase, FiUsers, FiCheckCircle, FiClock } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { calculateCompanyProfileCompletion } from '../../utils/profileCompletion';
 
 const CompanyDashboard = () => {
   const [stats, setStats] = useState(null);
@@ -108,6 +109,27 @@ const CompanyDashboard = () => {
             <FiUsers className="h-16 w-16 text-primary-200" />
           </div>
         </div>
+
+        {/* Profile Status */}
+        {calculateCompanyProfileCompletion(stats.profile) < 100 && (
+          <div className="card">
+            <h2 className="text-xl font-bold mb-4">Profile Status</h2>
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-600">Profile Completion</span>
+                  <span className="text-sm font-medium">{calculateCompanyProfileCompletion(stats.profile)}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-primary-600 h-2 rounded-full" style={{ width: `${calculateCompanyProfileCompletion(stats.profile)}%` }}></div>
+                </div>
+              </div>
+              <Link to="/company/profile" className="btn-primary">
+                Complete Profile
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Quick Actions */}
         <div className="grid md:grid-cols-2 gap-6">
