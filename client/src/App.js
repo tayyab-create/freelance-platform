@@ -46,26 +46,47 @@ function App() {
   }, [dispatch]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <Routes>
         {/* Public Routes */}
         <Route
           path="/"
           element={
-            <div className="text-center p-10">
-              <h1 className="text-4xl font-bold text-primary-600">
-                Welcome to Freelance Platform
-              </h1>
-              <p className="mt-4 text-gray-600">
-                Connect with talented freelancers or find your next project
-              </p>
-              <div className="mt-8 space-x-4">
-                <a href="/login" className="btn-primary">
-                  Login
-                </a>
-                <a href="/register" className="btn-secondary">
-                  Register
-                </a>
+            <div className="min-h-screen flex items-center justify-center px-4">
+              <div className="text-center max-w-4xl mx-auto animate-fade-in">
+                <h1 className="text-6xl md:text-7xl font-display font-bold text-gradient mb-6">
+                  Welcome to Freelance Platform
+                </h1>
+                <p className="text-xl md:text-2xl text-gray-600 mb-12 font-medium">
+                  Connect with talented freelancers or find your next exciting project
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                  <a href="/login" className="btn-primary inline-block px-8 py-4 text-lg">
+                    <span>Login</span>
+                  </a>
+                  <a href="/register" className="btn-secondary inline-block px-8 py-4 text-lg">
+                    Register
+                  </a>
+                </div>
+
+                {/* Feature highlights */}
+                <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <div className="card-premium text-center">
+                    <div className="text-4xl mb-4">🚀</div>
+                    <h3 className="text-xl font-bold mb-2 text-gray-800">Fast & Easy</h3>
+                    <p className="text-gray-600">Quick onboarding and intuitive interface</p>
+                  </div>
+                  <div className="card-premium text-center">
+                    <div className="text-4xl mb-4">💼</div>
+                    <h3 className="text-xl font-bold mb-2 text-gray-800">Quality Jobs</h3>
+                    <p className="text-gray-600">Find the perfect match for your skills</p>
+                  </div>
+                  <div className="card-premium text-center">
+                    <div className="text-4xl mb-4">⭐</div>
+                    <h3 className="text-xl font-bold mb-2 text-gray-800">Trusted Platform</h3>
+                    <p className="text-gray-600">Secure and reliable for everyone</p>
+                  </div>
+                </div>
               </div>
             </div>
           }
@@ -207,30 +228,36 @@ function App() {
         />
 
         {/* Message Routes */}
-<Route
-  path="/messages"
-  element={
-    <ProtectedRoute allowedRoles={["worker", "company"]}>
-      <Conversations />
-    </ProtectedRoute>
-  }
-/>
-<Route
-  path="/messages/:conversationId"
-  element={
-    <ProtectedRoute allowedRoles={["worker", "company"]}>
-      <Chat />
-    </ProtectedRoute>
-  }
-/>
+        <Route
+          path="/messages"
+          element={
+            <ProtectedRoute allowedRoles={["worker", "company"]}>
+              <Conversations />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/messages/:conversationId"
+          element={
+            <ProtectedRoute allowedRoles={["worker", "company"]}>
+              <Chat />
+            </ProtectedRoute>
+          }
+        />
         {/* 404 */}
         <Route
           path="*"
           element={
-            <div className="text-center p-10">
-              <h1 className="text-4xl font-bold text-gray-900">
-                404 - Page Not Found
-              </h1>
+            <div className="min-h-screen flex items-center justify-center px-4">
+              <div className="text-center">
+                <h1 className="text-8xl font-display font-bold text-gradient mb-4">
+                  404
+                </h1>
+                <p className="text-2xl text-gray-600 mb-8">Page Not Found</p>
+                <a href="/" className="btn-primary inline-block">
+                  <span>Go Home</span>
+                </a>
+              </div>
             </div>
           }
         />
