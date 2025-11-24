@@ -76,6 +76,22 @@ exports.register = async (req, res) => {
     // Generate token
     const token = generateToken(user._id);
 
+    // Get profile data to include in response
+    let profileData = {};
+    if (role === 'worker') {
+      const workerProfile = await WorkerProfile.findOne({ user: user._id });
+      profileData = {
+        name: workerProfile?.fullName,
+        profilePhoto: workerProfile?.profilePicture
+      };
+    } else if (role === 'company') {
+      const companyProfile = await CompanyProfile.findOne({ user: user._id });
+      profileData = {
+        name: companyProfile?.companyName,
+        profilePhoto: companyProfile?.logo
+      };
+    }
+
     res.status(201).json({
       success: true,
       message: 'Registration successful. Your account is pending admin approval.',
@@ -84,7 +100,8 @@ exports.register = async (req, res) => {
         id: user._id,
         email: user.email,
         role: user.role,
-        status: user.status
+        status: user.status,
+        ...profileData
       }
     });
 
@@ -144,6 +161,28 @@ exports.login = async (req, res) => {
     // Generate token
     const token = generateToken(user._id);
 
+    // Get profile data to include in response
+    let profileData = {};
+    if (user.role === 'worker') {
+      const workerProfile = await WorkerProfile.findOne({ user: user._id });
+      profileData = {
+        name: workerProfile?.fullName,
+        profilePhoto: workerProfile?.profilePicture
+      };
+    } else if (user.role === 'company') {
+      const companyProfile = await CompanyProfile.findOne({ user: user._id });
+      profileData = {
+        name: companyProfile?.companyName,
+        profilePhoto: companyProfile?.logo
+      };
+    } else if (user.role === 'admin') {
+      // Admin users don't have a profile
+      profileData = {
+        name: 'Admin',
+        profilePhoto: null
+      };
+    }
+
     res.status(200).json({
       success: true,
       message: 'Login successful',
@@ -152,7 +191,8 @@ exports.login = async (req, res) => {
         id: user._id,
         email: user.email,
         role: user.role,
-        status: user.status
+        status: user.status,
+        ...profileData
       }
     });
 
@@ -174,12 +214,31 @@ exports.getMe = async (req, res) => {
     const user = await User.findById(req.user._id);
 
     let profile = null;
+    let profileData = {};
 
     // Get profile based on role
     if (user.role === 'worker') {
       profile = await WorkerProfile.findOne({ user: user._id });
+      if (profile) {
+        profileData = {
+          name: profile.fullName,
+          profilePhoto: profile.profilePicture
+        };
+      }
     } else if (user.role === 'company') {
       profile = await CompanyProfile.findOne({ user: user._id });
+      if (profile) {
+        profileData = {
+          name: profile.companyName,
+          profilePhoto: profile.logo
+        };
+      }
+    } else if (user.role === 'admin') {
+      // Admin users don't have a profile
+      profileData = {
+        name: 'Admin',
+        profilePhoto: null
+      };
     }
 
     res.status(200).json({
@@ -190,7 +249,8 @@ exports.getMe = async (req, res) => {
         role: user.role,
         status: user.status,
         isActive: user.isActive,
-        createdAt: user.createdAt
+        createdAt: user.createdAt,
+        ...profileData
       },
       profile
     });

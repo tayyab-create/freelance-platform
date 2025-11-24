@@ -24,39 +24,6 @@ const Sidebar = () => {
     return '/';
   };
 
-  // Role-based color schemes
-  const roleColors = {
-    worker: {
-      gradient: 'from-primary-500 to-primary-600',
-      hoverBg: 'hover:bg-primary-50',
-      hoverText: 'hover:text-primary-600',
-      shadow: 'shadow-primary-500/30',
-      avatarGradient: 'from-primary-500 to-accent-500',
-      userBg: 'from-primary-50 to-purple-50',
-      logoBg: 'text-gradient', // purple gradient
-    },
-    company: {
-      gradient: 'from-blue-500 to-cyan-600',
-      hoverBg: 'hover:bg-blue-50',
-      hoverText: 'hover:text-blue-600',
-      shadow: 'shadow-blue-500/30',
-      avatarGradient: 'from-blue-500 to-cyan-500',
-      userBg: 'from-blue-50 to-cyan-50',
-      logoBg: 'bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent',
-    },
-    admin: {
-      gradient: 'from-red-500 to-orange-600',
-      hoverBg: 'hover:bg-red-50',
-      hoverText: 'hover:text-red-600',
-      shadow: 'shadow-red-500/30',
-      avatarGradient: 'from-red-500 to-orange-500',
-      userBg: 'from-red-50 to-orange-50',
-      logoBg: 'bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent',
-    },
-  };
-
-  const colors = roleColors[user?.role] || roleColors.worker;
-
   const navLinks = {
     worker: [
       { name: 'Dashboard', path: '/worker/dashboard', icon: FiHome },
@@ -118,7 +85,7 @@ const Sidebar = () => {
           <div className="p-6 border-b border-gray-200/50">
             <Link
               to={getDashboardLink()}
-              className={`font-display font-bold ${colors.logoBg} hover:scale-105 transition-all duration-300 block ${isCollapsed ? 'text-center text-xl' : 'text-2xl'}`}
+              className={`font-display font-bold text-gradient hover:scale-105 transition-all duration-300 block ${isCollapsed ? 'text-center text-xl' : 'text-2xl'}`}
             >
               {isCollapsed ? 'FP' : 'Freelance Platform'}
             </Link>
@@ -136,8 +103,8 @@ const Sidebar = () => {
                   className={`
                     flex items-center gap-4 px-4 py-3 rounded-xl font-medium transition-all duration-300
                     ${isLinkActive
-                      ? `bg-gradient-to-r ${colors.gradient} text-white shadow-lg ${colors.shadow}`
-                      : `text-gray-700 ${colors.hoverBg} ${colors.hoverText}`
+                      ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/30'
+                      : 'text-gray-700 hover:bg-primary-50 hover:text-primary-600'
                     }
                     ${isCollapsed ? 'justify-center' : ''}
                   `}
@@ -154,7 +121,7 @@ const Sidebar = () => {
           <div className="p-4 border-t border-gray-200/50 space-y-2">
             {/* User Info with Photo */}
             {user && (
-              <div className={`flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r ${colors.userBg} ${isCollapsed ? 'justify-center' : ''}`}>
+              <div className={`flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-primary-50 to-primary-100/50 ${isCollapsed ? 'justify-center' : ''}`}>
                 {/* Profile Photo or Avatar */}
                 <div className="flex-shrink-0">
                   {user.profilePhoto ? (
@@ -164,7 +131,7 @@ const Sidebar = () => {
                       className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-md"
                     />
                   ) : (
-                    <div className={`w-10 h-10 rounded-full bg-gradient-to-r ${colors.avatarGradient} flex items-center justify-center text-white font-bold shadow-md`}>
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold shadow-md">
                       {user.name?.[0]?.toUpperCase() || 'U'}
                     </div>
                   )}
