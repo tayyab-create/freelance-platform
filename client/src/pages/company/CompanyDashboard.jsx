@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { companyAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
@@ -8,6 +9,7 @@ import { toast } from 'react-toastify';
 import { calculateCompanyProfileCompletion } from '../../utils/profileCompletion';
 
 const CompanyDashboard = () => {
+  const { user } = useSelector((state) => state.auth);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -68,11 +70,27 @@ const CompanyDashboard = () => {
     <DashboardLayout>
       <div className="space-y-8">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, {stats?.profile?.name}!
-          </h1>
-          <p className="text-gray-600 mt-2">Manage your jobs and find the best talent</p>
+        <div className="card">
+          <div className="flex items-center gap-4">
+            {/* Profile Picture or Avatar */}
+            {user?.profilePhoto ? (
+              <img
+                src={user.profilePhoto}
+                alt={user.name}
+                className="h-16 w-16 rounded-full object-cover border-2 border-white shadow-md"
+              />
+            ) : (
+              <div className="h-16 w-16 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center text-white text-2xl font-bold shadow-md">
+                {user?.name?.[0]?.toUpperCase() || 'C'}
+              </div>
+            )}
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Welcome back, {user?.name || stats?.profile?.name || 'Company'}!
+              </h1>
+              <p className="text-gray-600 mt-1">Manage your jobs and find the best talent</p>
+            </div>
+          </div>
         </div>
 
         {/* Stats Grid */}

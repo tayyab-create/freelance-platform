@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { adminAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
@@ -7,6 +8,7 @@ import { FiUsers, FiBriefcase, FiFileText, FiClock } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 
 const AdminDashboard = () => {
+  const { user } = useSelector((state) => state.auth);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -67,9 +69,20 @@ const AdminDashboard = () => {
   return (
     <DashboardLayout>
       <div className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-600 mt-2">Manage your freelance platform</p>
+        {/* Header */}
+        <div className="card">
+          <div className="flex items-center gap-4">
+            {/* Admin Avatar (always shows initials since admins don't have profile photos) */}
+            <div className="h-16 w-16 rounded-full bg-gradient-to-r from-red-500 to-red-600 flex items-center justify-center text-white text-2xl font-bold shadow-md">
+              {user?.name?.[0]?.toUpperCase() || 'A'}
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Welcome back, {user?.name || 'Admin'}!
+              </h1>
+              <p className="text-gray-600 mt-1">Manage your freelance platform</p>
+            </div>
+          </div>
         </div>
 
         {/* Stats Grid */}
