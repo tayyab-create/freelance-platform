@@ -4,7 +4,7 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
-import { FiEdit2, FiSave, FiX } from 'react-icons/fi';
+import { FiEdit2, FiSave, FiX, FiTrash2 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import FileUpload from '../../components/common/FileUpload';
 import { uploadAPI } from '../../services/api';
@@ -15,6 +15,7 @@ const CompanyProfile = () => {
     const [editing, setEditing] = useState(false);
     const [saving, setSaving] = useState(false);
     const [uploadingLogo, setUploadingLogo] = useState(false);
+    const [uploadKey, setUploadKey] = useState(0);
 
     const handleLogoUpload = async (file) => {
         if (!file) return;
@@ -31,6 +32,18 @@ const CompanyProfile = () => {
             toast.error('Failed to upload logo');
         } finally {
             setUploadingLogo(false);
+            setUploadKey(prev => prev + 1);
+        }
+    };
+
+    const handleDeleteLogo = async () => {
+        if (!window.confirm('Delete company logo?')) return;
+        try {
+            await companyAPI.updateProfile({ logo: '' });
+            toast.success('Logo removed');
+            fetchProfile();
+        } catch (error) {
+            toast.error('Failed to remove logo');
         }
     };
 
@@ -176,6 +189,7 @@ const CompanyProfile = () => {
                     {editing && (
                         <div className="mb-6">
                             <FileUpload
+                                key={uploadKey}
                                 label="Company Logo"
                                 accept="image/*"
                                 preview={true}
@@ -185,6 +199,14 @@ const CompanyProfile = () => {
                             />
                             {uploadingLogo && (
                                 <p className="text-sm text-primary-600 mt-2">Uploading...</p>
+                            )}
+                            {profile?.logo && (
+                                <button
+                                    onClick={handleDeleteLogo}
+                                    className="text-red-600 text-sm hover:underline flex items-center gap-1 mt-2"
+                                >
+                                    <FiTrash2 className="h-4 w-4" /> Remove Logo
+                                </button>
                             )}
                         </div>
                     )}

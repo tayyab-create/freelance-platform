@@ -1,9 +1,9 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { FiUpload, FiX, FiImage } from 'react-icons/fi';
 import Button from './Button';
 
-const FileUpload = ({ 
-  onFileSelect, 
+const FileUpload = ({
+  onFileSelect,
   accept = "image/*",
   maxSize = 5, // MB
   preview = false,
@@ -14,6 +14,10 @@ const FileUpload = ({
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(currentImage);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    setPreviewUrl(currentImage);
+  }, [currentImage]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -63,7 +67,7 @@ const FileUpload = ({
   return (
     <div className="space-y-2">
       <label className="label">{label}</label>
-      
+
       <input
         ref={fileInputRef}
         type="file"
@@ -100,7 +104,7 @@ const FileUpload = ({
         >
           {selectedFile ? 'Change File' : 'Choose File'}
         </Button>
-        
+
         {selectedFile && !preview && (
           <Button
             type="button"

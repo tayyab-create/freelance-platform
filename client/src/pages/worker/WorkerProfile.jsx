@@ -48,6 +48,10 @@ const WorkerProfile = () => {
         certificateUrl: '',
     });
 
+    const [editingExpId, setEditingExpId] = useState(null);
+    const [editingCertId, setEditingCertId] = useState(null);
+    const [uploadKey, setUploadKey] = useState(0);
+
     useEffect(() => {
         fetchProfile();
     }, []);
@@ -68,6 +72,18 @@ const WorkerProfile = () => {
             toast.error('Failed to upload image');
         } finally {
             setUploadingImage(false);
+            setUploadKey(prev => prev + 1);
+        }
+    };
+
+    const handleDeleteProfilePicture = async () => {
+        if (!window.confirm('Delete profile picture?')) return;
+        try {
+            await workerAPI.updateProfile({ profilePicture: '' });
+            toast.success('Profile picture removed');
+            fetchProfile();
+        } catch (error) {
+            toast.error('Failed to remove profile picture');
         }
     };
 
@@ -121,12 +137,18 @@ const WorkerProfile = () => {
         }
     };
 
-    const handleAddExperience = async (e) => {
+    const handleSaveExperience = async (e) => {
         e.preventDefault();
         try {
-            await workerAPI.addExperience(experienceForm);
-            toast.success('Experience added successfully!');
+            if (editingExpId) {
+                await workerAPI.updateExperience(editingExpId, experienceForm);
+                toast.success('Experience updated successfully!');
+            } else {
+                await workerAPI.addExperience(experienceForm);
+                toast.success('Experience added successfully!');
+            }
             setShowExpModal(false);
+            setEditingExpId(null);
             setExperienceForm({
                 title: '',
                 company: '',
@@ -137,16 +159,46 @@ const WorkerProfile = () => {
             });
             fetchProfile();
         } catch (error) {
-            toast.error('Failed to add experience');
+            toast.error('Failed to save experience');
         }
     };
 
-    const handleAddCertification = async (e) => {
+    const handleEditExperience = (exp) => {
+        setExperienceForm({
+            title: exp.title,
+            company: exp.company,
+            startDate: exp.startDate ? exp.startDate.split('T')[0] : '',
+            endDate: exp.endDate ? exp.endDate.split('T')[0] : '',
+            current: exp.current,
+            description: exp.description || '',
+        });
+        setEditingExpId(exp._id);
+        setShowExpModal(true);
+    };
+
+    const handleDeleteExperience = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this experience?')) return;
+        try {
+            await workerAPI.deleteExperience(id);
+            toast.success('Experience deleted successfully');
+            fetchProfile();
+        } catch (error) {
+            toast.error('Failed to delete experience');
+        }
+    };
+
+    const handleSaveCertification = async (e) => {
         e.preventDefault();
         try {
-            await workerAPI.addCertification(certificationForm);
-            toast.success('Certification added successfully!');
+            if (editingCertId) {
+                await workerAPI.updateCertification(editingCertId, certificationForm);
+                toast.success('Certification updated successfully!');
+            } else {
+                await workerAPI.addCertification(certificationForm);
+                toast.success('Certification added successfully!');
+            }
             setShowCertModal(false);
+            setEditingCertId(null);
             setCertificationForm({
                 title: '',
                 issuedBy: '',
@@ -155,7 +207,29 @@ const WorkerProfile = () => {
             });
             fetchProfile();
         } catch (error) {
-            toast.error('Failed to add certification');
+            toast.error('Failed to save certification');
+        }
+    };
+
+    const handleEditCertification = (cert) => {
+        setCertificationForm({
+            title: cert.title,
+            issuedBy: cert.issuedBy,
+            issuedDate: cert.issuedDate ? cert.issuedDate.split('T')[0] : '',
+            certificateUrl: cert.certificateUrl || '',
+        });
+        setEditingCertId(cert._id);
+        setShowCertModal(true);
+    };
+
+    const handleDeleteCertification = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this certification?')) return;
+        try {
+            await workerAPI.deleteCertification(id);
+            toast.success('Certification deleted successfully');
+            fetchProfile();
+        } catch (error) {
+            toast.error('Failed to delete certification');
         }
     };
 
@@ -196,19 +270,28 @@ const WorkerProfile = () => {
                     <div className="flex flex-col md:flex-row gap-6">
                         {/* Profile Picture */}
                         <div className="flex-shrink-0">
-                            <div className="relative">
+                            <div className="relative group">
                                 <img
                                     src={profile?.profilePicture || 'https://via.placeholder.com/150'}
                                     alt="Profile"
                                     className="h-32 w-32 rounded-full object-cover border-4 border-gray-100"
                                 />
                                 {editing && (
-                                    <div className="mt-3">
+                                    <div className="mt-3 flex flex-col gap-2">
                                         <FileUpload
+                                            key={uploadKey}
                                             onFileSelect={handleImageUpload}
                                             accept="image/*"
                                             loading={uploadingImage}
                                         />
+                                        {profile?.profilePicture && (
+                                            <button
+                                                onClick={handleDeleteProfilePicture}
+                                                className="text-red-600 text-sm hover:underline flex items-center justify-center gap-1"
+                                            >
+                                                <FiTrash2 className="h-4 w-4" /> Remove
+                                            </button>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -384,21 +467,50 @@ const WorkerProfile = () => {
                 <div className="card">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-bold">Experience</h2>
-                        <Button variant="primary" size="sm" icon={FiPlus} onClick={() => setShowExpModal(true)}>
+                        <Button variant="primary" size="sm" icon={FiPlus} onClick={() => {
+                            setEditingExpId(null);
+                            setExperienceForm({
+                                title: '',
+                                company: '',
+                                startDate: '',
+                                endDate: '',
+                                current: false,
+                                description: '',
+                            });
+                            setShowExpModal(true);
+                        }}>
                             Add Experience
                         </Button>
                     </div>
                     {profile?.experience && profile.experience.length > 0 ? (
                         <div className="space-y-4">
                             {profile.experience.map((exp, index) => (
-                                <div key={index} className="border-l-4 border-primary-600 pl-4 py-2">
-                                    <h3 className="font-bold text-lg">{exp.title}</h3>
-                                    <p className="text-gray-600">{exp.company}</p>
-                                    <p className="text-sm text-gray-500">
-                                        {new Date(exp.startDate).toLocaleDateString()} -{' '}
-                                        {exp.current ? 'Present' : new Date(exp.endDate).toLocaleDateString()}
-                                    </p>
-                                    {exp.description && <p className="text-gray-700 mt-2">{exp.description}</p>}
+                                <div key={index} className="border-l-4 border-primary-600 pl-4 py-2 flex justify-between items-start group">
+                                    <div>
+                                        <h3 className="font-bold text-lg">{exp.title}</h3>
+                                        <p className="text-gray-600">{exp.company}</p>
+                                        <p className="text-sm text-gray-500">
+                                            {new Date(exp.startDate).toLocaleDateString()} -{' '}
+                                            {exp.current ? 'Present' : new Date(exp.endDate).toLocaleDateString()}
+                                        </p>
+                                        {exp.description && <p className="text-gray-700 mt-2">{exp.description}</p>}
+                                    </div>
+                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button
+                                            onClick={() => handleEditExperience(exp)}
+                                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-full"
+                                            title="Edit"
+                                        >
+                                            <FiEdit2 />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteExperience(exp._id)}
+                                            className="p-2 text-red-600 hover:bg-red-50 rounded-full"
+                                            title="Delete"
+                                        >
+                                            <FiTrash2 />
+                                        </button>
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -411,21 +523,46 @@ const WorkerProfile = () => {
                 <div className="card">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-bold">Certifications</h2>
-                        <Button variant="primary" size="sm" icon={FiPlus} onClick={() => setShowCertModal(true)}>
+                        <Button variant="primary" size="sm" icon={FiPlus} onClick={() => {
+                            setEditingCertId(null);
+                            setCertificationForm({
+                                title: '',
+                                issuedBy: '',
+                                issuedDate: '',
+                                certificateUrl: '',
+                            });
+                            setShowCertModal(true);
+                        }}>
                             Add Certification
                         </Button>
                     </div>
                     {profile?.certifications && profile.certifications.length > 0 ? (
                         <div className="grid md:grid-cols-2 gap-4">
                             {profile.certifications.map((cert, index) => (
-                                <div key={index} className="border border-gray-200 rounded-lg p-4">
-                                    <h3 className="font-bold text-lg">{cert.title}</h3>
+                                <div key={index} className="border border-gray-200 rounded-lg p-4 relative group">
+                                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white p-1 rounded shadow-sm">
+                                        <button
+                                            onClick={() => handleEditCertification(cert)}
+                                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-full"
+                                            title="Edit"
+                                        >
+                                            <FiEdit2 className="w-4 h-4" />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteCertification(cert._id)}
+                                            className="p-1.5 text-red-600 hover:bg-red-50 rounded-full"
+                                            title="Delete"
+                                        >
+                                            <FiTrash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                    <h3 className="font-bold text-lg pr-16">{cert.title}</h3>
                                     <p className="text-gray-600">{cert.issuedBy}</p>
                                     <p className="text-sm text-gray-500">
                                         Issued: {new Date(cert.issuedDate).toLocaleDateString()}
                                     </p>
                                     {cert.certificateUrl && (
-                                        <a  // <--- You are missing this opening tag in your screenshot
+                                        <a
                                             href={cert.certificateUrl}
                                             target="_blank"
                                             rel="noopener noreferrer"
@@ -460,7 +597,7 @@ const WorkerProfile = () => {
                     </div>
                 </div>
 
-                {/* Reviews Section - FIXED VERSION */}
+                {/* Reviews Section */}
                 <div className="card">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-xl font-bold">Recent Reviews</h2>
@@ -482,8 +619,8 @@ const WorkerProfile = () => {
                                             <FiStar
                                                 key={star}
                                                 className={`h-5 w-5 ${star <= Math.round(profile.averageRating)
-                                                        ? 'text-yellow-400 fill-current'
-                                                        : 'text-gray-300'
+                                                    ? 'text-yellow-400 fill-current'
+                                                    : 'text-gray-300'
                                                     }`}
                                             />
                                         ))}
@@ -553,8 +690,8 @@ const WorkerProfile = () => {
                                                     <FiStar
                                                         key={star}
                                                         className={`h-4 w-4 ${star <= review.rating
-                                                                ? 'text-yellow-400 fill-current'
-                                                                : 'text-gray-300'
+                                                            ? 'text-yellow-400 fill-current'
+                                                            : 'text-gray-300'
                                                             }`}
                                                     />
                                                 ))}
@@ -608,12 +745,12 @@ const WorkerProfile = () => {
                 </div>
             </div>
 
-            {/* Add Experience Modal */}
+            {/* Add/Edit Experience Modal */}
             {showExpModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-lg max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
-                        <h2 className="text-2xl font-bold mb-4">Add Experience</h2>
-                        <form onSubmit={handleAddExperience} className="space-y-4">
+                        <h2 className="text-2xl font-bold mb-4">{editingExpId ? 'Edit Experience' : 'Add Experience'}</h2>
+                        <form onSubmit={handleSaveExperience} className="space-y-4">
                             <Input
                                 label="Job Title"
                                 value={experienceForm.title}
@@ -664,7 +801,7 @@ const WorkerProfile = () => {
                                 />
                             </div>
                             <div className="flex gap-4">
-                                <Button type="submit" variant="primary">Add Experience</Button>
+                                <Button type="submit" variant="primary">{editingExpId ? 'Save Changes' : 'Add Experience'}</Button>
                                 <Button type="button" variant="secondary" onClick={() => setShowExpModal(false)}>
                                     Cancel
                                 </Button>
@@ -674,12 +811,12 @@ const WorkerProfile = () => {
                 </div>
             )}
 
-            {/* Add Certification Modal */}
+            {/* Add/Edit Certification Modal */}
             {showCertModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-lg max-w-2xl w-full p-6">
-                        <h2 className="text-2xl font-bold mb-4">Add Certification</h2>
-                        <form onSubmit={handleAddCertification} className="space-y-4">
+                        <h2 className="text-2xl font-bold mb-4">{editingCertId ? 'Edit Certification' : 'Add Certification'}</h2>
+                        <form onSubmit={handleSaveCertification} className="space-y-4">
                             <Input
                                 label="Certificate Title"
                                 value={certificationForm.title}
@@ -705,7 +842,7 @@ const WorkerProfile = () => {
                                 placeholder="https://..."
                             />
                             <div className="flex gap-4">
-                                <Button type="submit" variant="primary">Add Certification</Button>
+                                <Button type="submit" variant="primary">{editingCertId ? 'Save Changes' : 'Add Certification'}</Button>
                                 <Button type="button" variant="secondary" onClick={() => setShowCertModal(false)}>
                                     Cancel
                                 </Button>

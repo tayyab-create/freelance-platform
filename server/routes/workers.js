@@ -5,6 +5,10 @@ const {
   updateProfile,
   addCertification,
   addExperience,
+  updateExperience,
+  deleteExperience,
+  updateCertification,
+  deleteCertification,
   applyForJob,
   getMyApplications,
   getAssignedJobs,
@@ -22,7 +26,11 @@ router.use(authorize('worker'));
 router.get('/profile', getProfile);
 router.put('/profile', updateProfile);
 router.post('/profile/certifications', checkApproval, addCertification);
+router.put('/profile/certifications/:certId', checkApproval, updateCertification);
+router.delete('/profile/certifications/:certId', checkApproval, deleteCertification);
 router.post('/profile/experience', checkApproval, addExperience);
+router.put('/profile/experience/:expId', checkApproval, updateExperience);
+router.delete('/profile/experience/:expId', checkApproval, deleteExperience);
 
 // Job-related routes
 router.post('/apply/:jobId', checkApproval, applyForJob);
