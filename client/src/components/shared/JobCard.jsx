@@ -55,7 +55,7 @@ const JobCard = ({ job, linkTo }) => {
             </div>
 
             {/* Job Title */}
-            <h3 className="text-xl font-black text-gray-900 mb-3 group-hover:text-primary-600 transition-colors line-clamp-2">
+            <h3 className="text-xl font-black text-gray-700 mb-3 group-hover:text-primary-600 transition-colors line-clamp-2">
                 {job.title}
             </h3>
 

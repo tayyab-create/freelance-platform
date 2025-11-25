@@ -15,6 +15,7 @@ const WorkerProfile = () => {
     const [loading, setLoading] = useState(true);
     const [editing, setEditing] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [activeTab, setActiveTab] = useState('overview');
 
     // Form states
     const [basicInfo, setBasicInfo] = useState({
@@ -245,35 +246,32 @@ const WorkerProfile = () => {
 
     return (
         <DashboardLayout>
-            <div className="max-w-6xl mx-auto space-y-8 pb-8">
+            <div className="max-w-6xl mx-auto space-y-6 pb-8">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <h1 className="text-4xl font-black text-gray-900">My Profile</h1>
-                        <p className="text-gray-600 mt-2">Manage your professional information</p>
+                        <h1 className="text-3xl font-black text-gray-900">My Profile</h1>
+                        <p className="text-gray-600">Manage your professional presence</p>
                     </div>
                     {!editing ? (
-                        <Button variant="primary" icon={FiEdit2} onClick={() => setEditing(true)} className="text-lg px-6 py-3">
+                        <Button variant="primary" icon={FiEdit2} onClick={() => setEditing(true)} className="px-6 py-2.5 rounded-xl">
                             Edit Profile
                         </Button>
                     ) : (
                         <div className="flex gap-3">
-                            <Button variant="primary" icon={FiSave} onClick={handleSaveBasicInfo} loading={saving} className="px-6 py-3">
+                            <Button variant="primary" icon={FiSave} onClick={handleSaveBasicInfo} loading={saving} className="px-6 py-2.5 rounded-xl">
                                 Save Changes
                             </Button>
-                            <Button variant="secondary" icon={FiX} onClick={() => setEditing(false)} className="px-6 py-3">
+                            <Button variant="secondary" icon={FiX} onClick={() => setEditing(false)} className="px-6 py-2.5 rounded-xl">
                                 Cancel
                             </Button>
                         </div>
                     )}
                 </div>
 
-                {/* Profile Header Card - Premium */}
-                <div className="bg-gradient-to-br from-white via-purple-50/30 to-blue-50/30 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/60 p-8 relative overflow-hidden">
-                    {/* Decorative gradient */}
-                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-purple-500 via-blue-500 to-indigo-500"></div>
-
-                    <div className="flex flex-col md:flex-row gap-8">
+                {/* Main Profile Card - Always Visible */}
+                <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 relative overflow-hidden">
+                    <div className="flex flex-col md:flex-row gap-8 items-start">
                         {/* Profile Picture */}
                         <div className="flex-shrink-0">
                             <div className="relative group">
@@ -281,16 +279,16 @@ const WorkerProfile = () => {
                                     <img
                                         src={profile?.profilePicture || 'https://via.placeholder.com/150'}
                                         alt="Profile"
-                                        className="h-40 w-40 rounded-3xl object-cover border-4 border-white shadow-2xl"
+                                        className="h-32 w-32 rounded-2xl object-cover border-4 border-white shadow-lg"
                                     />
                                     {profile?.availability && (
-                                        <div className={`absolute bottom-3 right-3 h-6 w-6 rounded-full border-4 border-white shadow-lg ${profile.availability === 'available' ? 'bg-green-500' :
+                                        <div className={`absolute -bottom-2 -right-2 h-6 w-6 rounded-full border-4 border-white shadow-sm ${profile.availability === 'available' ? 'bg-green-500' :
                                             profile.availability === 'busy' ? 'bg-yellow-500' : 'bg-red-500'
                                             }`}></div>
                                     )}
                                 </div>
                                 {editing && (
-                                    <div className="mt-4 space-y-2">
+                                    <div className="mt-3 space-y-2 w-32">
                                         <FileUpload
                                             key={uploadKey}
                                             onFileSelect={handleImageUpload}
@@ -300,9 +298,9 @@ const WorkerProfile = () => {
                                         {profile?.profilePicture && (
                                             <button
                                                 onClick={handleDeleteProfilePicture}
-                                                className="w-full text-red-600 text-sm hover:bg-red-50 py-2 px-3 rounded-xl flex items-center justify-center gap-2 transition-all"
+                                                className="w-full text-red-600 text-xs hover:bg-red-50 py-1.5 rounded-lg flex items-center justify-center gap-1 transition-all"
                                             >
-                                                <FiTrash2 className="h-4 w-4" /> Remove Photo
+                                                <FiTrash2 className="h-3 w-3" /> Remove
                                             </button>
                                         )}
                                     </div>
@@ -311,9 +309,9 @@ const WorkerProfile = () => {
                         </div>
 
                         {/* Basic Info */}
-                        <div className="flex-1 space-y-6">
+                        <div className="flex-1 w-full space-y-4">
                             {editing ? (
-                                <>
+                                <div className="grid md:grid-cols-2 gap-4">
                                     <Input
                                         label="Full Name"
                                         name="fullName"
@@ -327,616 +325,388 @@ const WorkerProfile = () => {
                                         onChange={handleBasicInfoChange}
                                         placeholder="+1234567890"
                                     />
-                                    <div>
-                                        <label className="label text-base">Bio</label>
+                                    <div className="md:col-span-2">
+                                        <label className="label text-sm font-bold text-gray-700 mb-1 block">Bio</label>
                                         <textarea
                                             name="bio"
                                             value={basicInfo.bio}
                                             onChange={handleBasicInfoChange}
-                                            className="input-field text-base"
-                                            rows="4"
+                                            className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all"
+                                            rows="3"
                                             placeholder="Tell us about yourself..."
                                         />
                                     </div>
-                                </>
+                                </div>
                             ) : (
-                                <>
-                                    <div>
-                                        <h2 className="text-3xl font-black text-gray-900 mb-2">{profile?.fullName}</h2>
-                                        {profile?.phone && <p className="text-gray-600 text-lg">{profile.phone}</p>}
-                                    </div>
+                                <div>
+                                    <h2 className="text-2xl font-black text-gray-900 mb-1">{profile?.fullName}</h2>
+                                    {profile?.phone && <p className="text-gray-500 text-sm mb-3">{profile.phone}</p>}
                                     {profile?.bio && (
-                                        <p className="text-gray-700 leading-relaxed text-lg">{profile.bio}</p>
+                                        <p className="text-gray-600 leading-relaxed max-w-3xl">{profile.bio}</p>
                                     )}
-                                </>
+                                </div>
                             )}
                         </div>
                     </div>
                 </div>
 
-                {/* Stats Grid - Premium Cards */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/60 p-6 hover:shadow-xl transition-all duration-300">
-                        <div className="flex items-center gap-4">
-                            <div className="p-4 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg">
-                                <FiDollarSign className="h-8 w-8 text-white" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-600 font-semibold uppercase tracking-wide">Hourly Rate</p>
-                                <p className="text-2xl font-black text-gray-900">${profile?.hourlyRate || 0}</p>
-                            </div>
-                        </div>
-                    </div>
+                {/* Tabs Navigation */}
+                <div className="flex items-center gap-2 border-b border-gray-200 overflow-x-auto">
+                    {['overview', 'portfolio', 'reviews'].map((tab) => (
+                        <button
+                            key={tab}
+                            onClick={() => setActiveTab(tab)}
+                            className={`px-6 py-3 font-bold text-sm capitalize transition-all border-b-2 ${activeTab === tab
+                                ? 'border-primary-600 text-primary-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
+                        >
+                            {tab}
+                        </button>
+                    ))}
+                </div>
 
-                    <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/60 p-6 hover:shadow-xl transition-all duration-300">
-                        <div className="flex items-center gap-4">
-                            <div className="p-4 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
-                                <FiBriefcase className="h-8 w-8 text-white" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-600 font-semibold uppercase tracking-wide">Jobs Done</p>
-                                <p className="text-2xl font-black text-gray-900">{profile?.totalJobsCompleted || 0}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/60 p-6 hover:shadow-xl transition-all duration-300">
-                        <div className="flex items-center gap-4">
-                            <div className="p-4 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl shadow-lg">
-                                <FiStar className="h-8 w-8 text-white" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-600 font-semibold uppercase tracking-wide">Rating</p>
-                                <p className="text-2xl font-black text-gray-900">{profile?.averageRating?.toFixed(1) || '0.0'}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/60 p-6 hover:shadow-xl transition-all duration-300">
-                        <div className="flex items-center gap-4">
-                            {editing ? (
-                                <select
-                                    name="availability"
-                                    value={basicInfo.availability}
-                                    onChange={handleBasicInfoChange}
-                                    className="input-field"
-                                >
-                                    <option value="available">Available</option>
-                                    <option value="busy">Busy</option>
-                                    <option value="not-available">Not Available</option>
-                                </select>
-                            ) : (
-                                <>
-                                    <div className={`p-4 rounded-xl shadow-lg ${profile?.availability === 'available' ? 'bg-gradient-to-br from-green-500 to-emerald-600' :
-                                        profile?.availability === 'busy' ? 'bg-gradient-to-br from-yellow-500 to-orange-600' :
-                                            'bg-gradient-to-br from-red-500 to-pink-600'
-                                        }`}>
-                                        <FiCheckCircle className="h-8 w-8 text-white" />
+                {/* Tab Content */}
+                <div className="min-h-[400px]">
+                    {activeTab === 'overview' && (
+                        <div className="space-y-6 animate-fadeIn">
+                            {/* Stats Grid */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <div className="p-2 bg-green-50 text-green-600 rounded-lg">
+                                            <FiDollarSign className="h-5 w-5" />
+                                        </div>
+                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Rate</span>
                                     </div>
-                                    <div>
-                                        <p className="text-sm text-gray-600 font-semibold uppercase tracking-wide">Status</p>
+                                    <p className="text-2xl font-black text-gray-900">${profile?.hourlyRate || 0}<span className="text-sm text-gray-400 font-medium">/hr</span></p>
+                                </div>
+
+                                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                                            <FiBriefcase className="h-5 w-5" />
+                                        </div>
+                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Jobs</span>
+                                    </div>
+                                    <p className="text-2xl font-black text-gray-900">{profile?.totalJobsCompleted || 0}</p>
+                                </div>
+
+                                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <div className="p-2 bg-yellow-50 text-yellow-600 rounded-lg">
+                                            <FiStar className="h-5 w-5" />
+                                        </div>
+                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Rating</span>
+                                    </div>
+                                    <p className="text-2xl font-black text-gray-900">{profile?.averageRating?.toFixed(1) || '0.0'}</p>
+                                </div>
+
+                                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <div className="p-2 bg-purple-50 text-purple-600 rounded-lg">
+                                            <FiCheckCircle className="h-5 w-5" />
+                                        </div>
+                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Status</span>
+                                    </div>
+                                    {editing ? (
+                                        <select
+                                            name="availability"
+                                            value={basicInfo.availability}
+                                            onChange={handleBasicInfoChange}
+                                            className="w-full text-sm border-gray-200 rounded-lg focus:ring-primary-500 focus:border-primary-500"
+                                        >
+                                            <option value="available">Available</option>
+                                            <option value="busy">Busy</option>
+                                            <option value="not-available">Unavailable</option>
+                                        </select>
+                                    ) : (
                                         <p className="text-lg font-bold text-gray-900 capitalize">{profile?.availability || 'Not set'}</p>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                </div>
+                                    )}
+                                </div>
+                            </div>
 
-                {/* Skills */}
-                <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/60 p-8 hover:shadow-2xl transition-all duration-300">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="h-10 w-1 bg-gradient-to-b from-primary-500 to-primary-700 rounded-full"></div>
-                        <h2 className="text-2xl font-black text-gray-900">Skills & Expertise</h2>
-                    </div>
-                    {editing ? (
-                        <Input
-                            label="Skills (comma-separated)"
-                            value={skills}
-                            onChange={(e) => setSkills(e.target.value)}
-                            placeholder="React, Node.js, MongoDB, etc."
-                        />
-                    ) : (
-                        <div className="flex flex-wrap gap-3">
-                            {profile?.skills?.length > 0 ? (
-                                profile.skills.map((skill, index) => (
-                                    <span
-                                        key={index}
-                                        className="px-5 py-2.5 text-sm font-bold rounded-xl bg-gradient-to-r from-purple-100 via-primary-100 to-blue-100 text-primary-700 border-2 border-primary-200/50 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+                            <div className="grid md:grid-cols-3 gap-6">
+                                {/* Skills */}
+                                <div className="md:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                                    <h3 className="text-lg font-bold text-gray-900 mb-4">Skills & Expertise</h3>
+                                    {editing ? (
+                                        <Input
+                                            label="Skills (comma-separated)"
+                                            value={skills}
+                                            onChange={(e) => setSkills(e.target.value)}
+                                            placeholder="React, Node.js, MongoDB, etc."
+                                        />
+                                    ) : (
+                                        <div className="flex flex-wrap gap-2">
+                                            {profile?.skills?.length > 0 ? (
+                                                profile.skills.map((skill, index) => (
+                                                    <span
+                                                        key={index}
+                                                        className="px-3 py-1.5 text-sm font-semibold rounded-lg bg-gray-50 text-gray-700 border border-gray-200"
+                                                    >
+                                                        {skill}
+                                                    </span>
+                                                ))
+                                            ) : (
+                                                <p className="text-gray-400 text-sm">No skills added yet</p>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Social Links */}
+                                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                                    <h3 className="text-lg font-bold text-gray-900 mb-4">Social Profiles</h3>
+                                    {editing ? (
+                                        <div className="space-y-3">
+                                            <Input
+                                                label="GitHub"
+                                                name="githubProfile"
+                                                value={basicInfo.githubProfile}
+                                                onChange={handleBasicInfoChange}
+                                                placeholder="username"
+                                            />
+                                            <Input
+                                                label="LinkedIn"
+                                                name="linkedinProfile"
+                                                value={basicInfo.linkedinProfile}
+                                                onChange={handleBasicInfoChange}
+                                                placeholder="username"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-3">
+                                            {profile?.githubProfile ? (
+                                                <a
+                                                    href={profile.githubProfile}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 transition-colors"
+                                                >
+                                                    <FiGithub className="h-5 w-5" />
+                                                    <span className="font-medium">GitHub</span>
+                                                </a>
+                                            ) : <p className="text-sm text-gray-400">No GitHub linked</p>}
+
+                                            {profile?.linkedinProfile ? (
+                                                <a
+                                                    href={profile.linkedinProfile}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex items-center gap-3 p-3 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 transition-colors"
+                                                >
+                                                    <FiLinkedin className="h-5 w-5" />
+                                                    <span className="font-medium">LinkedIn</span>
+                                                </a>
+                                            ) : <p className="text-sm text-gray-400">No LinkedIn linked</p>}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'portfolio' && (
+                        <div className="space-y-6 animate-fadeIn">
+                            {/* Experience */}
+                            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-xl font-bold text-gray-900">Work Experience</h3>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        icon={FiPlus}
+                                        onClick={() => {
+                                            setEditingExpId(null);
+                                            setExperienceForm({
+                                                title: '',
+                                                company: '',
+                                                startDate: '',
+                                                endDate: '',
+                                                current: false,
+                                                description: '',
+                                            });
+                                            setShowExpModal(true);
+                                        }}
                                     >
-                                        {skill}
-                                    </span>
-                                ))
+                                        Add
+                                    </Button>
+                                </div>
+                                {profile?.experience && profile.experience.length > 0 ? (
+                                    <div className="space-y-8">
+                                        {profile.experience.map((exp, index) => (
+                                            <div key={index} className="relative pl-8 border-l-2 border-gray-100 last:border-0 group">
+                                                <div className="absolute -left-[9px] top-0 h-4 w-4 rounded-full bg-gray-200 border-2 border-white group-hover:bg-primary-500 transition-colors"></div>
+                                                <div className="flex justify-between items-start">
+                                                    <div>
+                                                        <h4 className="text-lg font-bold text-gray-900">{exp.title}</h4>
+                                                        <p className="text-primary-600 font-medium">{exp.company}</p>
+                                                        <p className="text-sm text-gray-500 mt-1 mb-2">
+                                                            {new Date(exp.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} -{' '}
+                                                            {exp.current ? <span className="text-green-600 font-semibold">Present</span> : new Date(exp.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                                                        </p>
+                                                        {exp.description && <p className="text-gray-600 text-sm leading-relaxed">{exp.description}</p>}
+                                                    </div>
+                                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <button onClick={() => handleEditExperience(exp)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"><FiEdit2 className="h-4 w-4" /></button>
+                                                        <button onClick={() => handleDeleteExperience(exp._id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"><FiTrash2 className="h-4 w-4" /></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-8 text-gray-500">No experience added yet.</div>
+                                )}
+                            </div>
+
+                            {/* Certifications */}
+                            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-xl font-bold text-gray-900">Certifications</h3>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        icon={FiPlus}
+                                        onClick={() => {
+                                            setEditingCertId(null);
+                                            setCertificationForm({
+                                                title: '',
+                                                issuedBy: '',
+                                                issuedDate: '',
+                                                certificateUrl: '',
+                                            });
+                                            setShowCertModal(true);
+                                        }}
+                                    >
+                                        Add
+                                    </Button>
+                                </div>
+                                {profile?.certifications && profile.certifications.length > 0 ? (
+                                    <div className="grid md:grid-cols-2 gap-4">
+                                        {profile.certifications.map((cert, index) => (
+                                            <div key={index} className="p-4 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-white hover:shadow-md transition-all group relative">
+                                                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button onClick={() => handleEditCertification(cert)} className="p-1.5 text-gray-400 hover:text-blue-600 rounded-lg"><FiEdit2 className="h-3.5 w-3.5" /></button>
+                                                    <button onClick={() => handleDeleteCertification(cert._id)} className="p-1.5 text-gray-400 hover:text-red-600 rounded-lg"><FiTrash2 className="h-3.5 w-3.5" /></button>
+                                                </div>
+                                                <div className="flex items-start gap-3">
+                                                    <div className="p-2 bg-white rounded-lg shadow-sm text-yellow-500">
+                                                        <FiAward className="h-5 w-5" />
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="font-bold text-gray-900 text-sm">{cert.title}</h4>
+                                                        <p className="text-xs text-gray-500">{cert.issuedBy}</p>
+                                                        <p className="text-xs text-gray-400 mt-1">Issued: {new Date(cert.issuedDate).toLocaleDateString()}</p>
+                                                        {cert.certificateUrl && (
+                                                            <a href={cert.certificateUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary-600 font-semibold mt-2 inline-block hover:underline">View Certificate</a>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-8 text-gray-500">No certifications added yet.</div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'reviews' && (
+                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 animate-fadeIn">
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="text-xl font-bold text-gray-900">Client Reviews</h3>
+                                <Link to="/worker/reviews" className="text-primary-600 text-sm font-bold hover:underline">View All</Link>
+                            </div>
+
+                            {profile?.totalReviews > 0 ? (
+                                <div className="space-y-6">
+                                    <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                                        <div className="text-center px-4 border-r border-gray-200">
+                                            <span className="text-3xl font-black text-gray-900">{profile.averageRating?.toFixed(1)}</span>
+                                            <div className="flex text-yellow-400 text-sm mt-1">
+                                                {[1, 2, 3, 4, 5].map(s => <FiStar key={s} className={s <= Math.round(profile.averageRating) ? "fill-current" : "text-gray-300"} />)}
+                                            </div>
+                                            <p className="text-xs text-gray-500 mt-1">{profile.totalReviews} reviews</p>
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-sm text-gray-600 italic">"Great work! Highly recommended."</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        {profile.recentReviews?.slice(0, 3).map((review, i) => (
+                                            <div key={i} className="border-b border-gray-100 last:border-0 pb-4 last:pb-0">
+                                                <div className="flex justify-between mb-2">
+                                                    <h4 className="font-bold text-gray-900 text-sm">{review.companyName || 'Client'}</h4>
+                                                    <span className="text-xs text-gray-400">{new Date(review.createdAt).toLocaleDateString()}</span>
+                                                </div>
+                                                <div className="flex text-yellow-400 text-xs mb-2">
+                                                    {[1, 2, 3, 4, 5].map(s => <FiStar key={s} className={s <= review.rating ? "fill-current" : "text-gray-300"} />)}
+                                                </div>
+                                                <p className="text-sm text-gray-600">{review.reviewText}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
                             ) : (
-                                <p className="text-gray-500 text-center w-full py-4">No skills added yet</p>
+                                <div className="text-center py-12 text-gray-500">No reviews yet.</div>
                             )}
                         </div>
                     )}
                 </div>
 
-                {/* Social Links - Only show when editing OR when links exist */}
-                {(editing || profile?.githubProfile || profile?.linkedinProfile) && (
-                    <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/60 p-8 hover:shadow-2xl transition-all duration-300">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="h-10 w-1 bg-gradient-to-b from-blue-500 to-indigo-700 rounded-full"></div>
-                            <h2 className="text-2xl font-black text-gray-900">Social Links</h2>
+                {/* Modals */}
+                {showExpModal && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+                        <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl">
+                            <h3 className="text-xl font-bold mb-4">{editingExpId ? 'Edit Experience' : 'Add Experience'}</h3>
+                            <form onSubmit={handleSaveExperience} className="space-y-4">
+                                <Input label="Job Title" value={experienceForm.title} onChange={e => setExperienceForm({ ...experienceForm, title: e.target.value })} required />
+                                <Input label="Company" value={experienceForm.company} onChange={e => setExperienceForm({ ...experienceForm, company: e.target.value })} required />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Input type="date" label="Start Date" value={experienceForm.startDate} onChange={e => setExperienceForm({ ...experienceForm, startDate: e.target.value })} required />
+                                    <div className="space-y-1">
+                                        <Input type="date" label="End Date" value={experienceForm.endDate} onChange={e => setExperienceForm({ ...experienceForm, endDate: e.target.value })} disabled={experienceForm.current} />
+                                        <label className="flex items-center gap-2 text-sm text-gray-600">
+                                            <input type="checkbox" checked={experienceForm.current} onChange={e => setExperienceForm({ ...experienceForm, current: e.target.checked })} className="rounded text-primary-600" />
+                                            I currently work here
+                                        </label>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="label text-sm font-bold text-gray-700 mb-1 block">Description</label>
+                                    <textarea value={experienceForm.description} onChange={e => setExperienceForm({ ...experienceForm, description: e.target.value })} className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:border-primary-500 outline-none" rows="3" />
+                                </div>
+                                <div className="flex gap-3 pt-2">
+                                    <Button type="button" variant="secondary" onClick={() => setShowExpModal(false)} className="flex-1">Cancel</Button>
+                                    <Button type="submit" variant="primary" className="flex-1">Save</Button>
+                                </div>
+                            </form>
                         </div>
-                        {editing ? (
-                            <div className="space-y-4">
-                                <Input
-                                    label="GitHub Profile"
-                                    name="githubProfile"
-                                    value={basicInfo.githubProfile}
-                                    onChange={handleBasicInfoChange}
-                                    placeholder="https://github.com/username"
-                                />
-                                <Input
-                                    label="LinkedIn Profile"
-                                    name="linkedinProfile"
-                                    value={basicInfo.linkedinProfile}
-                                    onChange={handleBasicInfoChange}
-                                    placeholder="https://linkedin.com/in/username"
-                                />
-                            </div>
-                        ) : (
-                            <div className="flex gap-4">
-                                {profile?.githubProfile && (
-                                    <a
-                                        href={profile.githubProfile}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-gray-700 to-gray-900 text-white font-bold rounded-xl hover:shadow-lg transition-all"
-                                    >
-                                        <FiGithub className="h-5 w-5" /> GitHub
-                                    </a>
-                                )}
-                                {profile?.linkedinProfile && (
-                                    <a
-                                        href={profile.linkedinProfile}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-800 text-white font-bold rounded-xl hover:shadow-lg transition-all"
-                                    >
-                                        <FiLinkedin className="h-5 w-5" /> LinkedIn
-                                    </a>
-                                )}
-                            </div>
-                        )}
                     </div>
                 )}
 
-                {/* Experience */}
-                <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/60 p-8 hover:shadow-2xl transition-all duration-300">
-                    <div className="flex justify-between items-center mb-6">
-                        <div className="flex items-center gap-3">
-                            <div className="h-10 w-1 bg-gradient-to-b from-orange-500 to-red-700 rounded-full"></div>
-                            <h2 className="text-2xl font-black text-gray-900">Work Experience</h2>
+                {showCertModal && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+                        <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl">
+                            <h3 className="text-xl font-bold mb-4">{editingCertId ? 'Edit Certification' : 'Add Certification'}</h3>
+                            <form onSubmit={handleSaveCertification} className="space-y-4">
+                                <Input label="Certification Title" value={certificationForm.title} onChange={e => setCertificationForm({ ...certificationForm, title: e.target.value })} required />
+                                <Input label="Issued By" value={certificationForm.issuedBy} onChange={e => setCertificationForm({ ...certificationForm, issuedBy: e.target.value })} required />
+                                <Input type="date" label="Issued Date" value={certificationForm.issuedDate} onChange={e => setCertificationForm({ ...certificationForm, issuedDate: e.target.value })} required />
+                                <Input label="Credential URL" value={certificationForm.certificateUrl} onChange={e => setCertificationForm({ ...certificationForm, certificateUrl: e.target.value })} placeholder="https://" />
+                                <div className="flex gap-3 pt-2">
+                                    <Button type="button" variant="secondary" onClick={() => setShowCertModal(false)} className="flex-1">Cancel</Button>
+                                    <Button type="submit" variant="primary" className="flex-1">Save</Button>
+                                </div>
+                            </form>
                         </div>
-                        <Button
-                            variant="primary"
-                            size="sm"
-                            icon={FiPlus}
-                            onClick={() => {
-                                setEditingExpId(null);
-                                setExperienceForm({
-                                    title: '',
-                                    company: '',
-                                    startDate: '',
-                                    endDate: '',
-                                    current: false,
-                                    description: '',
-                                });
-                                setShowExpModal(true);
-                            }}
-                            className="px-5 py-2.5"
-                        >
-                            Add Experience
-                        </Button>
                     </div>
-                    {profile?.experience && profile.experience.length > 0 ? (
-                        <div className="space-y-6">
-                            {profile.experience.map((exp, index) => (
-                                <div
-                                    key={index}
-                                    className="border-l-4 border-primary-600 pl-6 py-4 bg-gradient-to-r from-primary-50/50 to-transparent rounded-r-2xl group hover:shadow-md transition-all"
-                                >
-                                    <div className="flex justify-between items-start">
-                                        <div className="flex-1">
-                                            <h3 className="text-xl font-bold text-gray-900 mb-1">{exp.title}</h3>
-                                            <p className="text-primary-600 font-semibold mb-2">{exp.company}</p>
-                                            <p className="text-sm text-gray-600 mb-3">
-                                                {new Date(exp.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} -{' '}
-                                                {exp.current ? <span className="text-green-600 font-semibold">Present</span> : new Date(exp.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                                            </p>
-                                            {exp.description && <p className="text-gray-700 leading-relaxed">{exp.description}</p>}
-                                        </div>
-                                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity ml-4">
-                                            <button
-                                                onClick={() => handleEditExperience(exp)}
-                                                className="p-2.5 text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
-                                                title="Edit"
-                                            >
-                                                <FiEdit2 className="h-5 w-5" />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDeleteExperience(exp._id)}
-                                                className="p-2.5 text-red-600 hover:bg-red-50 rounded-xl transition-all"
-                                                title="Delete"
-                                            >
-                                                <FiTrash2 className="h-5 w-5" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-12">
-                            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full mb-4">
-                                <FiBriefcase className="h-8 w-8 text-gray-400" />
-                            </div>
-                            <p className="text-gray-600 font-medium">No experience added yet</p>
-                            <p className="text-sm text-gray-500 mt-1">Add your work experience to showcase your skills</p>
-                        </div>
-                    )}
-                </div>
-
-                {/* Certifications */}
-                <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/60 p-8 hover:shadow-2xl transition-all duration-300">
-                    <div className="flex justify-between items-center mb-6">
-                        <div className="flex items-center gap-3">
-                            <div className="h-10 w-1 bg-gradient-to-b from-green-500 to-emerald-700 rounded-full"></div>
-                            <h2 className="text-2xl font-black text-gray-900">Certifications & Awards</h2>
-                        </div>
-                        <Button
-                            variant="primary"
-                            size="sm"
-                            icon={FiPlus}
-                            onClick={() => {
-                                setEditingCertId(null);
-                                setCertificationForm({
-                                    title: '',
-                                    issuedBy: '',
-                                    issuedDate: '',
-                                    certificateUrl: '',
-                                });
-                                setShowCertModal(true);
-                            }}
-                            className="px-5 py-2.5"
-                        >
-                            Add Certification
-                        </Button>
-                    </div>
-                    {profile?.certifications && profile.certifications.length > 0 ? (
-                        <div className="grid md:grid-cols-2 gap-6">
-                            {profile.certifications.map((cert, index) => (
-                                <div
-                                    key={index}
-                                    className="bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-2xl p-6 relative group hover:shadow-lg hover:border-primary-300 transition-all"
-                                >
-                                    <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button
-                                            onClick={() => handleEditCertification(cert)}
-                                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
-                                            title="Edit"
-                                        >
-                                            <FiEdit2 className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeleteCertification(cert._id)}
-                                            className="p-2 text-red-600 hover:bg-red-50 rounded-xl transition-all"
-                                            title="Delete"
-                                        >
-                                            <FiTrash2 className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                    <div className="flex items-start gap-4 mb-4">
-                                        <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg flex-shrink-0">
-                                            <FiAward className="h-6 w-6 text-white" />
-                                        </div>
-                                        <div className="flex-1 pr-16">
-                                            <h3 className="font-bold text-lg text-gray-900 mb-1">{cert.title}</h3>
-                                            <p className="text-gray-600 font-medium">{cert.issuedBy}</p>
-                                        </div>
-                                    </div>
-                                    <p className="text-sm text-gray-500 mb-3">
-                                        Issued: {new Date(cert.issuedDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                                    </p>
-                                    {cert.certificateUrl && (
-                                        <a
-                                            href={cert.certificateUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-semibold text-sm transition-colors"
-                                        >
-                                            View Certificate →
-                                        </a>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-12">
-                            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full mb-4">
-                                <FiAward className="h-8 w-8 text-gray-400" />
-                            </div>
-                            <p className="text-gray-600 font-medium">No certifications added yet</p>
-                            <p className="text-sm text-gray-500 mt-1">Add certifications to highlight your qualifications</p>
-                        </div>
-                    )}
-                </div>
-
-                {/* Reviews Section */}
-                <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/60 p-8 hover:shadow-2xl transition-all duration-300">
-                    <div className="flex justify-between items-center mb-6">
-                        <div className="flex items-center gap-3">
-                            <div className="h-10 w-1 bg-gradient-to-b from-yellow-500 to-orange-700 rounded-full"></div>
-                            <h2 className="text-2xl font-black text-gray-900">Recent Reviews</h2>
-                        </div>
-                        <Link to="/worker/reviews" className="text-primary-600 hover:text-primary-700 font-bold flex items-center gap-2 transition-colors">
-                            View All Reviews
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                        </Link>
-                    </div>
-
-                    {profile?.totalReviews > 0 && profile?.recentReviews && profile.recentReviews.length > 0 ? (
-                        <div className="space-y-6">
-                            {/* Overall Rating Summary */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-8 pb-6 border-b border-gray-200">
-                                <div className="text-center">
-                                    <p className="text-6xl font-black text-primary-600 mb-3">
-                                        {profile.averageRating?.toFixed(1) || '0.0'}
-                                    </p>
-                                    <div className="flex items-center gap-1 justify-center mb-2">
-                                        {[1, 2, 3, 4, 5].map((star) => (
-                                            <FiStar
-                                                key={star}
-                                                className={`h-6 w-6 ${star <= Math.round(profile.averageRating)
-                                                    ? 'text-yellow-400 fill-current'
-                                                    : 'text-gray-300'
-                                                    }`}
-                                            />
-                                        ))}
-                                    </div>
-                                    <p className="text-sm text-gray-600 font-semibold">{profile.totalReviews} reviews</p>
-                                </div>
-
-                                <div className="flex-1 w-full">
-                                    <p className="text-gray-700 mb-4 font-bold">Rating Distribution</p>
-                                    {[5, 4, 3, 2, 1].map((rating) => {
-                                        const count = profile.recentReviews.filter(r => r.rating === rating).length;
-                                        const percentage = profile.totalReviews > 0 ? (count / profile.totalReviews) * 100 : 0;
-                                        return (
-                                            <div key={rating} className="flex items-center gap-3 mb-3">
-                                                <div className="flex items-center gap-1 w-20">
-                                                    <span className="text-sm font-bold text-gray-700">{rating}</span>
-                                                    <FiStar className="h-4 w-4 text-yellow-400 fill-current" />
-                                                </div>
-                                                <div className="flex-1 bg-gray-200 rounded-full h-3 overflow-hidden">
-                                                    <div
-                                                        className="bg-gradient-to-r from-primary-500 to-primary-600 h-full rounded-full transition-all duration-500"
-                                                        style={{ width: `${percentage}%` }}
-                                                    ></div>
-                                                </div>
-                                                <span className="text-sm text-gray-600 w-12 text-right font-semibold">{count}</span>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-
-                            {/* Recent Reviews List */}
-                            <div className="space-y-6">
-                                {profile.recentReviews.slice(0, 3).map((review, index) => (
-                                    <div key={index} className="border-b border-gray-100 last:border-0 pb-6 last:pb-0">
-                                        {/* Review Header */}
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div className="flex items-center gap-4">
-                                                {review.companyLogo ? (
-                                                    <img
-                                                        src={review.companyLogo}
-                                                        alt={review.companyName}
-                                                        className="h-12 w-12 rounded-xl object-cover flex-shrink-0 border-2 border-white shadow-md"
-                                                    />
-                                                ) : (
-                                                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center flex-shrink-0 border-2 border-white shadow-md">
-                                                        <span className="text-primary-600 font-bold text-lg">
-                                                            {review.companyName?.charAt(0) || 'C'}
-                                                        </span>
-                                                    </div>
-                                                )}
-                                                <div>
-                                                    <h4 className="font-bold text-gray-900 text-lg">
-                                                        {review.companyName || 'Anonymous Client'}
-                                                    </h4>
-                                                    <p className="text-sm text-gray-500">
-                                                        {new Date(review.createdAt).toLocaleDateString('en-US', {
-                                                            month: 'short',
-                                                            day: 'numeric',
-                                                            year: 'numeric'
-                                                        })}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-1">
-                                                {[1, 2, 3, 4, 5].map((star) => (
-                                                    <FiStar
-                                                        key={star}
-                                                        className={`h-5 w-5 ${star <= review.rating
-                                                            ? 'text-yellow-400 fill-current'
-                                                            : 'text-gray-300'
-                                                            }`}
-                                                    />
-                                                ))}
-                                            </div>
-                                        </div>
-
-                                        {/* Job Title */}
-                                        {review.jobTitle && review.jobTitle !== 'N/A' && (
-                                            <p className="text-sm text-gray-600 mb-3">
-                                                Project: <span className="font-bold text-gray-900">{review.jobTitle}</span>
-                                            </p>
-                                        )}
-
-                                        {/* Review Text */}
-                                        <p className="text-gray-700 leading-relaxed mb-4">
-                                            {review.reviewText}
-                                        </p>
-
-                                        {/* Tags and Badges */}
-                                        <div className="flex flex-wrap items-center gap-2">
-                                            {review.tags && review.tags.length > 0 && (
-                                                <>
-                                                    {review.tags.slice(0, 3).map((tag, idx) => (
-                                                        <span key={idx} className="px-3 py-1 text-xs font-bold rounded-lg bg-blue-100 text-blue-700 border border-blue-200">
-                                                            {tag.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
-                                                        </span>
-                                                    ))}
-                                                </>
-                                            )}
-                                            {review.wouldHireAgain && (
-                                                <span className="inline-flex items-center gap-1 text-green-700 bg-green-100 px-3 py-1 rounded-lg text-xs font-bold border border-green-200">
-                                                    ✓ Would hire again
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="text-center py-12">
-                            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-full mb-4">
-                                <FiStar className="h-10 w-10 text-yellow-600" />
-                            </div>
-                            <p className="text-gray-900 font-bold text-xl mb-2">No reviews yet</p>
-                            <p className="text-gray-600">
-                                Complete jobs to receive reviews from clients
-                            </p>
-                        </div>
-                    )}
-                </div>
+                )}
             </div>
-
-            {/* Add/Edit Experience Modal */}
-            {showExpModal && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-                    <div className="bg-white rounded-3xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto shadow-2xl transform animate-slide-up">
-                        <div className="flex items-center gap-4 mb-6">
-                            <div className="h-12 w-1 bg-gradient-to-b from-primary-500 to-primary-700 rounded-full"></div>
-                            <h2 className="text-3xl font-black text-gray-900">{editingExpId ? 'Edit Experience' : 'Add Experience'}</h2>
-                        </div>
-                        <form onSubmit={handleSaveExperience} className="space-y-6">
-                            <Input
-                                label="Job Title"
-                                value={experienceForm.title}
-                                onChange={(e) => setExperienceForm({ ...experienceForm, title: e.target.value })}
-                                required
-                            />
-                            <Input
-                                label="Company"
-                                value={experienceForm.company}
-                                onChange={(e) => setExperienceForm({ ...experienceForm, company: e.target.value })}
-                                required
-                            />
-                            <div className="grid md:grid-cols-2 gap-4">
-                                <Input
-                                    label="Start Date"
-                                    type="date"
-                                    value={experienceForm.startDate}
-                                    onChange={(e) => setExperienceForm({ ...experienceForm, startDate: e.target.value })}
-                                    required
-                                />
-                                <Input
-                                    label="End Date"
-                                    type="date"
-                                    value={experienceForm.endDate}
-                                    onChange={(e) => setExperienceForm({ ...experienceForm, endDate: e.target.value })}
-                                    disabled={experienceForm.current}
-                                />
-                            </div>
-                            <div className="flex items-center">
-                                <input
-                                    type="checkbox"
-                                    id="current"
-                                    checked={experienceForm.current}
-                                    onChange={(e) => setExperienceForm({ ...experienceForm, current: e.target.checked })}
-                                    className="h-5 w-5 text-primary-600 rounded"
-                                />
-                                <label htmlFor="current" className="ml-3 text-base text-gray-700 font-medium">
-                                    I currently work here
-                                </label>
-                            </div>
-                            <div>
-                                <label className="label text-base">Description</label>
-                                <textarea
-                                    value={experienceForm.description}
-                                    onChange={(e) => setExperienceForm({ ...experienceForm, description: e.target.value })}
-                                    rows="5"
-                                    className="input-field text-base"
-                                    placeholder="Describe your role and achievements..."
-                                />
-                            </div>
-                            <div className="flex gap-4 pt-4">
-                                <Button type="submit" variant="primary" className="flex-1 text-lg py-4">
-                                    {editingExpId ? 'Save Changes' : 'Add Experience'}
-                                </Button>
-                                <Button type="button" variant="secondary" onClick={() => setShowExpModal(false)} className="flex-1 text-lg py-4">
-                                    Cancel
-                                </Button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
-            {/* Add/Edit Certification Modal */}
-            {showCertModal && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-                    <div className="bg-white rounded-3xl max-w-2xl w-full p-8 shadow-2xl transform animate-slide-up">
-                        <div className="flex items-center gap-4 mb-6">
-                            <div className="h-12 w-1 bg-gradient-to-b from-green-500 to-emerald-700 rounded-full"></div>
-                            <h2 className="text-3xl font-black text-gray-900">{editingCertId ? 'Edit Certification' : 'Add Certification'}</h2>
-                        </div>
-                        <form onSubmit={handleSaveCertification} className="space-y-6">
-                            <Input
-                                label="Certificate Title"
-                                value={certificationForm.title}
-                                onChange={(e) => setCertificationForm({ ...certificationForm, title: e.target.value })}
-                                required
-                            />
-                            <Input
-                                label="Issued By"
-                                value={certificationForm.issuedBy}
-                                onChange={(e) => setCertificationForm({ ...certificationForm, issuedBy: e.target.value })}
-                                required
-                            />
-                            <Input
-                                label="Issued Date"
-                                type="date"
-                                value={certificationForm.issuedDate}
-                                onChange={(e) => setCertificationForm({ ...certificationForm, issuedDate: e.target.value })}
-                            />
-                            <Input
-                                label="Certificate URL (optional)"
-                                value={certificationForm.certificateUrl}
-                                onChange={(e) => setCertificationForm({ ...certificationForm, certificateUrl: e.target.value })}
-                                placeholder="https://..."
-                            />
-                            <div className="flex gap-4 pt-4">
-                                <Button type="submit" variant="primary" className="flex-1 text-lg py-4">
-                                    {editingCertId ? 'Save Changes' : 'Add Certification'}
-                                </Button>
-                                <Button type="button" variant="secondary" onClick={() => setShowCertModal(false)} className="flex-1 text-lg py-4">
-                                    Cancel
-                                </Button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
         </DashboardLayout>
     );
 };
