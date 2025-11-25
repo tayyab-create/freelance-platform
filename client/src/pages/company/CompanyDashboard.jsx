@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { companyAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
-import { StatCard, SkeletonLoader } from '../../components/shared';
+import { StatCard, SkeletonLoader, Avatar, ProgressBar, EmptyState } from '../../components/shared';
 
 import {
   FiBriefcase, FiUsers, FiCheckCircle, FiClock, FiPlus,
@@ -40,8 +40,13 @@ const CompanyDashboard = () => {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex justify-center items-center h-64">
-          <Spinner size="lg" />
+        <div className="space-y-8">
+          <SkeletonLoader type="card" count={1} />
+          <SkeletonLoader type="stat" count={4} />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <SkeletonLoader type="card" count={2} className="lg:col-span-2" />
+            <SkeletonLoader type="card" count={1} />
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -54,48 +59,7 @@ const CompanyDashboard = () => {
     { name: 'Completed', value: stats?.jobs?.completed || 0, color: '#10b981' }, // Green
   ].filter(item => item.value > 0);
 
-  const statCards = [
-    {
-      title: 'Total Jobs Posted',
-      value: stats?.jobs?.total || 0,
-      icon: FiBriefcase,
-      color: 'blue',
-      gradient: 'from-blue-500 to-blue-600',
-      bgGradient: 'from-blue-50 to-white',
-      borderColor: 'border-blue-500',
-      link: '/company/jobs',
-    },
-    {
-      title: 'Active Jobs',
-      value: stats?.jobs?.active || 0,
-      icon: FiClock,
-      color: 'yellow',
-      gradient: 'from-yellow-500 to-yellow-600',
-      bgGradient: 'from-yellow-50 to-white',
-      borderColor: 'border-yellow-500',
-      link: '/company/jobs',
-    },
-    {
-      title: 'Assigned Jobs',
-      value: stats?.jobs?.assigned || 0,
-      icon: FiUsers,
-      color: 'purple',
-      gradient: 'from-purple-500 to-purple-600',
-      bgGradient: 'from-purple-50 to-white',
-      borderColor: 'border-purple-500',
-      link: '/company/jobs',
-    },
-    {
-      title: 'Completed Jobs',
-      value: stats?.jobs?.completed || 0,
-      icon: FiCheckCircle,
-      color: 'green',
-      gradient: 'from-green-500 to-green-600',
-      bgGradient: 'from-green-50 to-white',
-      borderColor: 'border-green-500',
-      link: '/company/jobs?status=completed',
-    },
-  ];
+
 
   const profileCompletion = calculateCompanyProfileCompletion(stats.profile);
 
@@ -108,17 +72,13 @@ const CompanyDashboard = () => {
           <div className="absolute bottom-0 right-20 w-40 h-40 bg-white opacity-5 rounded-full"></div>
           <div className="relative z-10 flex items-center justify-between">
             <div className="flex items-center gap-6">
-              {user?.profilePhoto ? (
-                <img
-                  src={user.profilePhoto}
-                  alt={user.name}
-                  className="h-24 w-24 rounded-2xl object-cover border-4 border-white/30 shadow-2xl"
-                />
-              ) : (
-                <div className="h-24 w-24 rounded-2xl bg-white/20 flex items-center justify-center text-white text-4xl font-bold shadow-2xl backdrop-blur-sm border-2 border-white/30">
-                  {user?.name?.[0]?.toUpperCase() || 'C'}
-                </div>
-              )}
+              <Avatar
+                src={user?.profilePhoto}
+                name={user?.name || 'Company'}
+                size="2xl"
+                shape="square"
+                className="border-4 border-white/30 shadow-2xl"
+              />
               <div>
                 <h1 className="text-4xl font-black mb-2 tracking-tight">
                   Welcome back, {user?.name || stats?.profile?.name || 'Company'}! 👋
@@ -135,25 +95,37 @@ const CompanyDashboard = () => {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {statCards.map((stat, index) => (
-            <div
-              key={index}
-              className={`card group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br ${stat.bgGradient} border-l-4 ${stat.borderColor}`}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className={`h-14 w-14 rounded-2xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                  <stat.icon className="h-7 w-7 text-white" />
-                </div>
-                {stat.link && (
-                  <Link to={stat.link} className={`text-${stat.color}-600 hover:bg-${stat.color}-50 p-2 rounded-full transition-colors`}>
-                    <FiArrowRight className="h-5 w-5" />
-                  </Link>
-                )}
-              </div>
-              <p className="text-sm font-semibold text-gray-500 mb-1 uppercase tracking-wider">{stat.title}</p>
-              <p className="text-4xl font-black text-gray-900">{stat.value}</p>
-            </div>
-          ))}
+          <StatCard
+            title="Total Jobs Posted"
+            value={stats?.jobs?.total || 0}
+            icon={FiBriefcase}
+            gradient="from-blue-500 to-blue-600"
+            onClick={() => window.location.href = '/company/jobs'}
+          />
+
+          <StatCard
+            title="Active Jobs"
+            value={stats?.jobs?.active || 0}
+            icon={FiClock}
+            gradient="from-yellow-500 to-yellow-600"
+            onClick={() => window.location.href = '/company/jobs'}
+          />
+
+          <StatCard
+            title="Assigned Jobs"
+            value={stats?.jobs?.assigned || 0}
+            icon={FiUsers}
+            gradient="from-purple-500 to-purple-600"
+            onClick={() => window.location.href = '/company/jobs'}
+          />
+
+          <StatCard
+            title="Completed Jobs"
+            value={stats?.jobs?.completed || 0}
+            icon={FiCheckCircle}
+            gradient="from-green-500 to-green-600"
+            onClick={() => window.location.href = '/company/jobs?status=completed'}
+          />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -200,9 +172,14 @@ const CompanyDashboard = () => {
                 </div>
               </div>
             ) : (
-              <div className="h-64 flex flex-col items-center justify-center text-gray-400 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-                <FiBriefcase className="h-12 w-12 mb-2 opacity-50" />
-                <p>No job data available yet</p>
+              <div className="h-64">
+                <EmptyState
+                  icon={FiBriefcase}
+                  title="No jobs yet"
+                  description="Post your first job to see statistics here."
+                  actionLabel="Post a Job"
+                  onAction={() => window.location.href = '/company/post-job'}
+                />
               </div>
             )}
           </div>
@@ -251,17 +228,16 @@ const CompanyDashboard = () => {
               <div className="card border-2 border-blue-100 bg-blue-50/50">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-bold text-gray-900">Profile Status</h3>
-                  <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">
-                    {profileCompletion}%
-                  </span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-3 mb-4 overflow-hidden">
-                  <div
-                    className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-1000"
-                    style={{ width: `${profileCompletion}%` }}
-                  ></div>
-                </div>
-                <Link to="/company/profile" className="text-sm font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                <ProgressBar
+                  percentage={profileCompletion}
+                  label="Profile Completion"
+                  color="info"
+                  size="lg"
+                  showPercentage={true}
+                  animate={true}
+                />
+                <Link to="/company/profile" className="text-sm font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 mt-4">
                   Complete Profile <FiArrowRight />
                 </Link>
               </div>
