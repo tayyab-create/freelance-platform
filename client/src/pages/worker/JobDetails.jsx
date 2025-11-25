@@ -7,6 +7,7 @@ import Button from '../../components/common/Button';
 import { FiDollarSign, FiClock, FiCalendar, FiBriefcase, FiMessageCircle } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { messageAPI } from '../../services/api';
+import { PageHeader, SkeletonLoader, StatusBadge, Avatar, Modal } from '../../components/shared';
 
 const JobDetails = () => {
 
@@ -74,8 +75,9 @@ const JobDetails = () => {
     if (loading) {
         return (
             <DashboardLayout>
-                <div className="flex justify-center items-center h-64">
-                    <Spinner size="lg" />
+                <div className="space-y-6">
+                    <SkeletonLoader type="card" count={1} />
+                    <SkeletonLoader type="card" count={2} />
                 </div>
             </DashboardLayout>
         );
@@ -106,10 +108,12 @@ const JobDetails = () => {
                                 {job.companyInfo && (
                                     <>
                                         {job.companyInfo.logo ? (
-                                            <img
-                                                src={job.companyInfo.logo}
-                                                alt={job.companyInfo.companyName}
-                                                className="h-16 w-16 rounded-2xl object-cover shadow-lg border-2 border-white"
+                                            <Avatar
+                                                src={job.companyInfo?.logo}
+                                                name={job.companyInfo?.companyName}
+                                                size="xl"
+                                                shape="square"
+                                                className="border-2 border-white shadow-lg"
                                             />
                                         ) : (
                                             <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-lg border-2 border-white">
@@ -134,11 +138,11 @@ const JobDetails = () => {
                         </div>
 
                         <div className="flex flex-col items-end gap-3">
-                            <span className="badge badge-success text-base px-5 py-2 shadow-md">{job.status}</span>
+                            <StatusBadge status={job.status} size="lg" />
                             {job.deadline && (
                                 <div className={`flex items-center gap-2 px-4 py-2 rounded-xl ${new Date(job.deadline) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-                                        ? 'bg-orange-100 text-orange-700 border border-orange-200'
-                                        : 'bg-blue-100 text-blue-700 border border-blue-200'
+                                    ? 'bg-orange-100 text-orange-700 border border-orange-200'
+                                    : 'bg-blue-100 text-blue-700 border border-blue-200'
                                     } shadow-sm`}>
                                     <FiCalendar className="h-4 w-4" />
                                     <span className="text-sm font-semibold">
@@ -270,78 +274,47 @@ const JobDetails = () => {
 
                 {/* Application Modal - Enhanced */}
                 {showApplyModal && (
-                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-                        <div className="bg-white rounded-3xl max-w-3xl w-full p-8 shadow-2xl transform animate-slide-up border border-gray-200">
-                            <div className="flex items-center gap-4 mb-6">
-                                <div className="h-12 w-1 bg-gradient-to-b from-primary-500 to-primary-700 rounded-full"></div>
-                                <h2 className="text-3xl font-black text-gray-900">Apply for this Job</h2>
+                    <Modal
+                        isOpen={showApplyModal}
+                        onClose={() => setShowApplyModal(false)}
+                        title="Apply for Job"
+                        size="lg"
+                        footer={
+                            <>
+                                <button onClick={() => setShowApplyModal(false)} className="btn-secondary">
+                                    Cancel
+                                </button>
+                                <button onClick={handleApply} className="btn-primary" disabled={applying}>
+                                    {applying ? 'Submitting...' : 'Submit Application'}
+                                </button>
+                            </>
+                        }
+                    >
+                        <form onSubmit={handleApply} className="space-y-4">
+                            <div>
+                                <label className="label">Proposal *</label>
+                                <textarea
+                                    value={proposal}
+                                    onChange={(e) => setProposal(e.target.value)}
+                                    placeholder="Explain why you're the best fit..."
+                                    rows="6"
+                                    required
+                                    className="input-field"
+                                />
+                                <p className="text-sm text-gray-500 mt-1">Minimum 50 characters</p>
                             </div>
 
-                            <form onSubmit={handleApply} className="space-y-6">
-                                <div>
-                                    <label className="label text-base">Your Proposal *</label>
-                                    <textarea
-                                        value={proposal}
-                                        onChange={(e) => setProposal(e.target.value)}
-                                        placeholder="Explain why you're the best fit for this job. Highlight your relevant experience and skills..."
-                                        rows="8"
-                                        required
-                                        className="input-field text-base"
-                                    />
-                                    <div className="flex items-center justify-between mt-2">
-                                        <p className={`text-sm font-semibold ${proposal.length >= 50 ? 'text-green-600' : 'text-orange-600'
-                                            }`}>
-                                            {proposal.length} / 50 characters minimum
-                                        </p>
-                                        {proposal.length >= 50 && (
-                                            <span className="text-green-600 text-sm font-bold">✓ Ready to submit</span>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="label text-base">Your Proposed Rate ($) *</label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                            <FiDollarSign className="h-5 w-5 text-gray-400" />
-                                        </div>
-                                        <input
-                                            type="number"
-                                            value={proposedRate}
-                                            onChange={(e) => setProposedRate(e.target.value)}
-                                            required
-                                            className="input-field pl-12 text-base"
-                                            placeholder="Enter your proposed rate"
-                                        />
-                                    </div>
-                                    <p className="text-sm text-gray-500 mt-2">
-                                        Job budget: ${job.salary} ({job.salaryType})
-                                    </p>
-                                </div>
-
-                                <div className="flex gap-4 pt-4">
-                                    <Button
-                                        type="submit"
-                                        variant="primary"
-                                        loading={applying}
-                                        disabled={applying}
-                                        className="flex-1 text-lg py-4"
-                                    >
-                                        {applying ? 'Submitting...' : 'Submit Application'}
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        variant="secondary"
-                                        onClick={() => setShowApplyModal(false)}
-                                        disabled={applying}
-                                        className="flex-1 text-lg py-4"
-                                    >
-                                        Cancel
-                                    </Button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+                            <div>
+                                <label className="label">Proposed Rate ($)</label>
+                                <input
+                                    type="number"
+                                    value={proposedRate}
+                                    onChange={(e) => setProposedRate(e.target.value)}
+                                    className="input-field"
+                                />
+                            </div>
+                        </form>
+                    </Modal>
                 )}
             </div>
         </DashboardLayout>

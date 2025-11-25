@@ -7,6 +7,7 @@ import Spinner from '../../components/common/Spinner';
 import { FiSend, FiArrowLeft, FiUser } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { useSocket } from '../../context/SocketContext';
+import { Avatar } from '../../components/shared';
 
 const Chat = () => {
   const { conversationId } = useParams();
@@ -182,10 +183,11 @@ const Chat = () => {
 
           {/* User Avatar */}
           {otherUser?.avatar ? (
-            <img
-              src={otherUser.avatar}
-              alt={otherUser.name}
-              className="h-10 w-10 rounded-full object-cover"
+            <Avatar
+              src={otherUser?.avatar}
+              name={otherUser?.name}
+              size="md"
+              status={otherUser?.isOnline ? 'online' : 'offline'}
             />
           ) : (
             <div className="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
@@ -218,8 +220,8 @@ const Chat = () => {
               >
                 <div
                   className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${isOwn
-                      ? 'bg-primary-600 text-white'
-                      : 'bg-gray-100 text-gray-900'
+                    ? 'bg-primary-600 text-white'
+                    : 'bg-gray-100 text-gray-900'
                     }`}
                 >
                   <p className="break-words">{message.content}</p>

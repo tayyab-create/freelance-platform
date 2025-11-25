@@ -4,8 +4,11 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
 import { FiStar, FiBriefcase } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { PageHeader, SkeletonLoader, EmptyState, StatCard } from '../../components/shared';
+import { useNavigate } from 'react-router-dom';
 
 const MyReviews = () => {
+  const navigate = useNavigate();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -51,9 +54,8 @@ const MyReviews = () => {
         {[1, 2, 3, 4, 5].map((star) => (
           <FiStar
             key={star}
-            className={`h-5 w-5 ${
-              star <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
-            }`}
+            className={`h-5 w-5 ${star <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+              }`}
           />
         ))}
       </div>
@@ -63,30 +65,28 @@ const MyReviews = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">My Reviews</h1>
-          <p className="text-gray-600 mt-2">See what clients think about your work</p>
-        </div>
+        <PageHeader
+          title="My Reviews"
+          subtitle="See what clients think about your work"
+          breadcrumbs={[
+            { label: 'Dashboard', href: '/worker/dashboard' },
+            { label: 'Reviews' }
+          ]}
+        />
 
         {loading ? (
-          <div className="flex justify-center py-12">
-            <Spinner size="lg" />
-          </div>
+          <SkeletonLoader type="card" count={4} />
         ) : (
           <>
             {/* Statistics */}
             <div className="grid md:grid-cols-3 gap-6">
               {/* Average Rating */}
-              <div className="card text-center">
-                <p className="text-gray-600 mb-2">Average Rating</p>
-                <p className="text-5xl font-bold text-primary-600 mb-2">
-                  {stats.averageRating}
-                </p>
-                <div className="flex justify-center mb-2">
-                  {renderStars(Math.round(parseFloat(stats.averageRating)))}
-                </div>
-                <p className="text-sm text-gray-500">Based on {stats.totalReviews} reviews</p>
-              </div>
+              <StatCard
+                title="Average Rating"
+                value={stats.averageRating}
+                icon={FiStar}
+                gradient="from-yellow-500 to-orange-500"
+              />
 
               {/* Rating Breakdown */}
               <div className="card col-span-2">
@@ -117,13 +117,13 @@ const MyReviews = () => {
 
             {/* Reviews List */}
             {reviews.length === 0 ? (
-              <div className="card text-center py-12">
-                <FiStar className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 mb-2">No reviews yet</p>
-                <p className="text-sm text-gray-500">
-                  Complete jobs to receive reviews from clients
-                </p>
-              </div>
+              <EmptyState
+                icon={FiStar}
+                title="No reviews yet"
+                description="Complete jobs to receive reviews from clients."
+                actionLabel="Browse Jobs"
+                onAction={() => navigate('/worker/jobs')}
+              />
             ) : (
               <div className="space-y-4">
                 {reviews.map((review) => (

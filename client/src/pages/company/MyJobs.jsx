@@ -5,8 +5,11 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
 import { FiDollarSign, FiUsers, FiEye, FiPlus, FiBriefcase, FiCheckCircle, FiClock, FiFileText } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { PageHeader, EmptyState, SkeletonLoader, StatusBadge } from '../../components/shared';
+import { useNavigate } from 'react-router-dom';
 
 const MyJobs = () => {
+  const navigate = useNavigate();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -57,16 +60,17 @@ const MyJobs = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-4xl font-black text-gray-900">My Posted Jobs</h1>
-            <p className="text-gray-600 mt-2 text-lg">Manage all your job postings</p>
+            <PageHeader
+              title="My Jobs"
+              subtitle="Manage your job postings"
+              actions={
+                <Link to="/company/post-job" className="btn-primary">
+                  <FiPlus className="w-5 h-5" />
+                  <span>Post New Job</span>
+                </Link>
+              }
+            />
           </div>
-          <Link
-            to="/company/post-job"
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white font-bold rounded-xl hover:shadow-lg transition-all text-lg"
-          >
-            <FiPlus className="h-6 w-6" />
-            Post New Job
-          </Link>
         </div>
 
         {/* Filter Tabs - Premium */}
@@ -83,8 +87,8 @@ const MyJobs = () => {
                 key={key}
                 onClick={() => setFilter(key)}
                 className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${filter === key
-                    ? 'bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg shadow-primary-500/30 scale-105'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
+                  ? 'bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg shadow-primary-500/30 scale-105'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
                   }`}
               >
                 <Icon className="h-5 w-5" />
@@ -111,9 +115,13 @@ const MyJobs = () => {
                   <FiBriefcase className="h-10 w-10 text-gray-400" />
                 </div>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                {filter === 'all' ? 'No Jobs Posted Yet' : `No ${filter.charAt(0).toUpperCase() + filter.slice(1)} Jobs`}
-              </h3>
+              <EmptyState
+                icon={FiBriefcase}
+                title="No jobs posted yet"
+                description="Start by posting your first job to find talented freelancers."
+                actionLabel="Post a Job"
+                onAction={() => navigate('/company/post-job')}
+              />
               <p className="text-gray-600 mb-6">
                 {filter === 'all'
                   ? "Start hiring talented workers by posting your first job!"

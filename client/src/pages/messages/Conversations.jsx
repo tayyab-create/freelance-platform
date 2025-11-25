@@ -6,8 +6,13 @@ import Spinner from '../../components/common/Spinner';
 import { FiMessageCircle, FiUser } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { useSocket } from '../../context/SocketContext';
+import { EmptyState, SkeletonLoader, Avatar } from '../../components/shared';
+import { useNavigate } from 'react-router-dom';
+
 
 const Conversations = () => {
+  const navigate = useNavigate();
+
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
   const { socket } = useSocket();
@@ -64,17 +69,15 @@ const Conversations = () => {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-12">
-            <Spinner size="lg" />
-          </div>
+          <SkeletonLoader type="list" count={8} />
         ) : conversations.length === 0 ? (
-          <div className="card text-center py-12">
-            <FiMessageCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600 mb-2">No conversations yet</p>
-            <p className="text-sm text-gray-500">
-              Start a conversation by applying to a job or contacting a freelancer
-            </p>
-          </div>
+          <EmptyState
+            icon={FiMessageCircle}
+            title="No conversations yet"
+            description="Start a conversation with a company or worker."
+            actionLabel="Browse Jobs"
+            onAction={() => navigate('/worker/jobs')}
+          />
         ) : (
           <div className="space-y-2">
             {conversations.map((conversation) => (
@@ -87,10 +90,11 @@ const Conversations = () => {
                   <div className="flex items-center gap-4">
                     {/* Avatar */}
                     {conversation.otherUser?.avatar ? (
-                      <img
-                        src={conversation.otherUser.avatar}
-                        alt={conversation.otherUser.name}
-                        className="h-12 w-12 rounded-full object-cover"
+                      <Avatar
+                        src={conversation.otherUser?.avatar}
+                        name={conversation.otherUser?.name}
+                        size="lg"
+                        status={conversation.otherUser?.isOnline ? 'online' : 'offline'}
                       />
                     ) : (
                       <div className="h-12 w-12 rounded-full bg-primary-100 flex items-center justify-center">
@@ -108,7 +112,7 @@ const Conversations = () => {
                           {formatTime(conversation.lastMessageAt)}
                         </span>
                       </div>
-                      
+
                       {conversation.job && (
                         <p className="text-xs text-gray-500 mb-1">
                           Re: {conversation.job.title}
