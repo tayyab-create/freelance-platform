@@ -8,15 +8,15 @@ const { protect, checkApproval } = require('../middleware/auth');
 // @access  Public
 router.get('/', async (req, res) => {
   try {
-    const { 
-      category, 
-      experienceLevel, 
-      salaryType, 
-      search, 
-      minSalary, 
+    const {
+      category,
+      experienceLevel,
+      salaryType,
+      search,
+      minSalary,
       maxSalary,
       page = 1,
-      limit = 10 
+      limit = 10
     } = req.query;
 
     let query = { status: 'posted', isActive: true };
@@ -43,9 +43,13 @@ router.get('/', async (req, res) => {
       if (maxSalary) query.salary.$lte = Number(maxSalary);
     }
 
-    // Search in title, description, and tags
+    // Search in title, description, and tags using Regex for partial matching
     if (search) {
-      query.$text = { $search: search };
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { tags: { $regex: search, $options: 'i' } }
+      ];
     }
 
     const skip = (page - 1) * limit;
@@ -152,7 +156,7 @@ router.get('/:id', async (req, res) => {
 router.get('/meta/categories', async (req, res) => {
   try {
     const categories = await Job.distinct('category');
-    
+
     res.status(200).json({
       success: true,
       data: categories

@@ -301,7 +301,12 @@ const JobDetails = () => {
                                     required
                                     className="input-field"
                                 />
-                                <p className="text-sm text-gray-500 mt-1">Minimum 50 characters</p>
+                                <div className="flex justify-between items-center mt-1">
+                                    <p className="text-sm text-gray-500">Minimum 50 characters</p>
+                                    <p className={`text-sm font-medium ${proposal.length >= 50 ? 'text-green-600' : 'text-gray-500'}`}>
+                                        {proposal.length} characters
+                                    </p>
+                                </div>
                             </div>
 
                             <div>
