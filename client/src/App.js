@@ -36,6 +36,8 @@ import PendingApprovals from "./pages/admin/PendingApprovals";
 import AllUsers from "./pages/admin/AllUsers";
 import ManageJobs from "./pages/admin/ManageJobs";
 
+import ScrollToTop from "./components/shared/ScrollToTop";
+
 function App() {
   const dispatch = useDispatch();
 
@@ -48,6 +50,7 @@ function App() {
 
   return (
     <div className="min-h-screen">
+      <ScrollToTop />
       <Routes>
         {/* Public Routes */}
         <Route
