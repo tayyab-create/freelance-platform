@@ -78,51 +78,13 @@ const WorkerDashboard = () => {
     );
   }
 
-  // Mock data for charts (replace with real data from backend)
-  const applicationsTrend = [
-    { month: 'Jan', applications: 4, accepted: 2 },
-    { month: 'Feb', applications: 6, accepted: 3 },
-    { month: 'Mar', applications: 8, accepted: 5 },
-    { month: 'Apr', applications: 5, accepted: 3 },
-    { month: 'May', applications: 7, accepted: 4 },
-    { month: 'Jun', applications: 10, accepted: 6 },
-  ];
-
-  const earningsTrend = [
-    { month: 'Jan', earnings: 1200 },
-    { month: 'Feb', earnings: 1800 },
-    { month: 'Mar', earnings: 2400 },
-    { month: 'Apr', earnings: 1900 },
-    { month: 'May', earnings: 2800 },
-    { month: 'Jun', earnings: 3200 },
-  ];
-
-  const skillsData = [
-    { name: 'JavaScript', value: 85, color: '#F7DF1E' },
-    { name: 'React', value: 90, color: '#61DAFB' },
-    { name: 'Node.js', value: 75, color: '#339933' },
-    { name: 'Python', value: 70, color: '#3776AB' },
-  ];
-
-  const recentActivities = [
-    { id: 1, action: 'Applied to Full Stack Developer position', time: '2 hours ago', icon: FiBriefcase, color: 'blue' },
-    { id: 2, action: 'Completed project for TechCorp', time: '1 day ago', icon: FiCheckCircle, color: 'green' },
-    { id: 3, action: 'Received 5-star review from ClientX', time: '2 days ago', icon: FiStar, color: 'yellow' },
-    { id: 4, action: 'Updated profile skills', time: '3 days ago', icon: FiActivity, color: 'purple' },
-  ];
-
-  const upcomingDeadlines = [
-    { id: 1, project: 'E-commerce Platform', deadline: '2 days', priority: 'high' },
-    { id: 2, project: 'Mobile App UI', deadline: '5 days', priority: 'medium' },
-    { id: 3, project: 'Dashboard Design', deadline: '1 week', priority: 'low' },
-  ];
-
-  const achievements = [
-    { id: 1, title: 'Rising Star', description: 'Complete 5 jobs', unlocked: true, icon: '⭐' },
-    { id: 2, title: 'Perfect Score', description: 'Maintain 5.0 rating', unlocked: true, icon: '🏆' },
-    { id: 3, title: 'Speed Demon', description: 'Complete job in 24hrs', unlocked: false, icon: '⚡' },
-    { id: 4, title: 'Century Club', description: 'Earn $10,000', unlocked: false, icon: '💰' },
-  ];
+  // Use real data from backend
+  const applicationsTrend = dashboardData.applicationsTrend || [];
+  const earningsTrend = dashboardData.earningsTrend || [];
+  // Limit to 5 recent activities
+  const recentActivities = (dashboardData.recentActivities || []).slice(0, 3);
+  const upcomingDeadlines = dashboardData.upcomingDeadlines || [];
+  const achievements = dashboardData.achievements || [];
 
   const profileCompletion = calculateWorkerProfileCompletion(dashboardData.profile);
 
@@ -167,8 +129,8 @@ const WorkerDashboard = () => {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 whitespace-nowrap ${activeTab === tab
-                  ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
+                ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30'
+                : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -185,10 +147,21 @@ const WorkerDashboard = () => {
                   <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                     <FiBriefcase className="h-7 w-7 text-white" />
                   </div>
-                  <div className="flex items-center gap-1 text-green-600 bg-green-50 px-3 py-1 rounded-full">
-                    <FiTrendingUp className="h-4 w-4" />
-                    <span className="text-sm font-semibold">+12%</span>
-                  </div>
+                  {
+                    dashboardData.trends?.applications !== undefined && dashboardData.trends.applications !== 0 ? (
+                      <div className={`flex items-center gap-1 px-3 py-1 rounded-full ${dashboardData.trends.applications > 0 ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'
+                        }`}>
+                        {dashboardData.trends.applications > 0 ? <FiTrendingUp className="h-4 w-4" /> : <FiTrendingDown className="h-4 w-4" />}
+                        <span className="text-sm font-semibold">
+                          {dashboardData.trends.applications > 0 ? '+' : ''}{dashboardData.trends.applications}%
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
+                        <span className="text-sm font-semibold">Same</span>
+                      </div>
+                    )
+                  }
                 </div>
                 <p className="text-sm text-gray-600 mb-1">Total Applications</p>
                 <p className="text-4xl font-bold text-gray-900 mb-2">
@@ -204,9 +177,21 @@ const WorkerDashboard = () => {
                   <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                     <FiClock className="h-7 w-7 text-white" />
                   </div>
-                  <div className="flex items-center gap-1 text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
-                    <span className="text-sm font-semibold">Same</span>
-                  </div>
+                  {
+                    dashboardData.trends?.pending !== undefined && dashboardData.trends.pending !== 0 ? (
+                      <div className={`flex items-center gap-1 px-3 py-1 rounded-full ${dashboardData.trends.pending > 0 ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'
+                        }`}>
+                        {dashboardData.trends.pending > 0 ? <FiTrendingUp className="h-4 w-4" /> : <FiTrendingDown className="h-4 w-4" />}
+                        <span className="text-sm font-semibold">
+                          {dashboardData.trends.pending > 0 ? '+' : ''}{dashboardData.trends.pending}%
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
+                        <span className="text-sm font-semibold">Same</span>
+                      </div>
+                    )
+                  }
                 </div>
                 <p className="text-sm text-gray-600 mb-1">Pending</p>
                 <p className="text-4xl font-bold text-gray-900 mb-2">
@@ -220,10 +205,21 @@ const WorkerDashboard = () => {
                   <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                     <FiCheckCircle className="h-7 w-7 text-white" />
                   </div>
-                  <div className="flex items-center gap-1 text-green-600 bg-green-50 px-3 py-1 rounded-full">
-                    <FiTrendingUp className="h-4 w-4" />
-                    <span className="text-sm font-semibold">+8%</span>
-                  </div>
+                  {
+                    dashboardData.trends?.activeJobs !== undefined && dashboardData.trends.activeJobs !== 0 ? (
+                      <div className={`flex items-center gap-1 px-3 py-1 rounded-full ${dashboardData.trends.activeJobs > 0 ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'
+                        }`}>
+                        {dashboardData.trends.activeJobs > 0 ? <FiTrendingUp className="h-4 w-4" /> : <FiTrendingDown className="h-4 w-4" />}
+                        <span className="text-sm font-semibold">
+                          {dashboardData.trends.activeJobs > 0 ? '+' : ''}{dashboardData.trends.activeJobs}%
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
+                        <span className="text-sm font-semibold">Same</span>
+                      </div>
+                    )
+                  }
                 </div>
                 <p className="text-sm text-gray-600 mb-1">Active Jobs</p>
                 <p className="text-4xl font-bold text-gray-900 mb-2">
@@ -237,10 +233,21 @@ const WorkerDashboard = () => {
                   <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                     <FiAward className="h-7 w-7 text-white" />
                   </div>
-                  <div className="flex items-center gap-1 text-green-600 bg-green-50 px-3 py-1 rounded-full">
-                    <FiTrendingUp className="h-4 w-4" />
-                    <span className="text-sm font-semibold">+15%</span>
-                  </div>
+                  {
+                    dashboardData.trends?.completedJobs !== undefined && dashboardData.trends.completedJobs !== 0 ? (
+                      <div className={`flex items-center gap-1 px-3 py-1 rounded-full ${dashboardData.trends.completedJobs > 0 ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'
+                        }`}>
+                        {dashboardData.trends.completedJobs > 0 ? <FiTrendingUp className="h-4 w-4" /> : <FiTrendingDown className="h-4 w-4" />}
+                        <span className="text-sm font-semibold">
+                          {dashboardData.trends.completedJobs > 0 ? '+' : ''}{dashboardData.trends.completedJobs}%
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
+                        <span className="text-sm font-semibold">Same</span>
+                      </div>
+                    )
+                  }
                 </div>
                 <p className="text-sm text-gray-600 mb-1">Completed Jobs</p>
                 <p className="text-4xl font-bold text-gray-900 mb-2">
@@ -283,17 +290,36 @@ const WorkerDashboard = () => {
 
               {/* Earnings Trend Chart */}
               <div className="card">
-                <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-                  <FiDollarSign className="text-green-600" />
-                  Earnings Trend
-                </h3>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-bold flex items-center gap-2">
+                    <FiDollarSign className="text-green-600" />
+                    Earnings Trend
+                  </h3>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-green-600">${(dashboardData.earnings?.total || 0).toLocaleString()}</div>
+                    <div className="text-sm text-gray-600">Total Earned</div>
+                  </div>
+                </div>
                 <ResponsiveContainer width="100%" height={250}>
                   <LineChart data={earningsTrend}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                     <XAxis dataKey="month" stroke="#9ca3af" />
                     <YAxis stroke="#9ca3af" />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="earnings" stroke="#10b981" strokeWidth={3} dot={{ fill: '#10b981', r: 5 }} activeDot={{ r: 7 }} />
+                    <Tooltip
+                      formatter={(value) => `$${value.toLocaleString()}`}
+                      labelStyle={{ color: '#111827' }}
+                      contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
+                    />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="earnings"
+                      name="Earnings ($)"
+                      stroke="#10b981"
+                      strokeWidth={3}
+                      dot={{ fill: '#10b981', r: 5 }}
+                      activeDot={{ r: 7 }}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -346,8 +372,8 @@ const WorkerDashboard = () => {
                         <FiStar
                           key={star}
                           className={`h-7 w-7 ${star <= Math.round(dashboardData.profile?.rating || 0)
-                              ? 'text-yellow-400 fill-current'
-                              : 'text-gray-300'
+                            ? 'text-yellow-400 fill-current'
+                            : 'text-gray-300'
                             }`}
                         />
                       ))}
@@ -377,20 +403,47 @@ const WorkerDashboard = () => {
                   Recent Activity
                 </h3>
                 <div className="space-y-4">
-                  {recentActivities.map((activity) => (
-                    <div key={activity.id} className="flex items-start gap-4 p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200">
-                      <div className={`h-10 w-10 rounded-full bg-${activity.color}-100 flex items-center justify-center flex-shrink-0`}>
-                        <activity.icon className={`h-5 w-5 text-${activity.color}-600`} />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-gray-900 font-medium text-sm">{activity.action}</p>
-                        <p className="text-gray-500 text-xs mt-1">{activity.time}</p>
-                      </div>
-                    </div>
-                  ))}
+                  {recentActivities.length > 0 ? (
+                    recentActivities.map((activity) => {
+                      // Map activity type to icon and color
+                      let icon = FiActivity;
+                      let color = 'blue';
+
+                      if (activity.type === 'application') {
+                        icon = FiBriefcase;
+                        color = 'blue';
+                      } else if (activity.type === 'job_completed') {
+                        icon = FiCheckCircle;
+                        color = 'green';
+                      } else if (activity.type === 'review') {
+                        icon = FiStar;
+                        color = 'yellow';
+                      }
+
+                      const Icon = icon;
+
+                      return (
+                        <div key={activity.id} className="flex items-start gap-4 p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                          <div className={`h-10 w-10 rounded-full bg-${color}-100 flex items-center justify-center flex-shrink-0`}>
+                            <Icon className={`h-5 w-5 text-${color}-600`} />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-gray-900 font-medium text-sm">{activity.action}</p>
+                            <p className="text-gray-500 text-xs mt-1">{new Date(activity.time).toLocaleString()}</p>
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <p className="text-gray-500 text-center py-4">No recent activity</p>
+                  )}
                 </div>
-                <Link to="/worker/applications" className="btn-secondary w-full mt-4">
+                <Link
+                  to="/worker/applications"
+                  className="mt-4 w-full py-2.5 flex items-center justify-center gap-2 rounded-xl border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 hover:text-primary-600 hover:border-primary-200 transition-all duration-200"
+                >
                   View All Activity
+                  <FiArrowRight className="h-4 w-4" />
                 </Link>
               </div>
 
@@ -405,8 +458,8 @@ const WorkerDashboard = () => {
                     <div
                       key={achievement.id}
                       className={`p-4 rounded-xl text-center transition-all duration-300 ${achievement.unlocked
-                          ? 'bg-gradient-to-br from-primary-50 to-white border-2 border-primary-200 hover:shadow-lg hover:-translate-y-1'
-                          : 'bg-gray-50 border-2 border-gray-200 opacity-60'
+                        ? 'bg-gradient-to-br from-primary-50 to-white border-2 border-primary-200 hover:shadow-lg hover:-translate-y-1'
+                        : 'bg-gray-50 border-2 border-gray-200 opacity-60'
                         }`}
                     >
                       <div className="text-4xl mb-2">{achievement.icon}</div>
@@ -453,8 +506,8 @@ const WorkerDashboard = () => {
                         <p className="text-xs text-gray-600 mt-1">Due in {deadline.deadline}</p>
                       </div>
                       <span className={`text-xs px-3 py-1 rounded-full ${deadline.priority === 'high' ? 'bg-red-100 text-red-700' :
-                          deadline.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-green-100 text-green-700'
+                        deadline.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                          'bg-green-100 text-green-700'
                         }`}>
                         {deadline.priority}
                       </span>

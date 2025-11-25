@@ -98,6 +98,8 @@ export const adminAPI = {
     approveUser: (id) => api.put(`/admin/users/${id}/approve`),
     rejectUser: (id) => api.put(`/admin/users/${id}/reject`),
     toggleUserActive: (id) => api.put(`/admin/users/${id}/toggle-active`),
+    getAllJobs: (params) => api.get('/admin/jobs', { params }),
+    deleteJob: (id) => api.delete(`/admin/jobs/${id}`),
 };
 
 // Upload APIs

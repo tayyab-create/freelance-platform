@@ -373,6 +373,7 @@ exports.completeJob = async (req, res) => {
     }
 
     job.status = "completed";
+    job.completedDate = Date.now();
     await job.save();
 
     // Update submission status

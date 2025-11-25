@@ -46,6 +46,7 @@ const Sidebar = () => {
       { name: 'Dashboard', path: '/admin/dashboard', icon: FiHome },
       { name: 'Pending Approvals', path: '/admin/pending', icon: FiUser },
       { name: 'All Users', path: '/admin/users', icon: FiUser },
+      { name: 'Manage Jobs', path: '/admin/jobs', icon: FiBriefcase },
     ],
   };
 

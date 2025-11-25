@@ -7,7 +7,9 @@ const {
   getUserDetails,
   approveUser,
   rejectUser,
-  toggleUserActive
+  toggleUserActive,
+  getAllJobs,
+  deleteJob
 } = require('../controllers/adminController');
 const { protect, authorize } = require('../middleware/auth');
 
@@ -22,5 +24,7 @@ router.get('/users/:id', getUserDetails);
 router.put('/users/:id/approve', approveUser);
 router.put('/users/:id/reject', rejectUser);
 router.put('/users/:id/toggle-active', toggleUserActive);
+router.get('/jobs', getAllJobs);
+router.delete('/jobs/:id', deleteJob);
 
 module.exports = router;

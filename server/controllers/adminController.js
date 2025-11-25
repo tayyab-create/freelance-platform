@@ -11,11 +11,11 @@ exports.getDashboard = async (req, res) => {
     const pendingApprovals = await User.countDocuments({ status: 'pending' });
     const approvedUsers = await User.countDocuments({ status: 'approved' });
     const rejectedUsers = await User.countDocuments({ status: 'rejected' });
-    
+
     const totalJobs = await Job.countDocuments();
     const activeJobs = await Job.countDocuments({ status: 'posted' });
     const completedJobs = await Job.countDocuments({ status: 'completed' });
-    
+
     const totalApplications = await Application.countDocuments();
 
     res.status(200).json({
@@ -95,7 +95,7 @@ exports.getPendingUsers = async (req, res) => {
 exports.getAllUsers = async (req, res) => {
   try {
     const { role, status } = req.query;
-    
+
     let query = {};
     if (role) query.role = role;
     if (status) query.status = status;
@@ -252,6 +252,79 @@ exports.toggleUserActive = async (req, res) => {
     });
   } catch (error) {
     console.error('Toggle User Active Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Get all jobs for admin
+// @route   GET /api/admin/jobs
+// @access  Private/Admin
+exports.getAllJobs = async (req, res) => {
+  try {
+    const { status, category } = req.query;
+
+    let query = {};
+    if (status) query.status = status;
+    if (category) query.category = category;
+
+    const jobs = await Job.find(query)
+      .populate('company', 'email')
+      .sort('-createdAt');
+
+    // Populate company details
+    const jobsWithDetails = await Promise.all(
+      jobs.map(async (job) => {
+        const jobObj = job.toObject();
+        if (jobObj.company) {
+          const companyProfile = await CompanyProfile.findOne({ user: jobObj.company._id });
+          jobObj.companyInfo = companyProfile ? {
+            companyName: companyProfile.companyName,
+            logo: companyProfile.logo
+          } : null;
+        }
+        return jobObj;
+      })
+    );
+
+    res.status(200).json({
+      success: true,
+      count: jobsWithDetails.length,
+      data: jobsWithDetails
+    });
+  } catch (error) {
+    console.error('Admin Get Jobs Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Delete job (Admin)
+// @route   DELETE /api/admin/jobs/:id
+// @access  Private/Admin
+exports.deleteJob = async (req, res) => {
+  try {
+    const job = await Job.findByIdAndDelete(req.params.id);
+
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        message: 'Job not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Job removed'
+    });
+  } catch (error) {
+    console.error('Admin Delete Job Error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error',

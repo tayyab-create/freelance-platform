@@ -93,81 +93,155 @@ const JobDetails = () => {
 
     return (
         <DashboardLayout>
-            <div className="max-w-4xl mx-auto space-y-6">
-                {/* Job Header */}
-                <div className="card">
-                    <div className="flex justify-between items-start mb-4">
+            <div className="max-w-5xl mx-auto space-y-8 pb-8">
+                {/* Job Header - Premium Card */}
+                <div className="bg-gradient-to-br from-white via-purple-50/30 to-blue-50/30 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/60 p-8 relative overflow-hidden">
+                    {/* Decorative gradient overlay */}
+                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-purple-500 via-blue-500 to-indigo-500"></div>
+
+                    <div className="flex flex-col lg:flex-row justify-between items-start gap-6 mb-6">
                         <div className="flex-1">
-                            <h1 className="text-3xl font-bold text-gray-900 mb-2">{job.title}</h1>
-                            {job.companyInfo && (
-                                <div className="flex items-center gap-2 text-gray-600">
-                                    {job.companyInfo.logo ? (
-                                        <img
-                                            src={job.companyInfo.logo}
-                                            alt={job.companyInfo.companyName}
-                                            className="h-10 w-10 rounded-full object-cover"
-                                        />
-                                    ) : (
-                                        <div className="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
-                                            <FiBriefcase className="h-5 w-5 text-primary-600" />
+                            <div className="flex items-start gap-4 mb-4">
+                                {/* Company Logo */}
+                                {job.companyInfo && (
+                                    <>
+                                        {job.companyInfo.logo ? (
+                                            <img
+                                                src={job.companyInfo.logo}
+                                                alt={job.companyInfo.companyName}
+                                                className="h-16 w-16 rounded-2xl object-cover shadow-lg border-2 border-white"
+                                            />
+                                        ) : (
+                                            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-lg border-2 border-white">
+                                                <FiBriefcase className="h-8 w-8 text-white" />
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+
+                                <div className="flex-1">
+                                    <h1 className="text-4xl font-black text-gray-900 mb-2 leading-tight">{job.title}</h1>
+                                    {job.companyInfo && (
+                                        <div className="space-y-1">
+                                            <p className="text-lg font-bold text-gray-700">{job.companyInfo.companyName}</p>
+                                            {job.companyInfo.tagline && (
+                                                <p className="text-sm text-gray-600 italic">{job.companyInfo.tagline}</p>
+                                            )}
                                         </div>
                                     )}
-                                    <div>
-                                        <p className="font-semibold text-gray-900">{job.companyInfo.companyName}</p>
-                                        {job.companyInfo.tagline && (
-                                            <p className="text-sm text-gray-500">{job.companyInfo.tagline}</p>
-                                        )}
-                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col items-end gap-3">
+                            <span className="badge badge-success text-base px-5 py-2 shadow-md">{job.status}</span>
+                            {job.deadline && (
+                                <div className={`flex items-center gap-2 px-4 py-2 rounded-xl ${new Date(job.deadline) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                                        ? 'bg-orange-100 text-orange-700 border border-orange-200'
+                                        : 'bg-blue-100 text-blue-700 border border-blue-200'
+                                    } shadow-sm`}>
+                                    <FiCalendar className="h-4 w-4" />
+                                    <span className="text-sm font-semibold">
+                                        Deadline: {new Date(job.deadline).toLocaleDateString()}
+                                    </span>
                                 </div>
                             )}
                         </div>
-                        <span className="badge badge-success">{job.status}</span>
                     </div>
 
-                    <div className="flex flex-wrap gap-6 text-gray-700 mb-6">
-                        <div className="flex items-center gap-2">
-                            <FiDollarSign className="h-5 w-5 text-primary-600" />
-                            <span className="font-semibold">${job.salary}</span>
-                            <span className="text-sm text-gray-500">({job.salaryType})</span>
+                    {/* Job Meta Info - Grid Layout */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-300">
+                            <div className="flex items-center gap-3">
+                                <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg">
+                                    <FiDollarSign className="h-6 w-6 text-white" />
+                                </div>
+                                <div>
+                                    <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide">Budget</p>
+                                    <p className="text-xl font-black text-gray-900">${job.salary}</p>
+                                    <p className="text-xs text-gray-600 capitalize">{job.salaryType}</p>
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <FiClock className="h-5 w-5 text-primary-600" />
-                            <span>{job.duration}</span>
+
+                        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-300">
+                            <div className="flex items-center gap-3">
+                                <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
+                                    <FiClock className="h-6 w-6 text-white" />
+                                </div>
+                                <div>
+                                    <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide">Duration</p>
+                                    <p className="text-lg font-bold text-gray-900">{job.duration}</p>
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <FiBriefcase className="h-5 w-5 text-primary-600" />
-                            <span className="capitalize">{job.experienceLevel}</span>
+
+                        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-300">
+                            <div className="flex items-center gap-3">
+                                <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl shadow-lg">
+                                    <FiBriefcase className="h-6 w-6 text-white" />
+                                </div>
+                                <div>
+                                    <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide">Level</p>
+                                    <p className="text-lg font-bold text-gray-900 capitalize">{job.experienceLevel}</p>
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <FiCalendar className="h-5 w-5 text-primary-600" />
-                            <span>{new Date(job.createdAt).toLocaleDateString()}</span>
+
+                        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-300">
+                            <div className="flex items-center gap-3">
+                                <div className="p-3 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl shadow-lg">
+                                    <FiCalendar className="h-6 w-6 text-white" />
+                                </div>
+                                <div>
+                                    <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide">Posted</p>
+                                    <p className="text-sm font-bold text-gray-900">{new Date(job.createdAt).toLocaleDateString()}</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <Button variant="primary" onClick={() => setShowApplyModal(true)}>
-                        Apply for this Job
-                    </Button>
-                    <Button
-                        variant="secondary"
-                        icon={FiMessageCircle}
-                        onClick={handleStartConversation}
-                    >
-                        Message Company
-                    </Button>
+                    {/* Action Buttons - Side by Side */}
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <Button
+                            variant="primary"
+                            onClick={() => setShowApplyModal(true)}
+                            className="flex-1 text-lg py-4"
+                        >
+                            Apply for this Job
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            icon={FiMessageCircle}
+                            onClick={handleStartConversation}
+                            className="flex-1 text-lg py-4"
+                        >
+                            Message Company
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Job Description */}
-                <div className="card">
-                    <h2 className="text-xl font-bold mb-4">Job Description</h2>
-                    <p className="text-gray-700 whitespace-pre-line">{job.description}</p>
+                <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/60 p-8 hover:shadow-2xl transition-all duration-300">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="h-10 w-1 bg-gradient-to-b from-primary-500 to-primary-700 rounded-full"></div>
+                        <h2 className="text-2xl font-black text-gray-900">Job Description</h2>
+                    </div>
+                    <p className="text-gray-700 leading-relaxed text-lg whitespace-pre-line">{job.description}</p>
                 </div>
 
                 {/* Skills Required */}
-                <div className="card">
-                    <h2 className="text-xl font-bold mb-4">Skills & Tags</h2>
-                    <div className="flex flex-wrap gap-2">
+                <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/60 p-8 hover:shadow-2xl transition-all duration-300">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="h-10 w-1 bg-gradient-to-b from-blue-500 to-indigo-700 rounded-full"></div>
+                        <h2 className="text-2xl font-black text-gray-900">Skills & Tags</h2>
+                    </div>
+                    <div className="flex flex-wrap gap-3">
                         {job.tags?.map((tag, index) => (
-                            <span key={index} className="badge badge-info">
+                            <span
+                                key={index}
+                                className="px-5 py-2.5 text-sm font-bold rounded-xl bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 text-blue-700 border-2 border-blue-200/50 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+                            >
                                 {tag}
                             </span>
                         ))}
@@ -176,62 +250,91 @@ const JobDetails = () => {
 
                 {/* Requirements */}
                 {job.requirements && job.requirements.length > 0 && (
-                    <div className="card">
-                        <h2 className="text-xl font-bold mb-4">Requirements</h2>
-                        <ul className="list-disc list-inside space-y-2 text-gray-700">
+                    <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/60 p-8 hover:shadow-2xl transition-all duration-300">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="h-10 w-1 bg-gradient-to-b from-orange-500 to-red-700 rounded-full"></div>
+                            <h2 className="text-2xl font-black text-gray-900">Requirements</h2>
+                        </div>
+                        <ul className="space-y-4">
                             {job.requirements.map((req, index) => (
-                                <li key={index}>{req}</li>
+                                <li key={index} className="flex items-start gap-3">
+                                    <div className="mt-1 h-6 w-6 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center flex-shrink-0 shadow-md">
+                                        <span className="text-white text-xs font-bold">✓</span>
+                                    </div>
+                                    <span className="text-gray-700 text-lg leading-relaxed">{req}</span>
+                                </li>
                             ))}
                         </ul>
                     </div>
                 )}
 
-                {/* Application Modal */}
+                {/* Application Modal - Enhanced */}
                 {showApplyModal && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                        <div className="bg-white rounded-lg max-w-2xl w-full p-6">
-                            <h2 className="text-2xl font-bold mb-4">Apply for this Job</h2>
-                            <form onSubmit={handleApply} className="space-y-4">
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+                        <div className="bg-white rounded-3xl max-w-3xl w-full p-8 shadow-2xl transform animate-slide-up border border-gray-200">
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="h-12 w-1 bg-gradient-to-b from-primary-500 to-primary-700 rounded-full"></div>
+                                <h2 className="text-3xl font-black text-gray-900">Apply for this Job</h2>
+                            </div>
+
+                            <form onSubmit={handleApply} className="space-y-6">
                                 <div>
-                                    <label className="label">Your Proposal *</label>
+                                    <label className="label text-base">Your Proposal *</label>
                                     <textarea
                                         value={proposal}
                                         onChange={(e) => setProposal(e.target.value)}
-                                        placeholder="Explain why you're the best fit for this job (minimum 50 characters)"
-                                        rows="6"
+                                        placeholder="Explain why you're the best fit for this job. Highlight your relevant experience and skills..."
+                                        rows="8"
                                         required
-                                        className="input-field"
+                                        className="input-field text-base"
                                     />
-                                    <p className="text-sm text-gray-500 mt-1">
-                                        {proposal.length} / 50 characters minimum
-                                    </p>
+                                    <div className="flex items-center justify-between mt-2">
+                                        <p className={`text-sm font-semibold ${proposal.length >= 50 ? 'text-green-600' : 'text-orange-600'
+                                            }`}>
+                                            {proposal.length} / 50 characters minimum
+                                        </p>
+                                        {proposal.length >= 50 && (
+                                            <span className="text-green-600 text-sm font-bold">✓ Ready to submit</span>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div>
-                                    <label className="label">Your Proposed Rate ($) *</label>
-                                    <input
-                                        type="number"
-                                        value={proposedRate}
-                                        onChange={(e) => setProposedRate(e.target.value)}
-                                        required
-                                        className="input-field"
-                                    />
+                                    <label className="label text-base">Your Proposed Rate ($) *</label>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                            <FiDollarSign className="h-5 w-5 text-gray-400" />
+                                        </div>
+                                        <input
+                                            type="number"
+                                            value={proposedRate}
+                                            onChange={(e) => setProposedRate(e.target.value)}
+                                            required
+                                            className="input-field pl-12 text-base"
+                                            placeholder="Enter your proposed rate"
+                                        />
+                                    </div>
+                                    <p className="text-sm text-gray-500 mt-2">
+                                        Job budget: ${job.salary} ({job.salaryType})
+                                    </p>
                                 </div>
 
-                                <div className="flex gap-4">
+                                <div className="flex gap-4 pt-4">
                                     <Button
                                         type="submit"
                                         variant="primary"
                                         loading={applying}
                                         disabled={applying}
+                                        className="flex-1 text-lg py-4"
                                     >
-                                        Submit Application
+                                        {applying ? 'Submitting...' : 'Submit Application'}
                                     </Button>
                                     <Button
                                         type="button"
                                         variant="secondary"
                                         onClick={() => setShowApplyModal(false)}
                                         disabled={applying}
+                                        className="flex-1 text-lg py-4"
                                     >
                                         Cancel
                                     </Button>

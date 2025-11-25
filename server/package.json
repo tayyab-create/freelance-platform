@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "concurrently \"nodemon server.js\" \"npm run client\"",
     "client": "cd ../client && npm start",
-    "start": "node server.js"
+    "start": "node server.js",
+    "seed": "node scripts/seedData.js"
   },
   "keywords": [],
   "author": "",

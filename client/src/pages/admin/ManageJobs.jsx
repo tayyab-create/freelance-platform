@@ -1,0 +1,318 @@
+import React, { useEffect, useState } from 'react';
+import { adminAPI, jobAPI } from '../../services/api';
+import DashboardLayout from '../../components/layout/DashboardLayout';
+import Spinner from '../../components/common/Spinner';
+import { FiBriefcase, FiFilter, FiTrash2, FiEye, FiX, FiCalendar, FiDollarSign, FiClock, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
+import { toast } from 'react-toastify';
+
+const ManageJobs = () => {
+    const [jobs, setJobs] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [categories, setCategories] = useState([]);
+    const [filters, setFilters] = useState({ status: '', category: '' });
+
+    // Modal State
+    const [selectedJob, setSelectedJob] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    useEffect(() => {
+        fetchJobs();
+        fetchCategories();
+    }, [filters]);
+
+    const fetchJobs = async () => {
+        try {
+            setLoading(true);
+            const response = await adminAPI.getAllJobs(filters);
+            setJobs(response.data.data);
+        } catch (error) {
+            toast.error('Failed to load jobs');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchCategories = async () => {
+        try {
+            const response = await jobAPI.getCategories();
+            setCategories(response.data.data);
+        } catch (error) {
+            console.error('Failed to load categories');
+        }
+    };
+
+    const handleDeleteJob = async (jobId) => {
+        if (!window.confirm('Are you sure you want to delete this job? This action cannot be undone.')) {
+            return;
+        }
+
+        try {
+            await adminAPI.deleteJob(jobId);
+            toast.success('Job deleted successfully');
+            fetchJobs();
+            if (selectedJob && selectedJob._id === jobId) {
+                closeModal();
+            }
+        } catch (error) {
+            toast.error('Failed to delete job');
+        }
+    };
+
+    const openModal = (job) => {
+        setSelectedJob(job);
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setSelectedJob(null);
+    };
+
+    const handleFilterChange = (e) => {
+        setFilters({ ...filters, [e.target.name]: e.target.value });
+    };
+
+    const getStatusBadge = (status) => {
+        switch (status) {
+            case 'posted':
+                return <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700"><FiCheckCircle className="h-3 w-3" /> Active</span>;
+            case 'assigned':
+                return <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700"><FiClock className="h-3 w-3" /> In Progress</span>;
+            case 'completed':
+                return <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-purple-50 text-purple-700"><FiCheckCircle className="h-3 w-3" /> Completed</span>;
+            default:
+                return <span className="px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-600">{status}</span>;
+        }
+    };
+
+    return (
+        <DashboardLayout>
+            <div className="space-y-6">
+                {/* Header & Filters */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-900">Manage Jobs</h1>
+                        <p className="text-gray-500 text-sm mt-1">Monitor and manage all job postings</p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <div className="relative">
+                            <select
+                                name="category"
+                                value={filters.category}
+                                onChange={handleFilterChange}
+                                className="pl-3 pr-8 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-pointer"
+                            >
+                                <option value="">All Categories</option>
+                                {categories.map((cat, index) => (
+                                    <option key={index} value={cat}>{cat}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="relative">
+                            <select
+                                name="status"
+                                value={filters.status}
+                                onChange={handleFilterChange}
+                                className="pl-3 pr-8 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-pointer"
+                            >
+                                <option value="">All Status</option>
+                                <option value="posted">Active</option>
+                                <option value="assigned">In Progress</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                        <button onClick={fetchJobs} className="p-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">
+                            <FiFilter className="h-4 w-4" />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Table View */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    {loading ? (
+                        <div className="flex justify-center py-12"><Spinner size="lg" /></div>
+                    ) : jobs.length === 0 ? (
+                        <div className="text-center py-12 text-gray-500">No jobs found matching your filters.</div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="bg-gray-50/50 border-b border-gray-100">
+                                        <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Job Title</th>
+                                        <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Company</th>
+                                        <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Budget</th>
+                                        <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Posted Date</th>
+                                        <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100">
+                                    {jobs.map((job) => (
+                                        <tr key={job._id} className="hover:bg-gray-50/50 transition-colors">
+                                            <td className="px-6 py-4">
+                                                <div className="font-medium text-gray-900">{job.title}</div>
+                                                <div className="text-xs text-gray-500 mt-0.5">{job.category}</div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-2">
+                                                    {job.companyInfo?.logo ? (
+                                                        <img src={job.companyInfo.logo} alt="" className="h-6 w-6 rounded-full object-cover" />
+                                                    ) : (
+                                                        <div className="h-6 w-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">
+                                                            {job.companyInfo?.companyName?.charAt(0) || 'C'}
+                                                        </div>
+                                                    )}
+                                                    <span className="text-sm text-gray-700">{job.companyInfo?.companyName || 'Unknown Company'}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="text-sm font-medium text-gray-900">${job.salary}</div>
+                                                <div className="text-xs text-gray-500 capitalize">{job.salaryType}</div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                {getStatusBadge(job.status)}
+                                            </td>
+                                            <td className="px-6 py-4 text-sm text-gray-500">
+                                                {new Date(job.createdAt).toLocaleDateString()}
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <button
+                                                        onClick={() => openModal(job)}
+                                                        className="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+                                                        title="View Details"
+                                                    >
+                                                        <FiEye className="h-4 w-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteJob(job._id)}
+                                                        className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                                                        title="Delete Job"
+                                                    >
+                                                        <FiTrash2 className="h-4 w-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+
+                {/* Job Details Modal */}
+                {isModalOpen && selectedJob && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                            {/* Modal Header */}
+                            <div className="p-6 border-b border-gray-100 flex items-start justify-between bg-gray-50/50">
+                                <div>
+                                    <h2 className="text-2xl font-bold text-gray-900">{selectedJob.title}</h2>
+                                    <div className="flex items-center gap-2 mt-2">
+                                        <span className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs font-medium">
+                                            {selectedJob.category}
+                                        </span>
+                                        <span className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs font-medium capitalize">
+                                            {selectedJob.experienceLevel} Level
+                                        </span>
+                                        {getStatusBadge(selectedJob.status)}
+                                    </div>
+                                </div>
+                                <button onClick={closeModal} className="p-2 hover:bg-black/5 rounded-full transition-colors">
+                                    <FiX className="h-6 w-6 text-gray-500" />
+                                </button>
+                            </div>
+
+                            {/* Modal Content */}
+                            <div className="p-6 space-y-6">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="p-4 bg-blue-50/50 rounded-xl border border-blue-100">
+                                        <div className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-2">Company</div>
+                                        <div className="flex items-center gap-3">
+                                            {selectedJob.companyInfo?.logo ? (
+                                                <img src={selectedJob.companyInfo.logo} alt="" className="h-10 w-10 rounded-lg object-cover" />
+                                            ) : (
+                                                <div className="h-10 w-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
+                                                    {selectedJob.companyInfo?.companyName?.charAt(0) || 'C'}
+                                                </div>
+                                            )}
+                                            <div>
+                                                <div className="font-bold text-gray-900">{selectedJob.companyInfo?.companyName || 'Unknown'}</div>
+                                                <div className="text-xs text-gray-500">{selectedJob.company?.email}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="p-4 bg-green-50/50 rounded-xl border border-green-100">
+                                        <div className="text-xs font-bold text-green-600 uppercase tracking-wider mb-2">Budget</div>
+                                        <div className="flex items-center gap-2">
+                                            <FiDollarSign className="text-green-600 h-5 w-5" />
+                                            <div>
+                                                <div className="font-bold text-gray-900">${selectedJob.salary}</div>
+                                                <div className="text-xs text-gray-500 capitalize">{selectedJob.salaryType}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h3 className="font-bold text-gray-900 mb-2">Description</h3>
+                                    <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">
+                                        {selectedJob.description}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <h3 className="font-bold text-gray-900 mb-2">Tags</h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {selectedJob.tags?.map((tag, i) => (
+                                            <span key={i} className="px-2 py-1 bg-gray-100 text-gray-600 rounded-md text-sm">
+                                                #{tag}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-6 pt-4 border-t border-gray-100">
+                                    <div>
+                                        <div className="text-xs text-gray-500 mb-1">Deadline</div>
+                                        <div className="flex items-center gap-2 font-medium text-gray-900">
+                                            <FiCalendar className="text-gray-400" />
+                                            {new Date(selectedJob.deadline).toLocaleDateString()}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className="text-xs text-gray-500 mb-1">Duration</div>
+                                        <div className="flex items-center gap-2 font-medium text-gray-900">
+                                            <FiClock className="text-gray-400" />
+                                            {selectedJob.duration}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Modal Footer */}
+                            <div className="p-6 border-t border-gray-100 bg-gray-50 rounded-b-2xl flex justify-end gap-3">
+                                <button
+                                    onClick={closeModal}
+                                    className="px-4 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg transition-colors"
+                                >
+                                    Close
+                                </button>
+                                <button
+                                    onClick={() => handleDeleteJob(selectedJob._id)}
+                                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+                                >
+                                    <FiTrash2 /> Delete Job
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </DashboardLayout>
+    );
+};
+
+export default ManageJobs;

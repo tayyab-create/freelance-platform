@@ -34,6 +34,7 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import PendingApprovals from "./pages/admin/PendingApprovals";
 import AllUsers from "./pages/admin/AllUsers";
+import ManageJobs from "./pages/admin/ManageJobs";
 
 function App() {
   const dispatch = useDispatch();
@@ -191,6 +192,14 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <AllUsers />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/jobs"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <ManageJobs />
             </ProtectedRoute>
           }
         />

@@ -63,6 +63,9 @@ const jobSchema = new mongoose.Schema({
   deadline: {
     type: Date
   },
+  completedDate: {
+    type: Date
+  },
   requirements: [{
     type: String
   }],
