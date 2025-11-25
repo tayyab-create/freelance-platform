@@ -49,59 +49,75 @@ exports.getProfile = async (req, res) => {
         ? formattedReviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews
         : 0;
 
-    // 5️⃣ Get ONLY the recent 3 reviews for frontend
-    const recentReviews = formattedReviews.slice(0, 3);
+    // 5️⃣ Update profile with calculated stats (Optional but good for caching)
+    profile.averageRating = parseFloat(averageRating.toFixed(1));
+    profile.totalReviews = totalReviews;
+    await profile.save();
 
-    // 6️⃣ Send all data to frontend
     res.status(200).json({
       success: true,
       data: {
         ...profile.toObject(),
-        totalReviews,
-        averageRating,
-        recentReviews
-      }
+        reviews: formattedReviews, // Send enriched reviews
+      },
     });
-
   } catch (error) {
-    console.error("Get Profile Error:", error);
+    console.error('Get Profile Error:', error);
     res.status(500).json({
       success: false,
-      message: "Server error",
+      message: 'Server error',
       error: error.message
     });
   }
 };
-
 
 // @desc    Update worker profile
 // @route   PUT /api/workers/profile
 // @access  Private/Worker
 exports.updateProfile = async (req, res) => {
   try {
-    const allowedFields = [
-      'fullName', 'phone', 'bio', 'skills', 'githubProfile',
-      'linkedinProfile', 'hourlyRate', 'availability', 'profilePicture'
-    ];
+    const {
+      title,
+      bio,
+      skills,
+      hourlyRate,
+      availability,
+      portfolio,
+      languages,
+      education,
+      socialLinks
+    } = req.body;
 
-    const updates = {};
-    allowedFields.forEach(field => {
-      if (req.body[field] !== undefined) {
-        updates[field] = req.body[field];
-      }
-    });
-
-    const profile = await WorkerProfile.findOneAndUpdate(
-      { user: req.user._id },
-      updates,
-      { new: true, runValidators: true }
-    );
+    let profile = await WorkerProfile.findOne({ user: req.user._id });
 
     if (!profile) {
-      return res.status(404).json({
-        success: false,
-        message: 'Profile not found'
+      // Create profile if it doesn't exist
+      profile = await WorkerProfile.create({
+        user: req.user._id,
+        fullName: req.user.email.split('@')[0], // Default name from email
+        title,
+        bio,
+        skills,
+        hourlyRate,
+        availability,
+        portfolio,
+        languages,
+        education,
+        socialLinks
       });
+    } else {
+      // Update existing profile
+      profile.title = title || profile.title;
+      profile.bio = bio || profile.bio;
+      profile.skills = skills || profile.skills;
+      profile.hourlyRate = hourlyRate || profile.hourlyRate;
+      profile.availability = availability || profile.availability;
+      profile.portfolio = portfolio || profile.portfolio;
+      profile.languages = languages || profile.languages;
+      profile.education = education || profile.education;
+      profile.socialLinks = socialLinks || profile.socialLinks;
+
+      await profile.save();
     }
 
     res.status(200).json({
@@ -319,10 +335,27 @@ exports.getAssignedJobs = async (req, res) => {
       .populate('company', 'email')
       .sort('-assignedDate');
 
+    // Get company profiles
+    const jobsWithCompanyInfo = await Promise.all(
+      jobs.map(async (job) => {
+        const jobObj = job.toObject();
+        if (jobObj.company) {
+          const companyProfile = await CompanyProfile.findOne({ user: jobObj.company._id });
+          if (companyProfile) {
+            jobObj.companyInfo = {
+              companyName: companyProfile.companyName,
+              logo: companyProfile.logo
+            };
+          }
+        }
+        return jobObj;
+      })
+    );
+
     res.status(200).json({
       success: true,
-      count: jobs.length,
-      data: jobs
+      count: jobsWithCompanyInfo.length,
+      data: jobsWithCompanyInfo
     });
   } catch (error) {
     console.error('Get Assigned Jobs Error:', error);

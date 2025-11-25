@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { workerAPI, uploadAPI } from '../../services/api';
+import { workerAPI, uploadAPI, messageAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
-import Spinner from '../../components/common/Spinner';
-import Button from '../../components/common/Button';
-import { FiDollarSign, FiClock, FiBriefcase, FiUpload, FiFile, FiX, FiCalendar, FiAlertCircle } from 'react-icons/fi';
+import { FiDollarSign, FiClock, FiBriefcase, FiUpload, FiFile, FiX, FiCalendar, FiAlertCircle, FiMessageCircle, FiCheckCircle } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import { PageHeader, EmptyState, SkeletonLoader, StatusBadge } from '../../components/shared';
+import { PageHeader, EmptyState, SkeletonLoader, Modal, JobMetaItem, StatusBadge } from '../../components/shared';
 import { useNavigate } from 'react-router-dom';
 
 const AssignedJobs = () => {
@@ -42,6 +39,11 @@ const AssignedJobs = () => {
     setSelectedJob(job);
     setShowSubmitModal(true);
     setSubmitData({ description: '', links: '', uploadedFiles: [] });
+  };
+
+  const handleCloseSubmitModal = () => {
+    setShowSubmitModal(false);
+    setTimeout(() => setSelectedJob(null), 300);
   };
 
   const handleFileUpload = async (e) => {
@@ -100,12 +102,32 @@ const AssignedJobs = () => {
       });
 
       toast.success('Work submitted successfully!');
-      setShowSubmitModal(false);
+      handleCloseSubmitModal();
       fetchAssignedJobs();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to submit work');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleStartConversation = async (job) => {
+    // Determine company ID
+    const companyId = job.companyInfo?._id || job.company?._id || job.company;
+
+    if (!companyId) {
+      toast.error('Company information not available.');
+      return;
+    }
+
+    try {
+      const response = await messageAPI.getOrCreateConversation({
+        otherUserId: companyId,
+        jobId: job._id
+      });
+      navigate(`/messages/${response.data.data._id}`);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to start conversation.');
     }
   };
 
@@ -120,25 +142,22 @@ const AssignedJobs = () => {
     <DashboardLayout>
       <div className="space-y-8 pb-8">
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <PageHeader
-              title="Assigned Jobs"
-              subtitle="Manage your active projects"
-              breadcrumbs={[
-                { label: 'Dashboard', href: '/worker/dashboard' },
-                { label: 'Assigned Jobs' }
-              ]}
-            />
-            <p className="text-gray-600 mt-2 text-lg">Jobs you're currently working on</p>
-          </div>
-          <div className="bg-gradient-to-br from-primary-500 to-primary-700 px-6 py-3 rounded-2xl shadow-lg">
-            <p className="text-white font-bold text-lg">{jobs.length} Active Jobs</p>
-          </div>
-        </div>
+        <PageHeader
+          title="Assigned Jobs"
+          subtitle="Manage your active projects and submissions"
+          breadcrumbs={[
+            { label: 'Dashboard', href: '/worker/dashboard' },
+            { label: 'Assigned Jobs' }
+          ]}
+          actions={
+            <div className="bg-gradient-to-br from-primary-500 to-primary-700 px-6 py-3 rounded-2xl shadow-lg">
+              <p className="text-white font-bold text-lg">{jobs.length} Active Jobs</p>
+            </div>
+          }
+        />
 
         {loading ? (
-          <SkeletonLoader type="card" count={4} />
+          <SkeletonLoader type="card" count={3} />
         ) : jobs.length === 0 ? (
           <EmptyState
             icon={FiBriefcase}
@@ -152,90 +171,102 @@ const AssignedJobs = () => {
             {jobs.map((job) => (
               <div
                 key={job._id}
-                className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-lg border border-white/60 p-8 hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 group"
+                className="bg-white rounded-3xl p-6 md:p-8 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 group"
               >
-                <div className="flex flex-col lg:flex-row justify-between items-start gap-6">
-                  <div className="flex-1 w-full">
-                    {/* Job Title */}
-                    <h3 className="text-3xl font-black text-gray-900 mb-3 group-hover:text-primary-600 transition-colors">
-                      {job.title}
-                    </h3>
-                    <p className="text-gray-700 mb-6 line-clamp-2 leading-relaxed text-lg">{job.description}</p>
-
-                    {/* Job Info Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                      <div className="flex items-center gap-3 px-5 py-4 bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl border-2 border-green-200">
-                        <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
-                          <FiDollarSign className="h-5 w-5 text-white" />
+                {/* Card Header */}
+                <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0">
+                      {job.companyInfo?.logo ? (
+                        <img
+                          src={job.companyInfo.logo}
+                          alt={job.companyInfo.companyName}
+                          className="h-16 w-16 rounded-2xl object-cover border border-gray-100 shadow-sm"
+                        />
+                      ) : (
+                        <div className="h-16 w-16 rounded-2xl bg-gray-50 flex items-center justify-center border border-gray-100 text-gray-400">
+                          <FiBriefcase className="h-8 w-8" />
                         </div>
-                        <div>
-                          <p className="text-xs text-gray-600 font-semibold uppercase">Payment</p>
-                          <p className="text-xl font-black text-gray-900">${job.salary}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 px-5 py-4 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl border-2 border-blue-200">
-                        <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg">
-                          <FiClock className="h-5 w-5 text-white" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-600 font-semibold uppercase">Duration</p>
-                          <p className="text-lg font-bold text-gray-900">{job.duration}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 px-5 py-4 bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl border-2 border-purple-200">
-                        <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg">
-                          <FiBriefcase className="h-5 w-5 text-white" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-600 font-semibold uppercase">Assigned</p>
-                          <p className="text-sm font-bold text-gray-900">{new Date(job.assignedDate).toLocaleDateString()}</p>
-                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-black text-gray-900 mb-1 group-hover:text-primary-600 transition-colors">
+                        {job.title}
+                      </h3>
+                      <div className="flex items-center gap-2 text-gray-500 font-medium">
+                        <span>{job.companyInfo?.companyName || 'Confidential Client'}</span>
+                        {job.companyInfo?.tagline && (
+                          <>
+                            <span className="text-gray-300">•</span>
+                            <span className="text-sm text-gray-400">{job.companyInfo.tagline}</span>
+                          </>
+                        )}
                       </div>
                     </div>
-
-                    {/* Deadline Warning */}
-                    {job.deadline && (
-                      <div className={`flex items-center gap-3 px-5 py-4 rounded-xl border-2 ${isDeadlineApproaching(job.deadline)
-                        ? 'bg-gradient-to-r from-red-100 to-orange-100 border-red-300'
-                        : 'bg-gradient-to-r from-yellow-100 to-amber-100 border-yellow-300'
-                        }`}>
-                        <div className={`p-2 rounded-lg ${isDeadlineApproaching(job.deadline)
-                          ? 'bg-red-500'
-                          : 'bg-yellow-500'
-                          }`}>
-                          {isDeadlineApproaching(job.deadline) ? (
-                            <FiAlertCircle className="h-5 w-5 text-white" />
-                          ) : (
-                            <FiCalendar className="h-5 w-5 text-white" />
-                          )}
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-600 font-semibold uppercase">Deadline</p>
-                          <p className={`text-lg font-bold ${isDeadlineApproaching(job.deadline) ? 'text-red-800' : 'text-yellow-800'
-                            }`}>
-                            {new Date(job.deadline).toLocaleDateString()}
-                            {isDeadlineApproaching(job.deadline) && (
-                              <span className="ml-2 text-sm">⚠️ Approaching!</span>
-                            )}
-                          </p>
-                        </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {isDeadlineApproaching(job.deadline) && (
+                      <div className="px-4 py-2 bg-red-50 text-red-600 rounded-xl text-sm font-bold flex items-center gap-2 border border-red-100 animate-pulse">
+                        <FiAlertCircle className="h-4 w-4" />
+                        Deadline Approaching
                       </div>
                     )}
+                    <StatusBadge status={job.status} />
                   </div>
+                </div>
 
-                  {/* Action Section */}
-                  <div className="flex flex-col gap-3">
-                    <StatusBadge status="warning" size="sm" />
-                    {job.status === 'assigned' && (
-                      <Button
-                        variant="primary"
-                        icon={FiUpload}
+                {/* Job Meta Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                  <JobMetaItem
+                    icon={FiDollarSign}
+                    label="Budget"
+                    value={`$${job.salary}`}
+                    subValue={job.salaryType}
+                    color="green"
+                  />
+                  <JobMetaItem
+                    icon={FiClock}
+                    label="Duration"
+                    value={job.duration || 'N/A'}
+                    color="blue"
+                  />
+                  <JobMetaItem
+                    icon={FiCalendar}
+                    label="Deadline"
+                    value={job.deadline ? new Date(job.deadline).toLocaleDateString() : 'No Deadline'}
+                    color={isDeadlineApproaching(job.deadline) ? 'red' : 'orange'}
+                  />
+                  <JobMetaItem
+                    icon={FiCheckCircle}
+                    label="Assigned"
+                    value={new Date(job.assignedDate).toLocaleDateString()}
+                    color="purple"
+                  />
+                </div>
+
+                {/* Description & Actions */}
+                <div className="flex flex-col lg:flex-row gap-6 items-end">
+                  <div className="flex-1 w-full">
+                    <p className="text-gray-600 leading-relaxed line-clamp-2 mb-2">{job.description}</p>
+                    <button className="text-primary-600 font-bold text-sm hover:underline">View Full Details</button>
+                  </div>
+                  <div className="flex gap-3 w-full lg:w-auto">
+                    <button
+                      onClick={() => handleStartConversation(job)}
+                      className="flex-1 lg:flex-none px-6 py-3 rounded-xl border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <FiMessageCircle className="h-5 w-5" />
+                      Message
+                    </button>
+                    {job.status === 'assigned' || job.status === 'in-progress' ? (
+                      <button
                         onClick={() => handleOpenSubmitModal(job)}
-                        className="px-6 py-4 text-lg shadow-lg hover:shadow-xl"
+                        className="flex-1 lg:flex-none px-8 py-3 rounded-xl bg-primary-600 text-white font-bold hover:bg-primary-700 transition-colors shadow-lg shadow-primary-500/30 flex items-center justify-center gap-2"
                       >
+                        <FiUpload className="h-5 w-5" />
                         Submit Work
-                      </Button>
-                    )}
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -243,123 +274,134 @@ const AssignedJobs = () => {
           </div>
         )}
 
-        {/* Submit Work Modal - Premium */}
-        {showSubmitModal && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-            <div className="bg-white rounded-3xl max-w-3xl w-full p-8 max-h-[90vh] overflow-y-auto shadow-2xl transform animate-slide-up">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="h-12 w-1 bg-gradient-to-b from-primary-500 to-primary-700 rounded-full"></div>
-                <h2 className="text-3xl font-black text-gray-900">Submit Your Work</h2>
+        {/* Submit Work Modal */}
+        <Modal
+          isOpen={showSubmitModal}
+          onClose={handleCloseSubmitModal}
+          title="Submit Your Work"
+          size="lg"
+        >
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Description */}
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Work Description *</label>
+              <textarea
+                value={submitData.description}
+                onChange={(e) => setSubmitData({ ...submitData, description: e.target.value })}
+                placeholder="Describe what you've completed and any important details..."
+                rows="6"
+                required
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all resize-none"
+              />
+              <div className="flex justify-between items-center mt-2">
+                <p className={`text-xs font-bold ${submitData.description.length >= 20 ? 'text-green-600' : 'text-gray-400'}`}>
+                  {submitData.description.length >= 20 ? '✓ Ready to submit' : `${submitData.description.length} / 20 characters minimum`}
+                </p>
+              </div>
+            </div>
+
+            {/* Links */}
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Links (Optional)</label>
+              <textarea
+                value={submitData.links}
+                onChange={(e) => setSubmitData({ ...submitData, links: e.target.value })}
+                placeholder="https://github.com/yourrepo&#10;https://demo.yourproject.com"
+                rows="3"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all resize-none font-mono text-sm"
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                Add links to your work (GitHub, live demo, drive, etc.). One per line.
+              </p>
+            </div>
+
+            {/* File Upload */}
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Attachments</label>
+              <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-primary-400 transition-colors bg-gray-50/50">
+                <input
+                  type="file"
+                  multiple
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  id="file-upload"
+                  disabled={uploadingFiles}
+                  accept=".pdf,.doc,.docx,.zip,.jpg,.jpeg,.png"
+                />
+                <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center gap-2">
+                  <div className="p-3 bg-white rounded-full shadow-sm">
+                    <FiUpload className="h-6 w-6 text-primary-600" />
+                  </div>
+                  <span className="text-sm font-bold text-gray-700">Click to upload files</span>
+                  <span className="text-xs text-gray-400">PDF, DOC, ZIP, Images (Max 5MB)</span>
+                </label>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Description */}
-                <div>
-                  <label className="label text-base">Work Description *</label>
-                  <textarea
-                    value={submitData.description}
-                    onChange={(e) => setSubmitData({ ...submitData, description: e.target.value })}
-                    placeholder="Describe what you've completed and any important details..."
-                    rows="7"
-                    required
-                    className="input-field text-base"
-                  />
-                  <div className="flex justify-between items-center mt-2">
-                    <p className={`text-sm font-semibold ${submitData.description.length >= 20 ? 'text-green-600' : 'text-gray-500'
-                      }`}>
-                      {submitData.description.length >= 20 ? '✓ Ready' : `${submitData.description.length} / 20 minimum`}
-                    </p>
-                  </div>
+              {uploadingFiles && (
+                <div className="mt-3 flex items-center gap-2 text-sm text-primary-600 font-medium animate-pulse">
+                  <div className="h-2 w-2 bg-primary-600 rounded-full animate-bounce"></div>
+                  Uploading files...
                 </div>
-
-                {/* Links */}
-                <div>
-                  <label className="label text-base">Links (one per line)</label>
-                  <textarea
-                    value={submitData.links}
-                    onChange={(e) => setSubmitData({ ...submitData, links: e.target.value })}
-                    placeholder="https://github.com/yourrepo\nhttps://demo.yourproject.com"
-                    rows="4"
-                    className="input-field text-base"
-                  />
-                  <p className="text-sm text-gray-500 mt-2">
-                    🔗 Add links to your work (GitHub, live demo, drive, etc.)
-                  </p>
-                </div>
-
-                {/* File Upload Section */}
-                <div>
-                  <label className="label text-base">Upload Files</label>
-                  <div className="relative">
-                    <input
-                      type="file"
-                      multiple
-                      onChange={handleFileUpload}
-                      className="input-field"
-                      disabled={uploadingFiles}
-                      accept=".pdf,.doc,.docx,.zip,.jpg,.jpeg,.png"
-                    />
-                  </div>
-                  <p className="text-sm text-gray-500 mt-2">
-                    📎 Upload documents, images, or zip files (Max 5MB each)
-                  </p>
-                  {uploadingFiles && (
-                    <p className="text-sm text-primary-600 mt-2 font-semibold">Uploading files...</p>
-                  )}
-                </div>
-
-                {/* Uploaded Files List */}
-                {submitData.uploadedFiles.length > 0 && (
-                  <div className="space-y-3">
-                    <label className="label text-base">Uploaded Files ({submitData.uploadedFiles.length})</label>
-                    <div className="space-y-2">
-                      {submitData.uploadedFiles.map((file, index) => (
-                        <div key={index} className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border-2 border-blue-200">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-blue-500 rounded-lg">
-                              <FiFile className="h-5 w-5 text-white" />
-                            </div>
-                            <span className="font-semibold text-gray-900">{file.fileName}</span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveFile(index)}
-                            className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-all"
-                            title="Remove file"
-                          >
-                            <FiX className="h-5 w-5" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Action Buttons */}
-                <div className="flex gap-4 pt-4">
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    loading={submitting}
-                    disabled={submitting || uploadingFiles}
-                    className="flex-1 text-lg py-4"
-                  >
-                    Submit Work
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => setShowSubmitModal(false)}
-                    disabled={submitting}
-                    className="flex-1 text-lg py-4"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </form>
+              )}
             </div>
-          </div>
-        )}
+
+            {/* Uploaded Files List */}
+            {submitData.uploadedFiles.length > 0 && (
+              <div className="space-y-3">
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">Uploaded Files ({submitData.uploadedFiles.length})</label>
+                <div className="space-y-2">
+                  {submitData.uploadedFiles.map((file, index) => (
+                    <div key={index} className="flex items-center justify-between bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                          <FiFile className="h-4 w-4" />
+                        </div>
+                        <span className="text-sm font-semibold text-gray-700 truncate max-w-[200px]">{file.fileName}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFile(index)}
+                        className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                        title="Remove file"
+                      >
+                        <FiX className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Footer Actions */}
+            <div className="flex gap-3 pt-4 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={handleCloseSubmitModal}
+                className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition-colors"
+                disabled={submitting}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={submitting || uploadingFiles}
+                className="flex-1 py-3 rounded-xl bg-primary-600 text-white font-bold hover:bg-primary-700 transition-colors shadow-lg shadow-primary-500/30 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                {submitting ? (
+                  <>
+                    <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <FiCheckCircle className="h-5 w-5" />
+                    Submit Work
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </Modal>
       </div>
     </DashboardLayout>
   );
