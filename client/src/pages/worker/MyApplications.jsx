@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { workerAPI } from '../../services/api';
+import { workerAPI, messageAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
-import { FiBriefcase, FiClock, FiCheckCircle, FiX, FiAlertCircle, FiFileText, FiAward, FiDollarSign } from 'react-icons/fi';
+import { FiBriefcase, FiClock, FiCheckCircle, FiX, FiAlertCircle, FiFileText, FiAward, FiDollarSign, FiMessageCircle } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { PageHeader, EmptyState, SkeletonLoader, Modal } from '../../components/shared';
 import ApplicationCard from '../../components/shared/ApplicationCard';
+import { useNavigate } from 'react-router-dom';
 
 const MyApplications = () => {
   const [applications, setApplications] = useState([]);
@@ -13,6 +14,8 @@ const MyApplications = () => {
   const [deletedCount, setDeletedCount] = useState(0);
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchApplications();
@@ -40,6 +43,52 @@ const MyApplications = () => {
   const closeModal = () => {
     setIsModalOpen(false);
     setTimeout(() => setSelectedApplication(null), 300); // Clear after animation
+  };
+
+  const handleStartConversation = async (application) => {
+    if (!application?.job?.companyInfo?._id) {
+      // Fallback if companyInfo is not populated correctly but company ID is in job.company
+      // Note: In getMyApplications, job.company is populated with email/role, and companyInfo is added separately.
+      // Let's check if we can use job.company._id if companyInfo._id is missing.
+      // However, the backend populates companyInfo based on job.company._id.
+      // If companyInfo is missing, it might mean the company profile doesn't exist or something went wrong.
+      // But let's try to use the raw company ID if available.
+      const companyId = application?.job?.company?._id;
+      if (!companyId) {
+        toast.error('Company information not available.');
+        return;
+      }
+
+      try {
+        const response = await messageAPI.getOrCreateConversation({
+          otherUserId: companyId,
+          jobId: application.job._id
+        });
+        toast.success('Opening conversation...');
+        closeModal();
+        navigate(`/messages/${response.data.data._id}`);
+        return;
+      } catch (error) {
+        toast.error(error.response?.data?.message || 'Failed to start conversation.');
+        return;
+      }
+    }
+
+    // If companyInfo is available (which it should be based on our controller logic)
+    try {
+      // The backend controller for getOrCreateConversation expects { otherUserId, jobId }
+      // It seems I used createConversation in the previous turn which might be wrong if the API is getOrCreateConversation.
+      // Let's check the API service definition if possible, but based on JobDetails.jsx it was getOrCreateConversation.
+      const response = await messageAPI.getOrCreateConversation({
+        otherUserId: application.job.company._id, // Use the user ID from the company object
+        jobId: application.job._id
+      });
+      toast.success('Opening conversation...');
+      closeModal();
+      navigate(`/messages/${response.data.data._id}`);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to start conversation.');
+    }
   };
 
   const filteredApplications = filter === 'all'
@@ -191,6 +240,25 @@ const MyApplications = () => {
           onClose={closeModal}
           title="Job Details"
           size="lg"
+          footer={
+            selectedApplication && (
+              <div className="flex justify-end gap-3 w-full">
+                <button
+                  onClick={closeModal}
+                  className="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition-colors"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => handleStartConversation(selectedApplication)}
+                  className="px-6 py-2.5 rounded-xl bg-primary-600 text-white font-bold hover:bg-primary-700 transition-colors shadow-lg shadow-primary-500/30 flex items-center gap-2"
+                >
+                  <FiMessageCircle className="h-5 w-5" />
+                  Message Company
+                </button>
+              </div>
+            )
+          }
         >
           {selectedApplication && (
             <div className="space-y-8">
