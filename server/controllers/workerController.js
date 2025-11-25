@@ -77,6 +77,8 @@ exports.getProfile = async (req, res) => {
 exports.updateProfile = async (req, res) => {
   try {
     const {
+      fullName,
+      phone,
       title,
       bio,
       skills,
@@ -85,7 +87,10 @@ exports.updateProfile = async (req, res) => {
       portfolio,
       languages,
       education,
-      socialLinks
+      socialLinks,
+      githubProfile,
+      linkedinProfile,
+      profilePicture
     } = req.body;
 
     let profile = await WorkerProfile.findOne({ user: req.user._id });
@@ -94,7 +99,8 @@ exports.updateProfile = async (req, res) => {
       // Create profile if it doesn't exist
       profile = await WorkerProfile.create({
         user: req.user._id,
-        fullName: req.user.email.split('@')[0], // Default name from email
+        fullName: fullName || req.user.email.split('@')[0],
+        phone,
         title,
         bio,
         skills,
@@ -103,19 +109,27 @@ exports.updateProfile = async (req, res) => {
         portfolio,
         languages,
         education,
-        socialLinks
+        socialLinks,
+        githubProfile,
+        linkedinProfile,
+        profilePicture
       });
     } else {
-      // Update existing profile
-      profile.title = title || profile.title;
-      profile.bio = bio || profile.bio;
-      profile.skills = skills || profile.skills;
-      profile.hourlyRate = hourlyRate || profile.hourlyRate;
-      profile.availability = availability || profile.availability;
-      profile.portfolio = portfolio || profile.portfolio;
-      profile.languages = languages || profile.languages;
-      profile.education = education || profile.education;
-      profile.socialLinks = socialLinks || profile.socialLinks;
+      // Update existing profile - only update fields that are provided
+      if (fullName !== undefined) profile.fullName = fullName;
+      if (phone !== undefined) profile.phone = phone;
+      if (title !== undefined) profile.title = title;
+      if (bio !== undefined) profile.bio = bio;
+      if (skills !== undefined) profile.skills = skills;
+      if (hourlyRate !== undefined) profile.hourlyRate = hourlyRate;
+      if (availability !== undefined) profile.availability = availability;
+      if (portfolio !== undefined) profile.portfolio = portfolio;
+      if (languages !== undefined) profile.languages = languages;
+      if (education !== undefined) profile.education = education;
+      if (socialLinks !== undefined) profile.socialLinks = socialLinks;
+      if (githubProfile !== undefined) profile.githubProfile = githubProfile;
+      if (linkedinProfile !== undefined) profile.linkedinProfile = linkedinProfile;
+      if (profilePicture !== undefined) profile.profilePicture = profilePicture;
 
       await profile.save();
     }

@@ -4,7 +4,7 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
-import { FiEdit2, FiPlus, FiTrash2, FiSave, FiX, FiStar, FiGithub, FiLinkedin, FiAward, FiBriefcase, FiDollarSign, FiCheckCircle } from 'react-icons/fi';
+import { FiEdit2, FiPlus, FiTrash2, FiSave, FiX, FiStar, FiGithub, FiLinkedin, FiAward, FiBriefcase, FiDollarSign, FiCheckCircle, FiPhone, FiUser } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import FileUpload from '../../components/common/FileUpload';
 import { uploadAPI } from '../../services/api';
@@ -246,106 +246,166 @@ const WorkerProfile = () => {
 
     return (
         <DashboardLayout>
-            <div className="max-w-6xl mx-auto space-y-6 pb-8">
-                {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                        <h1 className="text-3xl font-black text-gray-900">My Profile</h1>
-                        <p className="text-gray-600">Manage your professional presence</p>
-                    </div>
-                    {!editing ? (
-                        <Button variant="primary" icon={FiEdit2} onClick={() => setEditing(true)} className="px-6 py-2.5 rounded-xl">
-                            Edit Profile
-                        </Button>
-                    ) : (
-                        <div className="flex gap-3">
-                            <Button variant="primary" icon={FiSave} onClick={handleSaveBasicInfo} loading={saving} className="px-6 py-2.5 rounded-xl">
-                                Save Changes
-                            </Button>
-                            <Button variant="secondary" icon={FiX} onClick={() => setEditing(false)} className="px-6 py-2.5 rounded-xl">
-                                Cancel
-                            </Button>
+            <div className="maxw-6xl mx-auto space-y-6 pb-8">
+                {/* Modern Header with Banner - Green theme for workers */}
+                <div className="relative bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                    {/* Banner/Cover Area */}
+                    <div className="h-48 bg-gradient-to-r from-emerald-500 via-green-600 to-teal-600 relative">
+                        <div className="absolute inset-0 bg-black/5"></div>
+                        <div className="absolute top-6 right-6 z-10">
+                            {!editing ? (
+                                <button
+                                    onClick={() => setEditing(true)}
+                                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl shadow-xl bg-white text-gray-900 font-bold hover:bg-gray-50 transition-all border border-gray-200"
+                                >
+                                    <FiEdit2 className="h-4 w-4" />
+                                    Edit Profile
+                                </button>
+                            ) : (
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={handleSaveBasicInfo}
+                                        disabled={saving}
+                                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl shadow-xl bg-white text-green-700 font-bold hover:bg-green-50 transition-all border border-green-200 disabled:opacity-50"
+                                    >
+                                        <FiSave className="h-4 w-4" />
+                                        {saving ? 'Saving...' : 'Save Changes'}
+                                    </button>
+                                    <button
+                                        onClick={() => setEditing(false)}
+                                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl shadow-xl bg-white text-red-600 font-bold hover:bg-red-50 transition-all border border-red-200"
+                                    >
+                                        <FiX className="h-4 w-4" />
+                                        Cancel
+                                    </button>
+                                </div>
+                            )}
                         </div>
-                    )}
-                </div>
+                    </div>
 
-                {/* Main Profile Card - Always Visible */}
-                <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 relative overflow-hidden">
-                    <div className="flex flex-col md:flex-row gap-8 items-start">
-                        {/* Profile Picture */}
-                        <div className="flex-shrink-0">
-                            <div className="relative group">
+                    {/* Profile Content */}
+                    <div className="px-8 pb-8">
+                        <div className="flex flex-col md:flex-row gap-6 items-start -mt-20">
+                            {/* Profile Picture */}
+                            <div className="flex-shrink-0 relative z-20">
                                 <div className="relative">
-                                    <img
-                                        src={profile?.profilePicture || 'https://via.placeholder.com/150'}
-                                        alt="Profile"
-                                        className="h-32 w-32 rounded-2xl object-cover border-4 border-white shadow-lg"
-                                    />
+                                    {editing ? (
+                                        <div className="relative">
+                                            <FileUpload
+                                                key={uploadKey}
+                                                onFileSelect={handleImageUpload}
+                                                accept="image/*"
+                                                loading={uploadingImage}
+                                            >
+                                                <div className="relative h-40 w-40 rounded-3xl overflow-hidden border-4 border-white shadow-2xl cursor-pointer hover:ring-4 ring-green-200 transition-all bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+                                                    {profile?.profilePicture ? (
+                                                        <img
+                                                            src={profile.profilePicture}
+                                                            alt="Profile"
+                                                            className="h-full w-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="text-gray-300">
+                                                            <FiUser className="h-20 w-20" />
+                                                        </div>
+                                                    )}
+                                                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity backdrop-blur-sm">
+                                                        <div className="text-white flex flex-col items-center gap-1">
+                                                            <div className="p-2 bg-white/20 rounded-full">
+                                                                <FiEdit2 className="h-6 w-6" />
+                                                            </div>
+                                                            <span className="text-xs font-bold">Change Photo</span>
+                                                        </div>
+                                                    </div>
+                                                    {uploadingImage && (
+                                                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                                            <Spinner size="sm" color="white" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </FileUpload>
+                                            {/* Remove Button (Only in Edit Mode) - Outside FileUpload */}
+                                            {profile?.profilePicture && (
+                                                <button
+                                                    onClick={handleDeleteProfilePicture}
+                                                    type="button"
+                                                    className="absolute -top-2 -right-2 p-2 bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600 transition-all z-40"
+                                                    title="Remove Photo"
+                                                >
+                                                    <FiTrash2 className="h-4 w-4" />
+                                                </button>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className="relative h-40 w-40 rounded-3xl overflow-hidden border-4 border-white shadow-2xl bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+                                            {profile?.profilePicture ? (
+                                                <img
+                                                    src={profile.profilePicture}
+                                                    alt="Profile"
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            ) : (
+                                                <div className="text-gray-300">
+                                                    <FiUser className="h-20 w-20" />
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Availability Indicator */}
                                     {profile?.availability && (
-                                        <div className={`absolute -bottom-2 -right-2 h-6 w-6 rounded-full border-4 border-white shadow-sm ${profile.availability === 'available' ? 'bg-green-500' :
-                                            profile.availability === 'busy' ? 'bg-yellow-500' : 'bg-red-500'
+                                        <div className={`absolute bottom-2 right-2 h-6 w-6 rounded-full border-4 border-white shadow-sm z-30 ${profile.availability === 'available' ? 'bg-green-500' :
+                                                profile.availability === 'busy' ? 'bg-yellow-500' : 'bg-red-500'
                                             }`}></div>
                                     )}
                                 </div>
-                                {editing && (
-                                    <div className="mt-3 space-y-2 w-32">
-                                        <FileUpload
-                                            key={uploadKey}
-                                            onFileSelect={handleImageUpload}
-                                            accept="image/*"
-                                            loading={uploadingImage}
+                            </div>
+
+                            {/* Basic Info */}
+                            <div className="flex-1 w-full pt-2 md:pt-20 space-y-4">
+                                {editing ? (
+                                    <div className="grid md:grid-cols-2 gap-6">
+                                        <Input
+                                            label="Full Name"
+                                            name="fullName"
+                                            value={basicInfo.fullName}
+                                            onChange={handleBasicInfoChange}
+                                            className="text-lg"
                                         />
-                                        {profile?.profilePicture && (
-                                            <button
-                                                onClick={handleDeleteProfilePicture}
-                                                className="w-full text-red-600 text-xs hover:bg-red-50 py-1.5 rounded-lg flex items-center justify-center gap-1 transition-all"
-                                            >
-                                                <FiTrash2 className="h-3 w-3" /> Remove
-                                            </button>
+                                        <Input
+                                            label="Phone"
+                                            name="phone"
+                                            value={basicInfo.phone}
+                                            onChange={handleBasicInfoChange}
+                                            placeholder="+1234567890"
+                                        />
+                                        <div className="md:col-span-2">
+                                            <label className="label text-sm font-bold text-gray-700 mb-1 block">Bio</label>
+                                            <textarea
+                                                name="bio"
+                                                value={basicInfo.bio}
+                                                onChange={handleBasicInfoChange}
+                                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all"
+                                                rows="3"
+                                                placeholder="Tell us about yourself..."
+                                            />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <div className="flex items-center gap-3 mb-1">
+                                            <h2 className="text-3xl font-black text-gray-900">{profile?.fullName}</h2>
+                                            {profile?.availability === 'available' && (
+                                                <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full uppercase tracking-wide">Available for work</span>
+                                            )}
+                                        </div>
+                                        {profile?.phone && <p className="text-gray-500 font-medium mb-4 flex items-center gap-2"><FiPhone className="h-4 w-4" /> {profile.phone}</p>}
+                                        {profile?.bio && (
+                                            <p className="text-gray-600 leading-relaxed max-w-3xl text-lg">{profile.bio}</p>
                                         )}
                                     </div>
                                 )}
                             </div>
-                        </div>
-
-                        {/* Basic Info */}
-                        <div className="flex-1 w-full space-y-4">
-                            {editing ? (
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    <Input
-                                        label="Full Name"
-                                        name="fullName"
-                                        value={basicInfo.fullName}
-                                        onChange={handleBasicInfoChange}
-                                    />
-                                    <Input
-                                        label="Phone"
-                                        name="phone"
-                                        value={basicInfo.phone}
-                                        onChange={handleBasicInfoChange}
-                                        placeholder="+1234567890"
-                                    />
-                                    <div className="md:col-span-2">
-                                        <label className="label text-sm font-bold text-gray-700 mb-1 block">Bio</label>
-                                        <textarea
-                                            name="bio"
-                                            value={basicInfo.bio}
-                                            onChange={handleBasicInfoChange}
-                                            className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all"
-                                            rows="3"
-                                            placeholder="Tell us about yourself..."
-                                        />
-                                    </div>
-                                </div>
-                            ) : (
-                                <div>
-                                    <h2 className="text-2xl font-black text-gray-900 mb-1">{profile?.fullName}</h2>
-                                    {profile?.phone && <p className="text-gray-500 text-sm mb-3">{profile.phone}</p>}
-                                    {profile?.bio && (
-                                        <p className="text-gray-600 leading-relaxed max-w-3xl">{profile.bio}</p>
-                                    )}
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>
@@ -357,8 +417,8 @@ const WorkerProfile = () => {
                             key={tab}
                             onClick={() => setActiveTab(tab)}
                             className={`px-6 py-3 font-bold text-sm capitalize transition-all border-b-2 ${activeTab === tab
-                                ? 'border-primary-600 text-primary-600'
-                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    ? 'border-primary-600 text-primary-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
                         >
                             {tab}
@@ -367,7 +427,7 @@ const WorkerProfile = () => {
                 </div>
 
                 {/* Tab Content */}
-                <div className="min-h-[400px]">
+                <div className="min-h[400px]">
                     {activeTab === 'overview' && (
                         <div className="space-y-6 animate-fadeIn">
                             {/* Stats Grid */}

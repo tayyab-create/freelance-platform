@@ -166,93 +166,122 @@ const CompanyProfile = () => {
     return (
         <DashboardLayout>
             <div className="max-w-6xl mx-auto space-y-6 pb-8">
-                {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                        <h1 className="text-3xl font-black text-gray-900">Company Profile</h1>
-                        <p className="text-gray-600">Manage your company information</p>
-                    </div>
-                    {!editing ? (
-                        <Button variant="primary" icon={FiEdit2} onClick={() => setEditing(true)} className="px-6 py-2.5 rounded-xl">
-                            Edit Profile
-                        </Button>
-                    ) : (
-                        <div className="flex gap-3">
-                            <Button variant="primary" icon={FiSave} onClick={handleSave} loading={saving} className="px-6 py-2.5 rounded-xl">
-                                Save Changes
-                            </Button>
-                            <Button variant="secondary" icon={FiX} onClick={() => setEditing(false)} className="px-6 py-2.5 rounded-xl">
-                                Cancel
-                            </Button>
-                        </div>
-                    )}
-                </div>
-
-                {/* Main Company Card - Always Visible */}
-                <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 relative overflow-hidden">
-                    <div className="flex flex-col md:flex-row gap-8 items-start">
-                        {/* Company Logo */}
-                        <div className="flex-shrink-0">
-                            <div className="relative group">
-                                <div className="relative">
-                                    {profile?.logo ? (
-                                        <img
-                                            src={profile.logo}
-                                            alt="Logo"
-                                            className="h-32 w-32 rounded-2xl object-cover border-4 border-white shadow-lg"
-                                        />
-                                    ) : (
-                                        <div className="h-32 w-32 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center border-4 border-white shadow-lg">
-                                            <FaBuilding className="h-12 w-12 text-gray-400" />
-                                        </div>
-                                    )}
+                {/* Modern Header with Banner */}
+                <div className="relative bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                    {/* Banner/Cover Area */}
+                    <div className="h-48 bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 relative">
+                        <div className="absolute inset-0 bg-black/10"></div>
+                        <div className="absolute top-6 right-6 z-10">
+                            {!editing ? (
+                                <Button variant="white" icon={FiEdit2} onClick={() => setEditing(true)} className="px-5 py-2.5 rounded-xl shadow-lg border-0 text-gray-900 font-bold hover:bg-gray-50">
+                                    Edit Profile
+                                </Button>
+                            ) : (
+                                <div className="flex gap-3">
+                                    <Button variant="white" icon={FiSave} onClick={handleSave} loading={saving} className="px-5 py-2.5 rounded-xl shadow-lg border-0 text-green-700 font-bold hover:bg-green-50">
+                                        Save Changes
+                                    </Button>
+                                    <Button variant="white" icon={FiX} onClick={() => setEditing(false)} className="px-5 py-2.5 rounded-xl shadow-lg border-0 text-red-600 font-bold hover:bg-red-50">
+                                        Cancel
+                                    </Button>
                                 </div>
-                                {editing && (
-                                    <div className="mt-3 space-y-2 w-32">
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Profile Content */}
+                    <div className="px-8 pb-8">
+                        <div className="flex flex-col md:flex-row gap-6 items-start -mt-20">
+                            {/* Company Logo */}
+                            <div className="flex-shrink-0 relative z-20">
+                                <div className="relative group">
+                                    {editing ? (
                                         <FileUpload
                                             key={uploadKey}
                                             onFileSelect={handleLogoUpload}
                                             accept="image/*"
                                             loading={uploadingLogo}
+                                        >
+                                            <div className="relative h-40 w-40 rounded-3xl overflow-hidden border-4 border-white shadow-2xl cursor-pointer group-hover:ring-4 ring-primary-200 transition-all bg-white flex items-center justify-center">
+                                                {profile?.logo ? (
+                                                    <img
+                                                        src={profile.logo}
+                                                        alt="Logo"
+                                                        className="h-full w-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <FaBuilding className="h-16 w-16 text-gray-300" />
+                                                )}
+
+                                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">
+                                                    <div className="text-white flex flex-col items-center gap-1">
+                                                        <div className="p-2 bg-white/20 rounded-full">
+                                                            <FiEdit2 className="h-6 w-6" />
+                                                        </div>
+                                                        <span className="text-xs font-bold">Change Logo</span>
+                                                    </div>
+                                                </div>
+                                                {uploadingLogo && (
+                                                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                                        <Spinner size="sm" color="white" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </FileUpload>
+                                    ) : (
+                                        <div className="relative h-40 w-40 rounded-3xl overflow-hidden border-4 border-white shadow-2xl bg-white flex items-center justify-center">
+                                            {profile?.logo ? (
+                                                <img
+                                                    src={profile.logo}
+                                                    alt="Logo"
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            ) : (
+                                                <FaBuilding className="h-16 w-16 text-gray-300" />
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Remove Button (Only in Edit Mode) */}
+                                    {editing && profile?.logo && (
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleDeleteLogo(); }}
+                                            className="absolute -top-2 -right-2 p-2 bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600 transition-all z-30"
+                                            title="Remove Logo"
+                                        >
+                                            <FiTrash2 className="h-4 w-4" />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Company Basic Info */}
+                            <div className="flex-1 w-full pt-2 md:pt-20 space-y-4">
+                                {editing ? (
+                                    <div className="space-y-4">
+                                        <Input
+                                            label="Company Name"
+                                            name="companyName"
+                                            value={formData.companyName}
+                                            onChange={handleChange}
+                                            required
+                                            className="text-lg"
                                         />
-                                        {profile?.logo && (
-                                            <button
-                                                onClick={handleDeleteLogo}
-                                                className="w-full text-red-600 text-xs hover:bg-red-50 py-1.5 rounded-lg flex items-center justify-center gap-1 transition-all"
-                                            >
-                                                <FiTrash2 className="h-3 w-3" /> Remove
-                                            </button>
-                                        )}
+                                        <Input
+                                            label="Tagline"
+                                            name="tagline"
+                                            value={formData.tagline}
+                                            onChange={handleChange}
+                                            placeholder="One-line description of your company"
+                                        />
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <h2 className="text-3xl font-black text-gray-900 mb-2">{profile?.companyName}</h2>
+                                        {profile?.tagline && <p className="text-gray-500 text-lg font-medium">{profile.tagline}</p>}
                                     </div>
                                 )}
                             </div>
-                        </div>
-
-                        {/* Company Basic Info */}
-                        <div className="flex-1 w-full space-y-4">
-                            {editing ? (
-                                <div className="space-y-4">
-                                    <Input
-                                        label="Company Name"
-                                        name="companyName"
-                                        value={formData.companyName}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                    <Input
-                                        label="Tagline"
-                                        name="tagline"
-                                        value={formData.tagline}
-                                        onChange={handleChange}
-                                        placeholder="One-line description of your company"
-                                    />
-                                </div>
-                            ) : (
-                                <div>
-                                    <h2 className="text-3xl font-black text-gray-900 mb-2">{profile?.companyName}</h2>
-                                    {profile?.tagline && <p className="text-gray-500 text-lg">{profile.tagline}</p>}
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>

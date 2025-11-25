@@ -8,7 +8,8 @@ const FileUpload = ({
   maxSize = 5, // MB
   preview = false,
   currentImage = null,
-  label = "Upload File"
+  label = "Upload File",
+  children
 }) => {
   const fileInputRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -48,7 +49,8 @@ const FileUpload = ({
     }
   };
 
-  const handleRemove = () => {
+  const handleRemove = (e) => {
+    if (e) e.stopPropagation(); // Prevent triggering click if inside the trigger area
     setSelectedFile(null);
     setPreviewUrl(currentImage);
     setError('');
@@ -66,7 +68,7 @@ const FileUpload = ({
 
   return (
     <div className="space-y-2">
-      <label className="label">{label}</label>
+      {label && !children && <label className="label">{label}</label>}
 
       <input
         ref={fileInputRef}
@@ -76,51 +78,59 @@ const FileUpload = ({
         className="hidden"
       />
 
-      {preview && previewUrl ? (
-        <div className="relative inline-block">
-          <img
-            src={previewUrl}
-            alt="Preview"
-            className="h-32 w-32 object-cover rounded-lg border-2 border-gray-300"
-          />
-          {selectedFile && (
-            <button
-              type="button"
-              onClick={handleRemove}
-              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-            >
-              <FiX className="h-4 w-4" />
-            </button>
-          )}
+      {children ? (
+        <div onClick={handleClick} className="cursor-pointer inline-block relative group">
+          {children}
         </div>
-      ) : null}
+      ) : (
+        <>
+          {preview && previewUrl ? (
+            <div className="relative inline-block">
+              <img
+                src={previewUrl}
+                alt="Preview"
+                className="h-32 w-32 object-cover rounded-lg border-2 border-gray-300"
+              />
+              {selectedFile && (
+                <button
+                  type="button"
+                  onClick={handleRemove}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                >
+                  <FiX className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          ) : null}
 
-      <div className="flex gap-2">
-        <Button
-          type="button"
-          variant="secondary"
-          icon={preview ? FiImage : FiUpload}
-          onClick={handleClick}
-        >
-          {selectedFile ? 'Change File' : 'Choose File'}
-        </Button>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              icon={preview ? FiImage : FiUpload}
+              onClick={handleClick}
+            >
+              {selectedFile ? 'Change File' : 'Choose File'}
+            </Button>
 
-        {selectedFile && !preview && (
-          <Button
-            type="button"
-            variant="danger"
-            icon={FiX}
-            onClick={handleRemove}
-          >
-            Remove
-          </Button>
-        )}
-      </div>
+            {selectedFile && !preview && (
+              <Button
+                type="button"
+                variant="danger"
+                icon={FiX}
+                onClick={handleRemove}
+              >
+                Remove
+              </Button>
+            )}
+          </div>
 
-      {selectedFile && !preview && (
-        <p className="text-sm text-gray-600">
-          Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(2)} KB)
-        </p>
+          {selectedFile && !preview && (
+            <p className="text-sm text-gray-600">
+              Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(2)} KB)
+            </p>
+          )}
+        </>
       )}
 
       {error && (
