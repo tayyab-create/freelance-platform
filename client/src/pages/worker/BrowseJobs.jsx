@@ -5,6 +5,7 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
 import { FiDollarSign, FiClock, FiMapPin, FiBriefcase, FiSearch, FiFilter } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { PageHeader, FilterBar, EmptyState, SkeletonLoader, StatusBadge } from '../../components/shared';
 
 const BrowseJobs = () => {
     const [jobs, setJobs] = useState([]);
@@ -42,84 +43,65 @@ const BrowseJobs = () => {
         <DashboardLayout>
             <div className="space-y-8 pb-8">
                 {/* Header */}
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-4xl font-black text-gray-900 mb-2">Browse Jobs</h1>
-                        <p className="text-gray-600 text-lg">Discover your next opportunity</p>
-                    </div>
-                    <div className="bg-gradient-to-br from-primary-500 to-primary-700 px-6 py-3 rounded-2xl shadow-lg">
-                        <p className="text-white font-bold text-lg">{jobs.length} Jobs Available</p>
-                    </div>
-                </div>
+                <PageHeader
+                    title="Browse Jobs"
+                    subtitle="Discover your next opportunity"
+                    breadcrumbs={[
+                        { label: 'Dashboard', href: '/worker/dashboard' },
+                        { label: 'Browse Jobs' }
+                    ]}
+                    actions={
+                        <div className="bg-gradient-to-br from-primary-500 to-primary-700 px-6 py-3 rounded-2xl shadow-lg">
+                            <p className="text-white font-bold text-lg">{jobs.length} Jobs Available</p>
+                        </div>
+                    }
+                />
 
                 {/* Filters - Premium Card */}
-                <div className="bg-gradient-to-br from-white via-purple-50/30 to-blue-50/30 backdrop-blur-xl rounded-3xl shadow-xl border border-white/60 p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="p-3 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl shadow-lg">
-                            <FiFilter className="h-5 w-5 text-white" />
-                        </div>
-                        <h2 className="text-xl font-black text-gray-900">Filter Jobs</h2>
-                    </div>
-
-                    <div className="grid md:grid-cols-3 gap-4">
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <FiSearch className="h-5 w-5 text-gray-400" />
-                            </div>
-                            <input
-                                type="text"
-                                name="search"
-                                value={filters.search}
-                                onChange={handleFilterChange}
-                                placeholder="Search jobs..."
-                                className="input-field pl-12"
-                            />
-                        </div>
-                        <select
-                            name="category"
-                            value={filters.category}
-                            onChange={handleFilterChange}
-                            className="input-field"
-                        >
-                            <option value="">All Categories</option>
-                            <option value="Web Development">Web Development</option>
-                            <option value="Mobile Development">Mobile Development</option>
-                            <option value="Design">Design</option>
-                            <option value="Writing">Writing</option>
-                        </select>
-                        <select
-                            name="experienceLevel"
-                            value={filters.experienceLevel}
-                            onChange={handleFilterChange}
-                            className="input-field"
-                        >
-                            <option value="">All Levels</option>
-                            <option value="entry">Entry Level</option>
-                            <option value="intermediate">Intermediate</option>
-                            <option value="expert">Expert</option>
-                        </select>
-                    </div>
-                </div>
+                <FilterBar
+                    onSearch={(query) => setFilters({ ...filters, search: query })}
+                    onFilterChange={(newFilters) => {
+                        setFilters({ ...filters, ...newFilters });
+                    }}
+                    filters={[
+                        {
+                            key: 'category',
+                            label: 'Category',
+                            type: 'select',
+                            options: [
+                                { label: 'Web Development', value: 'Web Development' },
+                                { label: 'Mobile Development', value: 'Mobile Development' },
+                                { label: 'Design', value: 'Design' },
+                                { label: 'Writing', value: 'Writing' }
+                            ]
+                        },
+                        {
+                            key: 'experienceLevel',
+                            label: 'Experience Level',
+                            type: 'select',
+                            options: [
+                                { label: 'Entry Level', value: 'entry' },
+                                { label: 'Intermediate', value: 'intermediate' },
+                                { label: 'Expert', value: 'expert' }
+                            ]
+                        }
+                    ]}
+                    searchPlaceholder="Search jobs by title or description..."
+                />
 
                 {/* Jobs List */}
                 {loading ? (
-                    <div className="flex justify-center py-12">
-                        <Spinner size="lg" />
-                    </div>
+                    <SkeletonLoader type="card" count={6} />
                 ) : jobs.length === 0 ? (
-                    <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/60 p-12 text-center">
-                        <div className="max-w-md mx-auto">
-                            <div className="mb-6">
-                                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full">
-                                    <FiBriefcase className="h-10 w-10 text-gray-400" />
-                                </div>
-                            </div>
-                            <h3 className="text-2xl font-bold text-gray-900 mb-2">No Jobs Found</h3>
-                            <p className="text-gray-600">No jobs found matching your criteria. Try adjusting your filters.</p>
-                        </div>
-                    </div>
+                    <EmptyState
+                        icon={FiBriefcase}
+                        title="No jobs available"
+                        description="There are no jobs matching your criteria. Try adjusting your filters or check back later."
+                        actionLabel="Clear Filters"
+                        onAction={() => setFilters({ search: '', category: '', experienceLevel: '' })}
+                    />
                 ) : (
-                    <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {jobs.map((job) => (
                             <Link
                                 key={job._id}
@@ -206,9 +188,7 @@ const BrowseJobs = () => {
 
                                     {/* Status Badge */}
                                     <div className="flex flex-col items-end gap-3">
-                                        <span className="badge badge-success text-sm px-4 py-2 shadow-md capitalize">
-                                            {job.status}
-                                        </span>
+                                        <StatusBadge status={job.status} size="sm" />
                                         <div className="text-sm text-gray-500">
                                             Posted {new Date(job.createdAt).toLocaleDateString()}
                                         </div>

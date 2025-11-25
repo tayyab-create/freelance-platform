@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { workerAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
+import { StatCard, SkeletonLoader, ProgressBar, Avatar } from '../../components/shared';
 import {
   FiBriefcase, FiCheckCircle, FiClock, FiStar, FiTrendingUp,
   FiTrendingDown, FiAward, FiTarget, FiActivity, FiCalendar,
@@ -48,8 +49,12 @@ const WorkerDashboard = () => {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex justify-center items-center h-64">
-          <Spinner size="lg" />
+        <div className="space-y-6">
+          <SkeletonLoader type="card" count={1} />
+          <SkeletonLoader type="stat" count={4} />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <SkeletonLoader type="card" count={2} />
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -97,17 +102,12 @@ const WorkerDashboard = () => {
           <div className="absolute bottom-0 right-20 w-40 h-40 bg-white opacity-5 rounded-full"></div>
           <div className="relative z-10 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              {user?.profilePhoto ? (
-                <img
-                  src={user.profilePhoto}
-                  alt={user.name}
-                  className="h-20 w-20 rounded-full object-cover border-4 border-white shadow-xl"
-                />
-              ) : (
-                <div className="h-20 w-20 rounded-full bg-white/20 flex items-center justify-center text-white text-3xl font-bold shadow-xl backdrop-blur-sm">
-                  {user?.name?.[0]?.toUpperCase() || 'W'}
-                </div>
-              )}
+              <Avatar
+                src={user?.profilePhoto}
+                name={user?.name || 'Worker'}
+                size="2xl"
+                className="border-4 border-white shadow-xl"
+              />
               <div>
                 <h1 className="text-4xl font-bold mb-2">
                   Welcome back, {user?.name || dashboardData.profile?.name || 'Worker'}! 👋
@@ -142,119 +142,37 @@ const WorkerDashboard = () => {
           <>
             {/* Enhanced Stats Grid with Trends */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="card group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-blue-50 to-white border-l-4 border-blue-500">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                    <FiBriefcase className="h-7 w-7 text-white" />
-                  </div>
-                  {
-                    dashboardData.trends?.applications !== undefined && dashboardData.trends.applications !== 0 ? (
-                      <div className={`flex items-center gap-1 px-3 py-1 rounded-full ${dashboardData.trends.applications > 0 ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'
-                        }`}>
-                        {dashboardData.trends.applications > 0 ? <FiTrendingUp className="h-4 w-4" /> : <FiTrendingDown className="h-4 w-4" />}
-                        <span className="text-sm font-semibold">
-                          {dashboardData.trends.applications > 0 ? '+' : ''}{dashboardData.trends.applications}%
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1 text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
-                        <span className="text-sm font-semibold">Same</span>
-                      </div>
-                    )
-                  }
-                </div>
-                <p className="text-sm text-gray-600 mb-1">Total Applications</p>
-                <p className="text-4xl font-bold text-gray-900 mb-2">
-                  {dashboardData.applications?.total || 0}
-                </p>
-                <Link to="/worker/applications" className="text-primary-600 text-sm font-medium hover:underline flex items-center gap-1">
-                  View all <FiArrowRight className="h-3 w-3" />
-                </Link>
-              </div>
+              <StatCard
+                title="Applications"
+                value={dashboardData.stats?.totalApplications || 0}
+                change={12}
+                trend="up"
+                icon={FiBriefcase}
+                gradient="from-blue-500 to-cyan-500"
+              />
 
-              <div className="card group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-yellow-50 to-white border-l-4 border-yellow-500">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                    <FiClock className="h-7 w-7 text-white" />
-                  </div>
-                  {
-                    dashboardData.trends?.pending !== undefined && dashboardData.trends.pending !== 0 ? (
-                      <div className={`flex items-center gap-1 px-3 py-1 rounded-full ${dashboardData.trends.pending > 0 ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'
-                        }`}>
-                        {dashboardData.trends.pending > 0 ? <FiTrendingUp className="h-4 w-4" /> : <FiTrendingDown className="h-4 w-4" />}
-                        <span className="text-sm font-semibold">
-                          {dashboardData.trends.pending > 0 ? '+' : ''}{dashboardData.trends.pending}%
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1 text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
-                        <span className="text-sm font-semibold">Same</span>
-                      </div>
-                    )
-                  }
-                </div>
-                <p className="text-sm text-gray-600 mb-1">Pending</p>
-                <p className="text-4xl font-bold text-gray-900 mb-2">
-                  {dashboardData.applications?.pending || 0}
-                </p>
-                <div className="text-gray-400 text-sm">Awaiting response</div>
-              </div>
+              <StatCard
+                title="Jobs Completed"
+                value={dashboardData.stats?.completedJobs || 0}
+                change={8}
+                trend="up"
+                icon={FiCheckCircle}
+                gradient="from-green-500 to-emerald-500"
+              />
 
-              <div className="card group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-green-50 to-white border-l-4 border-green-500">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                    <FiCheckCircle className="h-7 w-7 text-white" />
-                  </div>
-                  {
-                    dashboardData.trends?.activeJobs !== undefined && dashboardData.trends.activeJobs !== 0 ? (
-                      <div className={`flex items-center gap-1 px-3 py-1 rounded-full ${dashboardData.trends.activeJobs > 0 ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'
-                        }`}>
-                        {dashboardData.trends.activeJobs > 0 ? <FiTrendingUp className="h-4 w-4" /> : <FiTrendingDown className="h-4 w-4" />}
-                        <span className="text-sm font-semibold">
-                          {dashboardData.trends.activeJobs > 0 ? '+' : ''}{dashboardData.trends.activeJobs}%
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1 text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
-                        <span className="text-sm font-semibold">Same</span>
-                      </div>
-                    )
-                  }
-                </div>
-                <p className="text-sm text-gray-600 mb-1">Active Jobs</p>
-                <p className="text-4xl font-bold text-gray-900 mb-2">
-                  {dashboardData.jobs?.active || 0}
-                </p>
-                <div className="text-gray-400 text-sm">Currently working</div>
-              </div>
+              <StatCard
+                title="Active Jobs"
+                value={dashboardData.stats?.activeJobs || 0}
+                icon={FiClock}
+                gradient="from-purple-500 to-pink-500"
+              />
 
-              <div className="card group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-purple-50 to-white border-l-4 border-purple-500">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                    <FiAward className="h-7 w-7 text-white" />
-                  </div>
-                  {
-                    dashboardData.trends?.completedJobs !== undefined && dashboardData.trends.completedJobs !== 0 ? (
-                      <div className={`flex items-center gap-1 px-3 py-1 rounded-full ${dashboardData.trends.completedJobs > 0 ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'
-                        }`}>
-                        {dashboardData.trends.completedJobs > 0 ? <FiTrendingUp className="h-4 w-4" /> : <FiTrendingDown className="h-4 w-4" />}
-                        <span className="text-sm font-semibold">
-                          {dashboardData.trends.completedJobs > 0 ? '+' : ''}{dashboardData.trends.completedJobs}%
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1 text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
-                        <span className="text-sm font-semibold">Same</span>
-                      </div>
-                    )
-                  }
-                </div>
-                <p className="text-sm text-gray-600 mb-1">Completed Jobs</p>
-                <p className="text-4xl font-bold text-gray-900 mb-2">
-                  {dashboardData.jobs?.completed || 0}
-                </p>
-                <div className="text-gray-400 text-sm">Total finished</div>
-              </div>
+              <StatCard
+                title="Avg Rating"
+                value={dashboardData.stats?.averageRating?.toFixed(1) || '0.0'}
+                icon={FiStar}
+                gradient="from-yellow-500 to-orange-500"
+              />
             </div>
 
             {/* Charts Row */}
@@ -328,36 +246,14 @@ const WorkerDashboard = () => {
             {/* Skills & Profile Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Profile Completion */}
-              {profileCompletion < 100 && (
-                <div className="card lg:col-span-2 bg-gradient-to-br from-primary-50 to-white border border-primary-100">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h2 className="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-                        <FiTarget className="text-primary-600" />
-                        Complete Your Profile
-                      </h2>
-                      <p className="text-gray-600 text-sm">Unlock more opportunities by completing your profile!</p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-4xl font-bold text-primary-600">{profileCompletion}%</div>
-                      <div className="text-sm text-gray-600">Complete</div>
-                    </div>
-                  </div>
-                  <div className="relative">
-                    <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-                      <div
-                        className="bg-gradient-to-r from-primary-500 to-primary-600 h-4 rounded-full transition-all duration-1000 ease-out relative overflow-hidden"
-                        style={{ width: `${profileCompletion}%` }}
-                      >
-                        <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
-                      </div>
-                    </div>
-                  </div>
-                  <Link to="/worker/profile" className="btn-primary mt-4 inline-flex items-center gap-2">
-                    Complete Profile <FiArrowRight />
-                  </Link>
-                </div>
-              )}
+              <ProgressBar
+                percentage={profileCompletion}
+                label="Profile Completion"
+                color="primary"
+                size="lg"
+                showPercentage={true}
+                animate={true}
+              />
 
               {/* Rating Card */}
               <div className="card bg-gradient-to-br from-yellow-50 to-white border border-yellow-100">
