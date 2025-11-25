@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { adminAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
-import { StatCard, SkeletonLoader } from '../../components/shared';
+import { StatCard, SkeletonLoader, DataTable, PageHeader } from '../../components/shared';
 import {
   FiUsers, FiBriefcase, FiFileText, FiClock, FiCheckCircle,
   FiXCircle, FiActivity, FiArrowRight, FiShield, FiDollarSign
@@ -38,9 +38,7 @@ const AdminDashboard = () => {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex justify-center items-center h-64">
-          <Spinner size="lg" />
-        </div>
+        <SkeletonLoader type="stat" count={4} />
       </DashboardLayout>
     );
   }
@@ -55,48 +53,6 @@ const AdminDashboard = () => {
     { name: 'Active', value: stats?.jobs?.active || 0, color: '#10b981' }, // Green
     { name: 'Completed', value: stats?.jobs?.completed || 0, color: '#6366f1' }, // Indigo
   ].filter(item => item.value > 0);
-
-  const statCards = [
-    {
-      title: 'Total Users',
-      value: stats?.users?.total || 0,
-      icon: FiUsers,
-      color: 'blue',
-      gradient: 'from-blue-500 to-blue-600',
-      bgGradient: 'from-blue-50 to-white',
-      borderColor: 'border-blue-500',
-      link: '/admin/users',
-    },
-    {
-      title: 'Pending Approvals',
-      value: stats?.users?.pending || 0,
-      icon: FiClock,
-      color: 'yellow',
-      gradient: 'from-yellow-500 to-yellow-600',
-      bgGradient: 'from-yellow-50 to-white',
-      borderColor: 'border-yellow-500',
-      link: '/admin/pending',
-    },
-    {
-      title: 'Total Jobs',
-      value: stats?.jobs?.total || 0,
-      icon: FiBriefcase,
-      color: 'purple',
-      gradient: 'from-purple-500 to-purple-600',
-      bgGradient: 'from-purple-50 to-white',
-      borderColor: 'border-purple-500',
-      link: '/admin/jobs',
-    },
-    {
-      title: 'Total Applications',
-      value: stats?.applications?.total || 0,
-      icon: FiFileText,
-      color: 'green',
-      gradient: 'from-green-500 to-green-600',
-      bgGradient: 'from-green-50 to-white',
-      borderColor: 'border-green-500',
-    },
-  ];
 
   return (
     <DashboardLayout>
@@ -128,28 +84,34 @@ const AdminDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <StatCard
             title="Total Users"
-            value={stats.totalUsers}
+            value={stats?.users?.total || 0}
+            change={stats?.users?.trend || 0}
+            trend={stats?.users?.trend >= 0 ? "up" : "down"}
             icon={FiUsers}
             gradient="from-blue-500 to-cyan-500"
           />
 
           <StatCard
             title="Pending Approvals"
-            value={stats.pendingApprovals}
+            value={stats?.users?.pending || 0}
             icon={FiClock}
             gradient="from-yellow-500 to-orange-500"
           />
 
           <StatCard
             title="Active Jobs"
-            value={stats.activeJobs}
+            value={stats?.jobs?.active || 0}
+            change={stats?.jobs?.trend || 0}
+            trend={stats?.jobs?.trend >= 0 ? "up" : "down"}
             icon={FiBriefcase}
             gradient="from-green-500 to-emerald-500"
           />
 
           <StatCard
             title="Total Revenue"
-            value={`$${stats.revenue}`}
+            value={`$${(stats?.revenue?.total || 0).toLocaleString()}`}
+            change={stats?.revenue?.trend || 0}
+            trend={stats?.revenue?.trend >= 0 ? "up" : "down"}
             icon={FiDollarSign}
             gradient="from-purple-500 to-pink-500"
           />

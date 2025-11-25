@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
 import { FiCheck, FiX, FiUser, FiBriefcase, FiClock } from 'react-icons/fi';
+import { PageHeader, SkeletonLoader, EmptyState, StatusBadge, Avatar, ActionDropdown } from '../../components/shared';
 
 const PendingApprovals = () => {
   const [pendingUsers, setPendingUsers] = useState([]);
@@ -52,9 +53,7 @@ const PendingApprovals = () => {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex justify-center items-center h-64">
-          <Spinner size="lg" />
-        </div>
+        <SkeletonLoader type="list" count={8} />
       </DashboardLayout>
     );
   }

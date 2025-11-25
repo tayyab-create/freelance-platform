@@ -58,20 +58,16 @@ const MyJobs = () => {
     <DashboardLayout>
       <div className="space-y-8 pb-8">
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <PageHeader
-              title="My Jobs"
-              subtitle="Manage your job postings"
-              actions={
-                <Link to="/company/post-job" className="btn-primary">
-                  <FiPlus className="w-5 h-5" />
-                  <span>Post New Job</span>
-                </Link>
-              }
-            />
-          </div>
-        </div>
+        <PageHeader
+          title="My Jobs"
+          subtitle="Manage your job postings"
+          actions={
+            <Link to="/company/post-job" className="btn-primary">
+              <FiPlus className="w-5 h-5" />
+              <span>Post New Job</span>
+            </Link>
+          }
+        />
 
         {/* Filter Tabs - Premium */}
         <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/60 p-6">
@@ -104,9 +100,7 @@ const MyJobs = () => {
 
         {/* Jobs List */}
         {loading ? (
-          <div className="flex justify-center py-12">
-            <Spinner size="lg" />
-          </div>
+          <SkeletonLoader type="card" count={6} />
         ) : filteredJobs.length === 0 ? (
           <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/60 p-12 text-center">
             <div className="max-w-md mx-auto">

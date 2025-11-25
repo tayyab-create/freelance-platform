@@ -9,6 +9,7 @@ import { FaBuilding } from 'react-icons/fa'
 import { toast } from 'react-toastify';
 import FileUpload from '../../components/common/FileUpload';
 import { uploadAPI } from '../../services/api';
+import { PageHeader, SkeletonLoader, Avatar, ProgressBar } from '../../components/shared';
 
 const CompanyProfile = () => {
     const [profile, setProfile] = useState(null);
@@ -154,9 +155,7 @@ const CompanyProfile = () => {
     if (loading) {
         return (
             <DashboardLayout>
-                <div className="flex justify-center items-center h-64">
-                    <Spinner size="lg" />
-                </div>
+                <SkeletonLoader type="profile" count={3} />
             </DashboardLayout>
         );
     }

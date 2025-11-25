@@ -4,6 +4,7 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
 import { FiBriefcase, FiFilter, FiTrash2, FiEye, FiX, FiCalendar, FiDollarSign, FiClock, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { PageHeader, SkeletonLoader, EmptyState, StatusBadge, DataTable, ActionDropdown, Modal } from '../../components/shared';
 
 const ManageJobs = () => {
     const [jobs, setJobs] = useState([]);
@@ -131,7 +132,7 @@ const ManageJobs = () => {
                 {/* Table View */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                     {loading ? (
-                        <div className="flex justify-center py-12"><Spinner size="lg" /></div>
+                        <SkeletonLoader type="table" count={1} />
                     ) : jobs.length === 0 ? (
                         <div className="text-center py-12 text-gray-500">No jobs found matching your filters.</div>
                     ) : (

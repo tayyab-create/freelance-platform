@@ -5,6 +5,7 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import { toast } from 'react-toastify';
+import { PageHeader } from '../../components/shared';
 
 const PostJob = () => {
   const navigate = useNavigate();

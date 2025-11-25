@@ -225,9 +225,7 @@ const AssignedJobs = () => {
 
                   {/* Action Section */}
                   <div className="flex flex-col gap-3">
-                    <span className="badge badge-warning text-base px-5 py-2.5 uppercase font-bold">
-                      {job.status}
-                    </span>
+                    <StatusBadge status="warning" size="sm" />
                     {job.status === 'assigned' && (
                       <Button
                         variant="primary"

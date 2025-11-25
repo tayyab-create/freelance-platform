@@ -6,6 +6,7 @@ import Spinner from '../../components/common/Spinner';
 import Button from '../../components/common/Button';
 import { FiUser, FiMail, FiStar, FiCheckCircle, FiMessageCircle, FiFileText, FiUsers, FiDollarSign, FiAward } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { PageHeader, SkeletonLoader, EmptyState, StatusBadge, Avatar, ActionDropdown } from '../../components/shared';
 
 const JobApplications = () => {
     const { id } = useParams();
@@ -73,9 +74,7 @@ const JobApplications = () => {
     if (loading) {
         return (
             <DashboardLayout>
-                <div className="flex justify-center items-center h-64">
-                    <Spinner size="lg" />
-                </div>
+                <SkeletonLoader type="list" count={5} />
             </DashboardLayout>
         );
     }

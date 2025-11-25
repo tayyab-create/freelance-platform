@@ -14,9 +14,58 @@ exports.getDashboard = async (req, res) => {
 
     const totalJobs = await Job.countDocuments();
     const activeJobs = await Job.countDocuments({ status: 'posted' });
-    const completedJobs = await Job.countDocuments({ status: 'completed' });
+    const completedJobsCount = await Job.countDocuments({ status: 'completed' });
+
+    // Calculate Revenue (sum of salaries of completed jobs)
+    const completedJobsList = await Job.find({ status: 'completed' }).select('salary');
+    const totalRevenue = completedJobsList.reduce((acc, job) => acc + (job.salary || 0), 0);
 
     const totalApplications = await Application.countDocuments();
+
+    // Calculate Trends (Current Month vs Last Month)
+    const now = new Date();
+    const firstDayCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const firstDayNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+    // Helper for trend calculation
+    const calculateTrend = async (Model, query = {}) => {
+      const currentMonth = await Model.countDocuments({
+        ...query,
+        createdAt: { $gte: firstDayCurrentMonth, $lt: firstDayNextMonth }
+      });
+      const lastMonth = await Model.countDocuments({
+        ...query,
+        createdAt: { $gte: firstDayLastMonth, $lt: firstDayCurrentMonth }
+      });
+
+      if (lastMonth === 0) return currentMonth > 0 ? 100 : 0;
+      return Math.round(((currentMonth - lastMonth) / lastMonth) * 100);
+    };
+
+    const usersTrend = await calculateTrend(User);
+    const jobsTrend = await calculateTrend(Job);
+    const applicationsTrend = await calculateTrend(Application);
+
+    // Revenue Trend
+    const currentMonthRevenueJobs = await Job.find({
+      status: 'completed',
+      updatedAt: { $gte: firstDayCurrentMonth, $lt: firstDayNextMonth }
+    }).select('salary');
+    const currentMonthRevenue = currentMonthRevenueJobs.reduce((acc, job) => acc + (job.salary || 0), 0);
+
+    const lastMonthRevenueJobs = await Job.find({
+      status: 'completed',
+      updatedAt: { $gte: firstDayLastMonth, $lt: firstDayCurrentMonth }
+    }).select('salary');
+    const lastMonthRevenue = lastMonthRevenueJobs.reduce((acc, job) => acc + (job.salary || 0), 0);
+
+    let revenueTrend = 0;
+    if (lastMonthRevenue === 0) {
+      revenueTrend = currentMonthRevenue > 0 ? 100 : 0;
+    } else {
+      revenueTrend = Math.round(((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100);
+    }
 
     res.status(200).json({
       success: true,
@@ -27,15 +76,22 @@ exports.getDashboard = async (req, res) => {
           companies: totalCompanies,
           pending: pendingApprovals,
           approved: approvedUsers,
-          rejected: rejectedUsers
+          rejected: rejectedUsers,
+          trend: usersTrend
         },
         jobs: {
           total: totalJobs,
           active: activeJobs,
-          completed: completedJobs
+          completed: completedJobsCount,
+          trend: jobsTrend
         },
         applications: {
-          total: totalApplications
+          total: totalApplications,
+          trend: applicationsTrend
+        },
+        revenue: {
+          total: totalRevenue,
+          trend: revenueTrend
         }
       }
     });

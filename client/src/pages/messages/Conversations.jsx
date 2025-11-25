@@ -6,7 +6,7 @@ import Spinner from '../../components/common/Spinner';
 import { FiMessageCircle, FiUser } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { useSocket } from '../../context/SocketContext';
-import { EmptyState, SkeletonLoader, Avatar } from '../../components/shared';
+import { EmptyState, SkeletonLoader, Avatar, PageHeader } from '../../components/shared';
 import { useNavigate } from 'react-router-dom';
 
 

@@ -4,6 +4,7 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
 import { FiUser, FiBriefcase, FiFilter, FiCheckCircle, FiXCircle, FiAlertCircle, FiEye, FiX, FiGlobe, FiMapPin, FiPhone, FiCalendar } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { PageHeader, DataTable, StatusBadge, ActionDropdown, SkeletonLoader } from '../../components/shared';
 
 const AllUsers = () => {
   const [users, setUsers] = useState([]);
@@ -137,7 +138,7 @@ const AllUsers = () => {
         {/* Table View */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           {loading ? (
-            <div className="flex justify-center py-12"><Spinner size="lg" /></div>
+            <SkeletonLoader type="table" count={1} />
           ) : users.length === 0 ? (
             <div className="text-center py-12 text-gray-500">No users found matching your filters.</div>
           ) : (
@@ -158,7 +159,7 @@ const AllUsers = () => {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold ${user.role === 'worker' ? 'bg-purple-100 text-purple-600' :
-                              user.role === 'company' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'
+                            user.role === 'company' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'
                             }`}>
                             {user.role === 'worker' ? 'W' : user.role === 'company' ? 'C' : 'A'}
                           </div>
@@ -170,7 +171,7 @@ const AllUsers = () => {
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium capitalize ${user.role === 'worker' ? 'bg-purple-50 text-purple-700' :
-                            user.role === 'company' ? 'bg-blue-50 text-blue-700' : 'bg-gray-100 text-gray-700'
+                          user.role === 'company' ? 'bg-blue-50 text-blue-700' : 'bg-gray-100 text-gray-700'
                           }`}>
                           {user.role}
                         </span>
@@ -196,8 +197,8 @@ const AllUsers = () => {
                           <button
                             onClick={() => handleToggleActive(user._id, user.isActive)}
                             className={`text-xs font-medium px-3 py-1.5 rounded-md transition-colors ${user.isActive
-                                ? 'text-red-600 bg-red-50 hover:bg-red-100'
-                                : 'text-green-600 bg-green-50 hover:bg-green-100'
+                              ? 'text-red-600 bg-red-50 hover:bg-red-100'
+                              : 'text-green-600 bg-green-50 hover:bg-green-100'
                               }`}
                           >
                             {user.isActive ? 'Deactivate' : 'Activate'}

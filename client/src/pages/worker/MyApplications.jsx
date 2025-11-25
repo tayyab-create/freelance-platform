@@ -162,9 +162,7 @@ const MyApplications = () => {
 
         {/* Applications List */}
         {loading ? (
-          <div className="flex justify-center py-12">
-            <Spinner size="lg" />
-          </div>
+          <SkeletonLoader type="card" count={6} />
         ) : filteredApplications.length === 0 ? (
           <EmptyState
             icon={FiBriefcase}

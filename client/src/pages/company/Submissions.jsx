@@ -6,6 +6,7 @@ import Button from '../../components/common/Button';
 import { FiCheckCircle, FiX, FiRefreshCw, FiDownload, FiExternalLink, FiFile, FiStar, FiFileText, FiClock, FiAlertCircle, FiUser, FiImage } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import ReviewModal from '../../components/company/ReviewModal';
+import { PageHeader, SkeletonLoader, EmptyState, StatusBadge, Modal, ConfirmModal } from '../../components/shared';
 
 const Submissions = () => {
   const [submissions, setSubmissions] = useState([]);
@@ -165,9 +166,7 @@ const Submissions = () => {
 
         {/* Submissions List */}
         {loading ? (
-          <div className="flex justify-center py-12">
-            <Spinner size="lg" />
-          </div>
+          <SkeletonLoader type="card" count={4} />
         ) : filteredSubmissions.length === 0 ? (
           <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/60 p-12 text-center">
             <div className="max-w-md mx-auto">
