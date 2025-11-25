@@ -5,6 +5,7 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
 import { FiDollarSign, FiClock, FiBriefcase, FiEye, FiCheckCircle, FiFileText, FiAward, FiAlertCircle, FiX } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { PageHeader, EmptyState, SkeletonLoader, StatusBadge, StatCard } from '../../components/shared';
 
 const MyApplications = () => {
   const [applications, setApplications] = useState([]);
@@ -68,15 +69,19 @@ const MyApplications = () => {
     <DashboardLayout>
       <div className="space-y-8 pb-8">
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h1 className="text-4xl font-black text-gray-900">My Applications</h1>
-            <p className="text-gray-600 mt-2 text-lg">Track all your job applications</p>
-          </div>
-          <div className="bg-gradient-to-br from-primary-500 to-primary-700 px-6 py-3 rounded-2xl shadow-lg">
-            <p className="text-white font-bold text-lg">{applications.length} Total Applications</p>
-          </div>
-        </div>
+        <PageHeader
+          title="My Applications"
+          subtitle="Track all your job applications"
+          breadcrumbs={[
+            { label: 'Dashboard', href: '/worker/dashboard' },
+            { label: 'Applications' }
+          ]}
+          actions={
+            <div className="bg-gradient-to-br from-primary-500 to-primary-700 px-6 py-3 rounded-2xl shadow-lg">
+              <p className="text-white font-bold text-lg">{applications.length} Total</p>
+            </div>
+          }
+        />
 
         {/* Deleted Jobs Notification */}
         {deletedCount > 0 && (
@@ -100,6 +105,33 @@ const MyApplications = () => {
           </div>
         )}
 
+        {/* ADD this right before the filter buttons: */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <StatCard
+            title="Total"
+            value={counts.all}
+            icon={FiBriefcase}
+            gradient="from-blue-500 to-cyan-500"
+          />
+          <StatCard
+            title="Pending"
+            value={counts.pending}
+            icon={FiClock}
+            gradient="from-yellow-500 to-orange-500"
+          />
+          <StatCard
+            title="Accepted"
+            value={counts.accepted}
+            icon={FiCheckCircle}
+            gradient="from-green-500 to-emerald-500"
+          />
+          <StatCard
+            title="Rejected"
+            value={counts.rejected}
+            icon={FiX}
+            gradient="from-red-500 to-pink-500"
+          />
+        </div>
         {/* Filter Tabs - Premium */}
         <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/60 p-6">
           <div className="flex gap-3 overflow-x-auto">
@@ -134,28 +166,18 @@ const MyApplications = () => {
             <Spinner size="lg" />
           </div>
         ) : filteredApplications.length === 0 ? (
-          <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/60 p-12 text-center">
-            <div className="max-w-md mx-auto">
-              <div className="mb-6">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full">
-                  <FiFileText className="h-10 w-10 text-gray-400" />
-                </div>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                {filter === 'all' ? 'No Applications Yet' : `No ${filter.charAt(0).toUpperCase() + filter.slice(1)} Applications`}
-              </h3>
-              <p className="text-gray-600 mb-6">
-                {filter === 'all'
-                  ? "You haven't applied to any jobs yet. Start browsing available opportunities!"
-                  : `You don't have any ${filter} applications at the moment.`}
-              </p>
-              {filter === 'all' && (
-                <Link to="/worker/jobs" className="btn-primary inline-block">
-                  Browse Available Jobs
-                </Link>
-              )}
-            </div>
-          </div>
+          <EmptyState
+            icon={FiBriefcase}
+            title={filter === 'all' ? "No applications yet" : `No ${filter} applications`}
+            description={filter === 'all'
+              ? "You haven't applied to any jobs yet. Start browsing available jobs!"
+              : `You don't have any ${filter} applications.`
+            }
+            actionLabel="Browse Jobs"
+            onAction={() => window.location.href = '/worker/jobs'}
+            secondaryActionLabel={filter !== 'all' ? "Show All" : undefined}
+            onSecondaryAction={filter !== 'all' ? () => setFilter('all') : undefined}
+          />
         ) : (
           <div className="space-y-6">
             {filteredApplications.map((application) => (
@@ -235,9 +257,7 @@ const MyApplications = () => {
                         Application: {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
                       </span>
                       {application.job?.status && (
-                        <span className={`badge ${getJobStatusColor(application.job.status)} text-sm px-4 py-2`}>
-                          Job: {application.job.status}
-                        </span>
+                        <StatusBadge status={application.status} size="md" />
                       )}
                     </div>
                   </div>

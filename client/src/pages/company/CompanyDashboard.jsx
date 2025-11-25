@@ -4,6 +4,8 @@ import { useSelector } from 'react-redux';
 import { companyAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
+import { StatCard, SkeletonLoader } from '../../components/shared';
+
 import {
   FiBriefcase, FiUsers, FiCheckCircle, FiClock, FiPlus,
   FiTrendingUp, FiActivity, FiStar, FiArrowRight, FiFileText

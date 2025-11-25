@@ -6,8 +6,11 @@ import Spinner from '../../components/common/Spinner';
 import Button from '../../components/common/Button';
 import { FiDollarSign, FiClock, FiBriefcase, FiUpload, FiFile, FiX, FiCalendar, FiAlertCircle } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { PageHeader, EmptyState, SkeletonLoader, StatusBadge } from '../../components/shared';
+import { useNavigate } from 'react-router-dom';
 
 const AssignedJobs = () => {
+  const navigate = useNavigate();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
@@ -119,7 +122,14 @@ const AssignedJobs = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-4xl font-black text-gray-900">Assigned Jobs</h1>
+            <PageHeader
+              title="Assigned Jobs"
+              subtitle="Manage your active projects"
+              breadcrumbs={[
+                { label: 'Dashboard', href: '/worker/dashboard' },
+                { label: 'Assigned Jobs' }
+              ]}
+            />
             <p className="text-gray-600 mt-2 text-lg">Jobs you're currently working on</p>
           </div>
           <div className="bg-gradient-to-br from-primary-500 to-primary-700 px-6 py-3 rounded-2xl shadow-lg">
@@ -128,24 +138,15 @@ const AssignedJobs = () => {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-12">
-            <Spinner size="lg" />
-          </div>
+          <SkeletonLoader type="card" count={4} />
         ) : jobs.length === 0 ? (
-          <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/60 p-12 text-center">
-            <div className="max-w-md mx-auto">
-              <div className="mb-6">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full">
-                  <FiBriefcase className="h-10 w-10 text-gray-400" />
-                </div>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">No Assigned Jobs Yet</h3>
-              <p className="text-gray-600 mb-6">You don't have any active assignments. Start browsing and applying to available jobs!</p>
-              <Link to="/worker/jobs" className="btn-primary inline-block">
-                Browse Available Jobs
-              </Link>
-            </div>
-          </div>
+          <EmptyState
+            icon={FiBriefcase}
+            title="No assigned jobs"
+            description="You don't have any assigned jobs at the moment."
+            actionLabel="View Applications"
+            onAction={() => navigate('/worker/applications')}
+          />
         ) : (
           <div className="space-y-6">
             {jobs.map((job) => (
@@ -195,12 +196,12 @@ const AssignedJobs = () => {
                     {/* Deadline Warning */}
                     {job.deadline && (
                       <div className={`flex items-center gap-3 px-5 py-4 rounded-xl border-2 ${isDeadlineApproaching(job.deadline)
-                          ? 'bg-gradient-to-r from-red-100 to-orange-100 border-red-300'
-                          : 'bg-gradient-to-r from-yellow-100 to-amber-100 border-yellow-300'
+                        ? 'bg-gradient-to-r from-red-100 to-orange-100 border-red-300'
+                        : 'bg-gradient-to-r from-yellow-100 to-amber-100 border-yellow-300'
                         }`}>
                         <div className={`p-2 rounded-lg ${isDeadlineApproaching(job.deadline)
-                            ? 'bg-red-500'
-                            : 'bg-yellow-500'
+                          ? 'bg-red-500'
+                          : 'bg-yellow-500'
                           }`}>
                           {isDeadlineApproaching(job.deadline) ? (
                             <FiAlertCircle className="h-5 w-5 text-white" />
