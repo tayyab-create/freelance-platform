@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { FiBriefcase, FiDollarSign, FiClock, FiEye, FiCheckCircle } from 'react-icons/fi';
 import StatusBadge from './StatusBadge';
 
-const ApplicationCard = ({ application }) => {
+const ApplicationCard = ({ application, onViewJob }) => {
     const getStatusColor = (status) => {
         const colors = {
             pending: 'bg-yellow-50 text-yellow-700 border-yellow-200',
@@ -66,13 +66,13 @@ const ApplicationCard = ({ application }) => {
 
                 {/* Right: Actions */}
                 <div className="flex flex-col items-end justify-center gap-3 min-w-[140px]">
-                    <Link
-                        to={`/worker/jobs/${application.job?._id}`}
+                    <button
+                        onClick={() => onViewJob(application)}
                         className="w-full py-2.5 px-4 bg-white border border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-colors flex items-center justify-center gap-2 text-sm"
                     >
                         <FiEye className="h-4 w-4" />
                         View Job
-                    </Link>
+                    </button>
 
                     {application.status === 'accepted' && (
                         <Link

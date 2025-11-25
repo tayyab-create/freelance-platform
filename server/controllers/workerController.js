@@ -262,7 +262,7 @@ exports.getMyApplications = async (req, res) => {
     const applications = await Application.find({ worker: req.user._id })
       .populate({
         path: 'job',
-        select: 'title description salary status company',
+        select: 'title description salary status company duration experienceLevel tags salaryType createdAt',
         populate: {
           path: 'company',
           select: 'email role'

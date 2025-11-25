@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { workerAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
-import { FiBriefcase, FiClock, FiCheckCircle, FiX, FiAlertCircle, FiFileText, FiAward } from 'react-icons/fi';
+import { FiBriefcase, FiClock, FiCheckCircle, FiX, FiAlertCircle, FiFileText, FiAward, FiDollarSign } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import { PageHeader, EmptyState, SkeletonLoader } from '../../components/shared';
+import { PageHeader, EmptyState, SkeletonLoader, Modal } from '../../components/shared';
 import ApplicationCard from '../../components/shared/ApplicationCard';
 
 const MyApplications = () => {
@@ -11,6 +11,8 @@ const MyApplications = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [deletedCount, setDeletedCount] = useState(0);
+  const [selectedApplication, setSelectedApplication] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchApplications();
@@ -28,6 +30,16 @@ const MyApplications = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleViewJob = (application) => {
+    setSelectedApplication(application);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setTimeout(() => setSelectedApplication(null), 300); // Clear after animation
   };
 
   const filteredApplications = filter === 'all'
@@ -164,10 +176,132 @@ const MyApplications = () => {
         ) : (
           <div className="space-y-6">
             {filteredApplications.map((application) => (
-              <ApplicationCard key={application._id} application={application} />
+              <ApplicationCard
+                key={application._id}
+                application={application}
+                onViewJob={handleViewJob}
+              />
             ))}
           </div>
         )}
+
+        {/* Job Details Modal */}
+        <Modal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          title="Job Details"
+          size="lg"
+        >
+          {selectedApplication && (
+            <div className="space-y-8">
+              {/* Header with Company Info */}
+              <div className="flex flex-col md:flex-row gap-6 pb-6 border-b border-gray-100">
+                <div className="flex-shrink-0">
+                  {selectedApplication.job?.companyInfo?.logo ? (
+                    <img
+                      src={selectedApplication.job.companyInfo.logo}
+                      alt={selectedApplication.job.companyInfo.companyName}
+                      className="h-20 w-20 rounded-2xl object-cover border border-gray-100 shadow-sm"
+                    />
+                  ) : (
+                    <div className="h-20 w-20 rounded-2xl bg-gray-50 flex items-center justify-center border border-gray-100 text-gray-400">
+                      <FiBriefcase className="h-10 w-10" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-2xl font-black text-gray-900 mb-2 leading-tight">{selectedApplication.job?.title}</h2>
+                  <div className="flex flex-wrap items-center gap-3 text-gray-600">
+                    <span className="font-bold text-gray-900">{selectedApplication.job?.companyInfo?.companyName}</span>
+                    {selectedApplication.job?.companyInfo?.tagline && (
+                      <>
+                        <span className="text-gray-300">•</span>
+                        <span className="text-sm">{selectedApplication.job.companyInfo.tagline}</span>
+                      </>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 mt-3 text-sm text-gray-500">
+                    <FiClock className="h-4 w-4" />
+                    <span>Posted on {new Date(selectedApplication.job?.createdAt).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Key Stats Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                  <div className="flex items-center gap-2 text-gray-500 mb-1">
+                    <FiDollarSign className="h-4 w-4" />
+                    <span className="text-xs font-bold uppercase tracking-wider">Budget</span>
+                  </div>
+                  <p className="text-lg font-black text-gray-900">${selectedApplication.job?.salary}</p>
+                  <p className="text-xs text-gray-500 capitalize">{selectedApplication.job?.salaryType}</p>
+                </div>
+                <div className="p-4 bg-primary-50 rounded-2xl border border-primary-100">
+                  <div className="flex items-center gap-2 text-primary-600 mb-1">
+                    <FiDollarSign className="h-4 w-4" />
+                    <span className="text-xs font-bold uppercase tracking-wider">Your Bid</span>
+                  </div>
+                  <p className="text-lg font-black text-primary-700">${selectedApplication.proposedRate}</p>
+                </div>
+                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                  <div className="flex items-center gap-2 text-gray-500 mb-1">
+                    <FiClock className="h-4 w-4" />
+                    <span className="text-xs font-bold uppercase tracking-wider">Duration</span>
+                  </div>
+                  <p className="text-lg font-bold text-gray-900">{selectedApplication.job?.duration || 'N/A'}</p>
+                </div>
+                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                  <div className="flex items-center gap-2 text-gray-500 mb-1">
+                    <FiBriefcase className="h-4 w-4" />
+                    <span className="text-xs font-bold uppercase tracking-wider">Level</span>
+                  </div>
+                  <p className="text-lg font-bold text-gray-900 capitalize">{selectedApplication.job?.experienceLevel}</p>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                  <FiFileText className="h-5 w-5 text-gray-400" />
+                  Job Description
+                </h3>
+                <div className="prose prose-sm max-w-none text-gray-600 bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
+                  <p className="whitespace-pre-line leading-relaxed">{selectedApplication.job?.description}</p>
+                </div>
+              </div>
+
+              {/* Skills & Tags */}
+              {selectedApplication.job?.tags && selectedApplication.job.tags.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <FiAward className="h-5 w-5 text-gray-400" />
+                    Skills & Tags
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedApplication.job.tags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="px-4 py-2 text-sm font-semibold rounded-xl bg-white text-gray-700 border border-gray-200 shadow-sm"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Your Proposal Section */}
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-2xl border border-blue-100">
+                <h3 className="text-lg font-bold text-blue-900 mb-3 flex items-center gap-2">
+                  <FiFileText className="h-5 w-5" />
+                  Your Proposal
+                </h3>
+                <p className="text-blue-800 whitespace-pre-wrap leading-relaxed">{selectedApplication.proposal}</p>
+              </div>
+            </div>
+          )}
+        </Modal>
       </div>
     </DashboardLayout>
   );
