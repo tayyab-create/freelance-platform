@@ -3,7 +3,7 @@ import { workerAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { FiBriefcase, FiClock, FiCheckCircle, FiX, FiAlertCircle, FiFileText, FiAward } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import { PageHeader, EmptyState, SkeletonLoader, StatCard } from '../../components/shared';
+import { PageHeader, EmptyState, SkeletonLoader } from '../../components/shared';
 import ApplicationCard from '../../components/shared/ApplicationCard';
 
 const MyApplications = () => {
@@ -82,32 +82,39 @@ const MyApplications = () => {
           </div>
         )}
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <StatCard
-            title="Total"
-            value={counts.all}
-            icon={FiBriefcase}
-            gradient="from-blue-500 to-cyan-500"
-          />
-          <StatCard
-            title="Pending"
-            value={counts.pending}
-            icon={FiClock}
-            gradient="from-yellow-500 to-orange-500"
-          />
-          <StatCard
-            title="Accepted"
-            value={counts.accepted}
-            icon={FiCheckCircle}
-            gradient="from-green-500 to-emerald-500"
-          />
-          <StatCard
-            title="Rejected"
-            value={counts.rejected}
-            icon={FiX}
-            gradient="from-red-500 to-pink-500"
-          />
+        {/* Simple Stats Row */}
+        <div className="flex flex-wrap gap-4 items-center justify-between bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+          <div className="flex gap-6">
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                <FiBriefcase className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Total</p>
+                <p className="text-lg font-bold text-gray-900">{counts.all}</p>
+              </div>
+            </div>
+            <div className="w-px bg-gray-100 h-10"></div>
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-yellow-50 text-yellow-600 rounded-lg">
+                <FiClock className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Pending</p>
+                <p className="text-lg font-bold text-gray-900">{counts.pending}</p>
+              </div>
+            </div>
+            <div className="w-px bg-gray-100 h-10 hidden sm:block"></div>
+            <div className="flex items-center gap-2 hidden sm:flex">
+              <div className="p-2 bg-green-50 text-green-600 rounded-lg">
+                <FiCheckCircle className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Accepted</p>
+                <p className="text-lg font-bold text-gray-900">{counts.accepted}</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Filter Tabs */}
