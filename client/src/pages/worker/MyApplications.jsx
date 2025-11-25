@@ -3,13 +3,14 @@ import { Link } from 'react-router-dom';
 import { workerAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
-import { FiDollarSign, FiClock, FiBriefcase, FiEye, FiCheckCircle, FiFileText, FiAward } from 'react-icons/fi';
+import { FiDollarSign, FiClock, FiBriefcase, FiEye, FiCheckCircle, FiFileText, FiAward, FiAlertCircle, FiX } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 
 const MyApplications = () => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [deletedCount, setDeletedCount] = useState(0);
 
   useEffect(() => {
     fetchApplications();
@@ -19,6 +20,9 @@ const MyApplications = () => {
     try {
       const response = await workerAPI.getMyApplications();
       setApplications(response.data.data);
+      if (response.data.deletedCount) {
+        setDeletedCount(response.data.deletedCount);
+      }
     } catch (error) {
       toast.error('Failed to load applications');
     } finally {
@@ -74,6 +78,28 @@ const MyApplications = () => {
           </div>
         </div>
 
+        {/* Deleted Jobs Notification */}
+        {deletedCount > 0 && (
+          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-xl flex items-center justify-between shadow-sm animate-fade-in">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <FiAlertCircle className="h-5 w-5 text-red-500" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-red-700">
+                  <span className="font-bold">{deletedCount} application(s)</span> were removed because the job postings were deleted by the admin or company.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setDeletedCount(0)}
+              className="ml-auto pl-3 text-red-500 hover:text-red-700 transition-colors"
+            >
+              <FiX className="h-5 w-5" />
+            </button>
+          </div>
+        )}
+
         {/* Filter Tabs - Premium */}
         <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/60 p-6">
           <div className="flex gap-3 overflow-x-auto">
@@ -87,8 +113,8 @@ const MyApplications = () => {
                 key={key}
                 onClick={() => setFilter(key)}
                 className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${filter === key
-                    ? 'bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg shadow-primary-500/30 scale-105'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
+                  ? 'bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg shadow-primary-500/30 scale-105'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
                   }`}
               >
                 <Icon className="h-5 w-5" />

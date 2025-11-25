@@ -289,10 +289,12 @@ exports.getMyApplications = async (req, res) => {
 
     // Filter out applications where job is null (deleted jobs)
     const validApplications = applicationsWithCompanyInfo.filter(app => app.job);
+    const deletedCount = applicationsWithCompanyInfo.length - validApplications.length;
 
     res.status(200).json({
       success: true,
       count: validApplications.length,
+      deletedCount: deletedCount,
       data: validApplications
     });
   } catch (error) {
@@ -405,10 +407,23 @@ exports.getDashboard = async (req, res) => {
       });
     }
 
-    // Basic counts
-    const totalApplications = await Application.countDocuments({ worker: req.user._id });
-    const pendingApplications = await Application.countDocuments({ worker: req.user._id, status: 'pending' });
-    const acceptedApplications = await Application.countDocuments({ worker: req.user._id, status: 'accepted' });
+    // Helper function to count applications with valid jobs
+    const countValidApplications = async (query = {}) => {
+      const result = await Application.aggregate([
+        { $match: { worker: req.user._id, ...query } },
+        { $lookup: { from: 'jobs', localField: 'job', foreignField: '_id', as: 'jobData' } },
+        { $match: { 'jobData.0': { $exists: true } } },
+        { $count: 'count' }
+      ]);
+      return result.length > 0 ? result[0].count : 0;
+    };
+
+    // Basic counts (Filtered for deleted jobs)
+    const totalApplications = await countValidApplications();
+    const pendingApplications = await countValidApplications({ status: 'pending' });
+    const acceptedApplications = await countValidApplications({ status: 'accepted' });
+
+    // For jobs, we query the Job model directly, so deleted jobs are naturally excluded
     const activeJobs = await Job.countDocuments({ assignedWorker: req.user._id, status: { $in: ['assigned', 'in-progress'] } });
     const completedJobs = await Job.countDocuments({ assignedWorker: req.user._id, status: 'completed' });
 
@@ -416,8 +431,13 @@ exports.getDashboard = async (req, res) => {
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
+    // We need to filter trends too, but for simplicity and performance in aggregation, 
+    // we might accept that historical trend data includes deleted jobs, 
+    // OR we can add the lookup to the trend aggregation. Let's add the lookup.
     const applicationsTrend = await Application.aggregate([
       { $match: { worker: req.user._id, createdAt: { $gte: sixMonthsAgo } } },
+      { $lookup: { from: 'jobs', localField: 'job', foreignField: '_id', as: 'jobData' } },
+      { $match: { 'jobData.0': { $exists: true } } }, // Filter out deleted jobs
       {
         $group: {
           _id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } },
@@ -459,7 +479,7 @@ exports.getDashboard = async (req, res) => {
 
     // Recent Activities
     const recentActivities = [];
-    const recentApps = await Application.find({ worker: req.user._id }).sort('-createdAt').limit(5).populate('job', 'title');
+    const recentApps = await Application.find({ worker: req.user._id }).sort('-createdAt').limit(10).populate('job', 'title');
     recentApps.forEach(app => {
       if (app.job) recentActivities.push({ id: app._id, action: `Applied to ${app.job.title}`, time: app.createdAt, type: 'application' });
     });
@@ -507,24 +527,26 @@ exports.getDashboard = async (req, res) => {
       { id: 4, title: 'Century Club', description: 'Earn $10,000', unlocked: totalEarnings >= 10000, icon: '💰' }
     ];
 
-    // ===== TREND CALCULATIONS (ADD THESE 4 TREND CALCULATIONS) =====
+    // ===== TREND CALCULATIONS =====
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     const sixtyDaysAgo = new Date();
     sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
 
-    // 1. Total Applications Trend
-    const appsLast30Days = await Application.countDocuments({ worker: req.user._id, createdAt: { $gte: thirtyDaysAgo } });
-    const appsPrevious30Days = await Application.countDocuments({ worker: req.user._id, createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo } });
+    // 1. Total Applications Trend (Filtered)
+    const countAppsTrend = async (startDate, endDate) => {
+      const query = { createdAt: { $gte: startDate } };
+      if (endDate) query.createdAt.$lt = endDate;
+      return await countValidApplications(query);
+    };
+
+    const appsLast30Days = await countAppsTrend(thirtyDaysAgo);
+    const appsPrevious30Days = await countAppsTrend(sixtyDaysAgo, thirtyDaysAgo);
     const appsTrend = appsPrevious30Days > 0 ? Math.round(((appsLast30Days - appsPrevious30Days) / appsPrevious30Days) * 100) : (appsLast30Days > 0 ? 100 : 0);
 
-    // 2. Pending Applications Trend
+    // 2. Pending Applications Trend (Filtered)
     const pendingNow = pendingApplications;
-    const pending30DaysAgo = await Application.countDocuments({
-      worker: req.user._id,
-      status: 'pending',
-      createdAt: { $lte: thirtyDaysAgo }
-    });
+    const pending30DaysAgo = await countValidApplications({ status: 'pending', createdAt: { $lte: thirtyDaysAgo } });
     const pendingTrend = pending30DaysAgo > 0 ? Math.round(((pendingNow - pending30DaysAgo) / pending30DaysAgo) * 100) : (pendingNow > 0 ? 100 : 0);
 
     // 3. Active Jobs Trend
