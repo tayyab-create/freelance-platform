@@ -172,12 +172,22 @@ const JobDetails = () => {
 
                     {/* Action Buttons */}
                     <div className="flex flex-col sm:flex-row gap-4">
-                        <button
-                            onClick={() => setShowApplyModal(true)}
-                            className="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg shadow-primary-500/30 transition-all duration-200 transform hover:-translate-y-0.5"
-                        >
-                            Apply for this Job
-                        </button>
+                        {job.applicationStatus && job.applicationStatus !== 'rejected' ? (
+                            <button
+                                disabled
+                                className="flex-1 bg-gray-100 text-gray-500 font-bold py-4 px-8 rounded-xl border border-gray-200 cursor-not-allowed flex items-center justify-center gap-2"
+                            >
+                                <FiCheckCircle className="h-5 w-5" />
+                                Application {job.applicationStatus.charAt(0).toUpperCase() + job.applicationStatus.slice(1)}
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => setShowApplyModal(true)}
+                                className="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg shadow-primary-500/30 transition-all duration-200 transform hover:-translate-y-0.5"
+                            >
+                                Apply for this Job
+                            </button>
+                        )}
                         <button
                             onClick={handleStartConversation}
                             className="flex-1 bg-white hover:bg-gray-50 text-gray-700 font-bold py-4 px-8 rounded-xl border border-gray-200 shadow-sm transition-all duration-200 flex items-center justify-center gap-2"

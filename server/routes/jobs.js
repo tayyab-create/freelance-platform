@@ -1,7 +1,25 @@
 const express = require('express');
 const router = express.Router();
-const { Job, CompanyProfile } = require('../models');
+const { Job, CompanyProfile, Application, User } = require('../models');
 const { protect, checkApproval } = require('../middleware/auth');
+const jwt = require('jsonwebtoken');
+
+// Helper to get user from token (optional auth)
+const getUserFromToken = async (req) => {
+  let token;
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+
+  if (!token) return null;
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    return await User.findById(decoded.id).select('-password');
+  } catch (error) {
+    return null;
+  }
+};
 
 // @desc    Get all jobs with filters and search
 // @route   GET /api/jobs
@@ -20,6 +38,23 @@ router.get('/', async (req, res) => {
     } = req.query;
 
     let query = { status: 'posted', isActive: true };
+
+    // Check for authenticated user to filter applied jobs
+    const user = await getUserFromToken(req);
+    if (user && user.role === 'worker') {
+      // Find applications where status is NOT rejected (i.e., pending, accepted)
+      // If rejected, user can see the job again to re-apply
+      const applications = await Application.find({
+        worker: user._id,
+        status: { $ne: 'rejected' }
+      }).select('job');
+
+      const appliedJobIds = applications.map(app => app.job);
+
+      if (appliedJobIds.length > 0) {
+        query._id = { $nin: appliedJobIds };
+      }
+    }
 
     // Filter by category
     if (category) {
@@ -45,11 +80,19 @@ router.get('/', async (req, res) => {
 
     // Search in title, description, and tags using Regex for partial matching
     if (search) {
-      query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-        { tags: { $regex: search, $options: 'i' } }
+      const searchRegex = { $regex: search, $options: 'i' };
+      const searchQuery = [
+        { title: searchRegex },
+        { description: searchRegex },
+        { tags: searchRegex }
       ];
+
+      // If we already have an _id filter (from applied jobs), we need to be careful with $or
+      // But $or is top-level usually. 
+      // If query._id exists, we can't just overwrite query.$or if we want AND logic.
+      // Actually, Mongoose/MongoDB handles top-level implicit AND.
+      // So query.$or = [...] works alongside query._id = ...
+      query.$or = searchQuery;
     }
 
     const skip = (page - 1) * limit;
@@ -120,6 +163,23 @@ router.get('/:id', async (req, res) => {
     }
 
     const jobObj = job.toObject();
+
+    // Check for authenticated user to get application status
+    const user = await getUserFromToken(req);
+    console.log('Debug - Job Details - User:', user ? `${user._id} (${user.role})` : 'No user');
+
+    if (user && user.role === 'worker') {
+      const application = await Application.findOne({
+        job: job._id,
+        worker: user._id
+      }).sort('-createdAt'); // Get most recent if multiple (though unique index prevents it usually)
+
+      console.log('Debug - Job Details - Application found:', application ? application.status : 'None');
+
+      if (application) {
+        jobObj.applicationStatus = application.status;
+      }
+    }
 
     // Get company profile separately
     if (jobObj.company) {
