@@ -285,7 +285,7 @@ const WorkerProfile = () => {
                                     />
                                     {profile?.availability && (
                                         <div className={`absolute bottom-3 right-3 h-6 w-6 rounded-full border-4 border-white shadow-lg ${profile.availability === 'available' ? 'bg-green-500' :
-                                                profile.availability === 'busy' ? 'bg-yellow-500' : 'bg-red-500'
+                                            profile.availability === 'busy' ? 'bg-yellow-500' : 'bg-red-500'
                                             }`}></div>
                                     )}
                                 </div>
@@ -408,8 +408,8 @@ const WorkerProfile = () => {
                             ) : (
                                 <>
                                     <div className={`p-4 rounded-xl shadow-lg ${profile?.availability === 'available' ? 'bg-gradient-to-br from-green-500 to-emerald-600' :
-                                            profile?.availability === 'busy' ? 'bg-gradient-to-br from-yellow-500 to-orange-600' :
-                                                'bg-gradient-to-br from-red-500 to-pink-600'
+                                        profile?.availability === 'busy' ? 'bg-gradient-to-br from-yellow-500 to-orange-600' :
+                                            'bg-gradient-to-br from-red-500 to-pink-600'
                                         }`}>
                                         <FiCheckCircle className="h-8 w-8 text-white" />
                                     </div>
