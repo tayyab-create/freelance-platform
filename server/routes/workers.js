@@ -1,21 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const {
-  getProfile,
-  updateProfile,
-  addCertification,
-  addExperience,
-  updateExperience,
-  deleteExperience,
-  updateCertification,
-  deleteCertification,
-  applyForJob,
-  getMyApplications,
-  getAssignedJobs,
-  submitWork,
-  getDashboard,
-  getMyReviews
-} = require('../controllers/workerController');
+
+// Import controllers from their new locations
+const profileController = require('../controllers/worker/profileController');
+const applicationController = require('../controllers/worker/applicationController');
+const jobController = require('../controllers/worker/jobController');
+const dashboardController = require('../controllers/worker/dashboardController');
+const reviewController = require('../controllers/worker/reviewController');
+
 const { protect, authorize, checkApproval } = require('../middleware/auth');
 
 // All routes are protected and only accessible by workers
@@ -23,25 +15,27 @@ router.use(protect);
 router.use(authorize('worker'));
 
 // Profile routes
-router.get('/profile', getProfile);
-router.put('/profile', updateProfile);
-router.post('/profile/certifications', checkApproval, addCertification);
-router.put('/profile/certifications/:certId', checkApproval, updateCertification);
-router.delete('/profile/certifications/:certId', checkApproval, deleteCertification);
-router.post('/profile/experience', checkApproval, addExperience);
-router.put('/profile/experience/:expId', checkApproval, updateExperience);
-router.delete('/profile/experience/:expId', checkApproval, deleteExperience);
+router.get('/profile', profileController.getProfile);
+router.put('/profile', profileController.updateProfile);
+router.post('/profile/certifications', checkApproval, profileController.addCertification);
+router.put('/profile/certifications/:certId', checkApproval, profileController.updateCertification);
+router.delete('/profile/certifications/:certId', checkApproval, profileController.deleteCertification);
+router.post('/profile/experience', checkApproval, profileController.addExperience);
+router.put('/profile/experience/:expId', checkApproval, profileController.updateExperience);
+router.delete('/profile/experience/:expId', checkApproval, profileController.deleteExperience);
 
-// Job-related routes
-router.post('/apply/:jobId', checkApproval, applyForJob);
-router.get('/applications', getMyApplications);
-router.get('/jobs/assigned', checkApproval, getAssignedJobs);
-router.post('/submit/:jobId', checkApproval, submitWork);
+// Application routes
+router.post('/apply/:jobId', checkApproval, applicationController.applyForJob);
+router.get('/applications', applicationController.getMyApplications);
+
+// Job routes
+router.get('/jobs/assigned', checkApproval, jobController.getAssignedJobs);
+router.post('/submit/:jobId', checkApproval, jobController.submitWork);
 
 // Review routes
-router.get('/reviews', getMyReviews);
+router.get('/reviews', reviewController.getMyReviews);
 
 // Dashboard
-router.get('/dashboard', getDashboard);
+router.get('/dashboard', dashboardController.getDashboard);
 
 module.exports = router;
