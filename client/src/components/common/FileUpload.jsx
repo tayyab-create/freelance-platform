@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { FiUpload, FiX, FiImage } from 'react-icons/fi';
+import { FiUpload, FiX, FiImage, FiFile } from 'react-icons/fi';
 import Button from './Button';
+import ProgressBar from './ProgressBar';
 
 const FileUpload = ({
   onFileSelect,
@@ -9,61 +10,144 @@ const FileUpload = ({
   preview = false,
   currentImage = null,
   label = "Upload File",
-  children
+  children,
+  showProgress = false,
+  uploadProgress = 0,
+  isUploading = false,
+  multiple = false,
+  helperText,
+  disabled = false,
 }) => {
   const fileInputRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const [previewUrl, setPreviewUrl] = useState(currentImage);
   const [error, setError] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     setPreviewUrl(currentImage);
   }, [currentImage]);
 
+  const validateFile = (file) => {
+    if (file.size > maxSize * 1024 * 1024) {
+      return `File size should not exceed ${maxSize}MB`;
+    }
+    return null;
+  };
+
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
+    const files = Array.from(e.target.files);
     setError('');
 
-    if (!file) return;
+    if (!files.length) return;
 
-    // Check file size
-    if (file.size > maxSize * 1024 * 1024) {
-      setError(`File size should not exceed ${maxSize}MB`);
-      return;
-    }
+    if (multiple) {
+      const validFiles = [];
+      for (const file of files) {
+        const fileError = validateFile(file);
+        if (fileError) {
+          setError(fileError);
+          return;
+        }
+        validFiles.push(file);
+      }
+      setSelectedFiles(validFiles);
+      if (onFileSelect) {
+        onFileSelect(validFiles);
+      }
+    } else {
+      const file = files[0];
+      const fileError = validateFile(file);
+      if (fileError) {
+        setError(fileError);
+        return;
+      }
 
-    setSelectedFile(file);
+      setSelectedFile(file);
 
-    // Create preview for images
-    if (preview && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
+      // Create preview for images
+      if (preview && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setPreviewUrl(reader.result);
+        };
+        reader.readAsDataURL(file);
+      }
 
-    // Call parent callback
-    if (onFileSelect) {
-      onFileSelect(file);
+      // Call parent callback
+      if (onFileSelect) {
+        onFileSelect(file);
+      }
     }
   };
 
-  const handleRemove = (e) => {
-    if (e) e.stopPropagation(); // Prevent triggering click if inside the trigger area
-    setSelectedFile(null);
-    setPreviewUrl(currentImage);
-    setError('');
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-    if (onFileSelect) {
-      onFileSelect(null);
+  const handleRemove = (e, index = null) => {
+    if (e) e.stopPropagation();
+
+    if (multiple && index !== null) {
+      const newFiles = selectedFiles.filter((_, i) => i !== index);
+      setSelectedFiles(newFiles);
+      if (onFileSelect) {
+        onFileSelect(newFiles);
+      }
+    } else {
+      setSelectedFile(null);
+      setSelectedFiles([]);
+      setPreviewUrl(currentImage);
+      setError('');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      if (onFileSelect) {
+        onFileSelect(null);
+      }
     }
   };
 
   const handleClick = () => {
-    fileInputRef.current?.click();
+    if (!disabled) {
+      fileInputRef.current?.click();
+    }
+  };
+
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!disabled) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    if (disabled) return;
+
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length) {
+      const event = { target: { files } };
+      handleFileChange(event);
+    }
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
   };
 
   return (
@@ -75,11 +159,18 @@ const FileUpload = ({
         type="file"
         accept={accept}
         onChange={handleFileChange}
+        multiple={multiple}
+        disabled={disabled}
         className="hidden"
       />
 
       {children ? (
-        <div onClick={handleClick} className="cursor-pointer inline-block relative group">
+        <div
+          onClick={handleClick}
+          className={`cursor-pointer inline-block relative group ${
+            disabled ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
+        >
           {children}
         </div>
       ) : (
@@ -91,50 +182,116 @@ const FileUpload = ({
                 alt="Preview"
                 className="h-32 w-32 object-cover rounded-lg border-2 border-gray-300"
               />
-              {selectedFile && (
+              {selectedFile && !disabled && (
                 <button
                   type="button"
                   onClick={handleRemove}
-                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
                 >
                   <FiX className="h-4 w-4" />
                 </button>
               )}
             </div>
-          ) : null}
-
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="secondary"
-              icon={preview ? FiImage : FiUpload}
+          ) : (
+            <div
               onClick={handleClick}
+              onDragEnter={handleDragEnter}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                isDragging
+                  ? 'border-primary-500 bg-primary-50'
+                  : 'border-gray-300 hover:border-primary-400'
+              } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
             >
-              {selectedFile ? 'Change File' : 'Choose File'}
-            </Button>
+              <FiUpload className="mx-auto h-12 w-12 text-gray-400 mb-3" />
+              <p className="text-sm text-gray-600 mb-1">
+                {isDragging
+                  ? 'Drop files here'
+                  : 'Click to upload or drag and drop'}
+              </p>
+              <p className="text-xs text-gray-500">
+                {accept === 'image/*' ? 'Images only' : 'Any file type'} (max {maxSize}MB)
+              </p>
+            </div>
+          )}
 
-            {selectedFile && !preview && (
-              <Button
-                type="button"
-                variant="danger"
-                icon={FiX}
-                onClick={handleRemove}
-              >
-                Remove
-              </Button>
-            )}
-          </div>
+          {multiple && selectedFiles.length > 0 && (
+            <div className="space-y-2">
+              {selectedFiles.map((file, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
+                >
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <FiFile className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {file.name}
+                      </p>
+                      <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
+                    </div>
+                  </div>
+                  {!disabled && (
+                    <button
+                      type="button"
+                      onClick={(e) => handleRemove(e, index)}
+                      className="ml-2 text-red-500 hover:text-red-700 transition-colors"
+                    >
+                      <FiX className="h-5 w-5" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
 
-          {selectedFile && !preview && (
-            <p className="text-sm text-gray-600">
-              Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(2)} KB)
-            </p>
+          {!multiple && selectedFile && !preview && (
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <FiFile className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {selectedFile.name}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {formatFileSize(selectedFile.size)}
+                  </p>
+                </div>
+              </div>
+              {!disabled && (
+                <button
+                  type="button"
+                  onClick={handleRemove}
+                  className="ml-2 text-red-500 hover:text-red-700 transition-colors"
+                >
+                  <FiX className="h-5 w-5" />
+                </button>
+              )}
+            </div>
+          )}
+
+          {showProgress && isUploading && (
+            <ProgressBar
+              progress={uploadProgress}
+              label="Uploading"
+              color="primary"
+              size="md"
+            />
           )}
         </>
       )}
 
       {error && (
-        <p className="text-sm text-red-600">{error}</p>
+        <p className="text-sm text-red-600 flex items-start gap-1">
+          <span className="flex-shrink-0 mt-0.5">⚠️</span>
+          <span>{error}</span>
+        </p>
+      )}
+
+      {!error && helperText && (
+        <p className="text-sm text-gray-500">{helperText}</p>
       )}
     </div>
   );

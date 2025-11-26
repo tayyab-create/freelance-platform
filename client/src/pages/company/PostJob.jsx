@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { companyAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
@@ -15,51 +15,139 @@ import {
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { Select, PageHeader } from '../../components/shared';
+import Input from '../../components/common/Input';
+import Textarea from '../../components/common/Textarea';
+import AutoSaveIndicator from '../../components/common/AutoSaveIndicator';
+import UnsavedChangesModal from '../../components/common/UnsavedChangesModal';
+import { useFormValidation } from '../../hooks/useFormValidation';
+import { useAutoSave } from '../../hooks/useAutoSave';
+import { useUnsavedChangesWarning } from '../../hooks/useUnsavedChanges';
+import { validationRules, ValidationSchema } from '../../utils/validation';
 
 const PostJob = () => {
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
-    const [formData, setFormData] = useState({
-        title: '',
-        description: '',
-        category: '',
-        tags: '',
-        salary: '',
-        salaryType: 'fixed',
-        duration: '',
-        experienceLevel: 'intermediate',
-        requirements: '',
-        deadline: '',
+    const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+    const [pendingNavigation, setPendingNavigation] = useState(null);
+
+    // Validation schema
+    const validationSchema = new ValidationSchema()
+        .field('title', validationRules.required, validationRules.minLength(10), validationRules.maxLength(200))
+        .field('description', validationRules.required, validationRules.minLength(50), validationRules.maxLength(5000))
+        .field('category', validationRules.required)
+        .field('salary', validationRules.required, validationRules.min(1))
+        .field('duration', validationRules.required, validationRules.minLength(2))
+        .build();
+
+    // Form validation hook
+    const {
+        values: formData,
+        errors,
+        touched,
+        isDirty,
+        isSubmitting,
+        isValid,
+        handleChange,
+        handleBlur,
+        handleSubmit,
+        setFieldValue,
+        resetForm,
+    } = useFormValidation(
+        {
+            title: '',
+            description: '',
+            category: '',
+            tags: '',
+            salary: '',
+            salaryType: 'fixed',
+            duration: '',
+            experienceLevel: 'intermediate',
+            requirements: '',
+            deadline: '',
+        },
+        validationSchema,
+        { validateOnChange: true, validateOnBlur: true }
+    );
+
+    // Auto-save hook
+    const {
+        isSaving,
+        lastSaved,
+        hasUnsavedChanges,
+        hasSavedData,
+        restoreFromStorage,
+        clearSaved,
+    } = useAutoSave('postJobDraft', formData, {
+        enabled: true,
+        debounceDelay: 2000,
+        exclude: [],
     });
 
-    const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
-    };
+    // Unsaved changes warning
+    useUnsavedChangesWarning(
+        isDirty && !isSubmitting,
+        'You have unsaved changes. Are you sure you want to leave?'
+    );
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
+    // Restore draft on mount
+    useEffect(() => {
+        if (hasSavedData) {
+            const restored = restoreFromStorage();
+            if (restored) {
+                const shouldRestore = window.confirm(
+                    `We found a draft from ${new Date(restored.timestamp).toLocaleString()}. Would you like to restore it?`
+                );
+                if (shouldRestore) {
+                    Object.keys(restored.data).forEach((key) => {
+                        setFieldValue(key, restored.data[key]);
+                    });
+                    toast.success('Draft restored successfully!');
+                } else {
+                    clearSaved();
+                }
+            }
+        }
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+    const onSubmit = async (values) => {
         try {
             // Convert tags and requirements to arrays
             const jobData = {
-                ...formData,
-                tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
-                requirements: formData.requirements.split('\n').filter(req => req.trim()),
-                salary: Number(formData.salary),
+                ...values,
+                tags: values.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+                requirements: values.requirements.split('\n').filter(req => req.trim()),
+                salary: Number(values.salary),
             };
 
             await companyAPI.postJob(jobData);
+            clearSaved(); // Clear draft after successful submission
             toast.success('Job posted successfully!');
             navigate('/company/jobs');
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to post job');
-        } finally {
-            setLoading(false);
+            throw error;
         }
+    };
+
+    const handleCancel = () => {
+        if (isDirty) {
+            setPendingNavigation('/company/jobs');
+            setShowUnsavedModal(true);
+        } else {
+            navigate('/company/jobs');
+        }
+    };
+
+    const confirmLeave = () => {
+        setShowUnsavedModal(false);
+        if (pendingNavigation) {
+            clearSaved();
+            navigate(pendingNavigation);
+        }
+    };
+
+    const cancelLeave = () => {
+        setShowUnsavedModal(false);
+        setPendingNavigation(null);
     };
 
     return (
@@ -75,19 +163,26 @@ const PostJob = () => {
                         { label: 'Post Job' }
                     ]}
                     actions={
-                        <button
-                            onClick={() => navigate('/company/jobs')}
-                            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 font-semibold transition-colors group"
-                        >
-                            <FiArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                            Back to Jobs
-                        </button>
+                        <div className="flex items-center gap-4">
+                            <AutoSaveIndicator
+                                isSaving={isSaving}
+                                lastSaved={lastSaved}
+                                hasUnsavedChanges={hasUnsavedChanges}
+                            />
+                            <button
+                                onClick={() => navigate('/company/jobs')}
+                                className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 font-semibold transition-colors group"
+                            >
+                                <FiArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                                Back to Jobs
+                            </button>
+                        </div>
                     }
                 />
 
                 <div className="max-w-4xl mx-auto">
                     {/* Form */}
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         {/* Job Title */}
                         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
                             <div className="flex items-center gap-3 mb-4">
@@ -96,14 +191,18 @@ const PostJob = () => {
                                 </div>
                                 <h2 className="text-xl font-bold text-gray-900">Job Title</h2>
                             </div>
-                            <input
-                                type="text"
+                            <Input
                                 name="title"
                                 value={formData.title}
                                 onChange={handleChange}
+                                onBlur={handleBlur}
+                                error={touched.title ? errors.title : ''}
                                 placeholder="e.g., Full Stack Developer, UI/UX Designer"
                                 required
-                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all outline-none text-gray-700 placeholder:text-gray-400"
+                                maxLength={200}
+                                showCharacterCount
+                                helperText="Choose a clear, descriptive title that highlights the role"
+                                className="mb-0"
                             />
                         </div>
 
@@ -115,14 +214,19 @@ const PostJob = () => {
                                 </div>
                                 <h2 className="text-xl font-bold text-gray-900">Job Description</h2>
                             </div>
-                            <textarea
+                            <Textarea
                                 name="description"
                                 value={formData.description}
                                 onChange={handleChange}
+                                onBlur={handleBlur}
+                                error={touched.description ? errors.description : ''}
                                 placeholder="Describe the job, responsibilities, and what you're looking for in detail..."
-                                rows="6"
+                                rows={6}
                                 required
-                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all outline-none resize-none text-gray-700 placeholder:text-gray-400"
+                                maxLength={5000}
+                                showCharacterCount
+                                helperText="Provide a detailed overview to attract qualified candidates"
+                                className="mb-0"
                             />
                         </div>
 
@@ -151,6 +255,9 @@ const PostJob = () => {
                                         { value: 'Data Science', label: 'Data Science' }
                                     ]}
                                 />
+                                {touched.category && errors.category && (
+                                    <p className="mt-2 text-sm text-red-600">{errors.category}</p>
+                                )}
                             </div>
 
                             <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
@@ -183,15 +290,15 @@ const PostJob = () => {
                                 </div>
                                 <h2 className="text-xl font-bold text-gray-900">Skills & Tags</h2>
                             </div>
-                            <input
-                                type="text"
+                            <Input
                                 name="tags"
                                 value={formData.tags}
                                 onChange={handleChange}
+                                onBlur={handleBlur}
                                 placeholder="React, Node.js, MongoDB, TypeScript (comma-separated)"
-                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all outline-none text-gray-700 placeholder:text-gray-400"
+                                helperText="Separate skills with commas to help candidates find your job"
+                                className="mb-0"
                             />
-                            <p className="text-sm text-gray-500 mt-2">Separate skills with commas</p>
                         </div>
 
                         {/* Budget & Salary Type */}
@@ -203,20 +310,19 @@ const PostJob = () => {
                                     </div>
                                     <h2 className="text-lg font-bold text-gray-900">Budget</h2>
                                 </div>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <FiDollarSign className="w-5 h-5 text-gray-400" />
-                                    </div>
-                                    <input
-                                        type="number"
-                                        name="salary"
-                                        value={formData.salary}
-                                        onChange={handleChange}
-                                        placeholder="5000"
-                                        required
-                                        className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all outline-none text-gray-700"
-                                    />
-                                </div>
+                                <Input
+                                    type="number"
+                                    name="salary"
+                                    value={formData.salary}
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    error={touched.salary ? errors.salary : ''}
+                                    placeholder="5000"
+                                    required
+                                    icon={FiDollarSign}
+                                    helperText={formData.salaryType === 'hourly' ? 'Per hour rate' : 'Total project budget'}
+                                    className="mb-0"
+                                />
                             </div>
 
                             <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
@@ -248,14 +354,17 @@ const PostJob = () => {
                                     </div>
                                     <h2 className="text-lg font-bold text-gray-900">Duration</h2>
                                 </div>
-                                <input
+                                <Input
                                     type="text"
                                     name="duration"
                                     value={formData.duration}
                                     onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    error={touched.duration ? errors.duration : ''}
                                     placeholder="e.g., 2 months, 3 weeks"
                                     required
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all outline-none text-gray-700 placeholder:text-gray-400"
+                                    helperText="Estimated project duration"
+                                    className="mb-0"
                                 />
                             </div>
 
@@ -266,12 +375,14 @@ const PostJob = () => {
                                     </div>
                                     <h2 className="text-lg font-bold text-gray-900">Deadline</h2>
                                 </div>
-                                <input
+                                <Input
                                     type="date"
                                     name="deadline"
                                     value={formData.deadline}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all outline-none text-gray-700 bg-white"
+                                    onBlur={handleBlur}
+                                    helperText="Application deadline (optional)"
+                                    className="mb-0"
                                 />
                             </div>
                         </div>
@@ -284,25 +395,27 @@ const PostJob = () => {
                                 </div>
                                 <h2 className="text-xl font-bold text-gray-900">Requirements</h2>
                             </div>
-                            <textarea
+                            <Textarea
                                 name="requirements"
                                 value={formData.requirements}
                                 onChange={handleChange}
+                                onBlur={handleBlur}
                                 placeholder="3+ years of experience&#10;Strong knowledge of React&#10;Portfolio required&#10;(one requirement per line)"
-                                rows="6"
-                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all outline-none resize-none text-gray-700 placeholder:text-gray-400"
+                                rows={6}
+                                helperText="Enter one requirement per line for clarity"
+                                showCharacterCount
+                                className="mb-0"
                             />
-                            <p className="text-sm text-gray-500 mt-2">Enter one requirement per line</p>
                         </div>
 
                         {/* Action Buttons */}
                         <div className="flex flex-col sm:flex-row gap-4 pt-4">
                             <button
                                 type="submit"
-                                disabled={loading}
+                                disabled={isSubmitting || !isValid}
                                 className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-semibold shadow-lg shadow-primary-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {loading ? (
+                                {isSubmitting ? (
                                     <>
                                         <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
                                         Posting Job...
@@ -316,8 +429,8 @@ const PostJob = () => {
                             </button>
                             <button
                                 type="button"
-                                onClick={() => navigate('/company/jobs')}
-                                disabled={loading}
+                                onClick={handleCancel}
+                                disabled={isSubmitting}
                                 className="flex-1 px-6 py-4 bg-white hover:bg-gray-50 text-gray-700 rounded-xl font-semibold border border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Cancel
@@ -326,6 +439,13 @@ const PostJob = () => {
                     </form>
                 </div>
             </div>
+
+            {/* Unsaved Changes Modal */}
+            <UnsavedChangesModal
+                isOpen={showUnsavedModal}
+                onConfirm={confirmLeave}
+                onCancel={cancelLeave}
+            />
         </DashboardLayout>
     );
 };

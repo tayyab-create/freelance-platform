@@ -1,10 +1,9 @@
 import React from 'react';
-import { FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
+import { FiAlertCircle } from 'react-icons/fi';
 import CharacterCounter from './CharacterCounter';
 
-const Input = ({
+const Textarea = ({
   label,
-  type = 'text',
   name,
   value,
   onChange,
@@ -12,33 +11,38 @@ const Input = ({
   placeholder,
   required = false,
   error,
-  success,
   disabled = false,
-  icon: Icon,
   helperText,
   maxLength,
-  showCharacterCount = false,
-  autoComplete,
+  minLength,
+  rows = 4,
+  showCharacterCount = true,
+  autoResize = false,
   className = '',
-  inputClassName = '',
+  textareaClassName = '',
 }) => {
   const hasError = Boolean(error);
-  const hasSuccess = Boolean(success) && !hasError;
   const currentLength = value ? String(value).length : 0;
 
   const getBorderColor = () => {
     if (hasError) return 'border-red-500 focus:ring-red-500 focus:border-red-500';
-    if (hasSuccess) return 'border-green-500 focus:ring-green-500 focus:border-green-500';
     return 'border-gray-300 focus:ring-primary-500 focus:border-primary-500';
   };
 
-  const StatusIcon = hasError ? FiAlertCircle : hasSuccess ? FiCheckCircle : null;
-  const statusIconColor = hasError ? 'text-red-500' : 'text-green-500';
+  const handleChange = (e) => {
+    if (autoResize) {
+      e.target.style.height = 'auto';
+      e.target.style.height = `${e.target.scrollHeight}px`;
+    }
+    if (onChange) {
+      onChange(e);
+    }
+  };
 
   return (
     <div className={`mb-4 ${className}`}>
       {label && (
-        <label htmlFor={name} className="label flex items-center justify-between">
+        <label htmlFor={name} className="label flex items-start justify-between">
           <span>
             {label} {required && <span className="text-red-500">*</span>}
           </span>
@@ -48,38 +52,27 @@ const Input = ({
         </label>
       )}
       <div className="relative">
-        {Icon && (
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Icon className="h-5 w-5 text-gray-400" />
-          </div>
-        )}
-        <input
-          type={type}
+        <textarea
           id={name}
           name={name}
           value={value}
-          onChange={onChange}
+          onChange={handleChange}
           onBlur={onBlur}
           placeholder={placeholder}
           required={required}
           disabled={disabled}
           maxLength={maxLength}
-          autoComplete={autoComplete}
+          minLength={minLength}
+          rows={rows}
           aria-invalid={hasError}
           aria-describedby={
             hasError ? `${name}-error` : helperText ? `${name}-helper` : undefined
           }
-          className={`input-field ${Icon ? 'pl-10' : ''} ${
-            StatusIcon ? 'pr-10' : ''
-          } ${getBorderColor()} ${
+          className={`input-field resize-none ${getBorderColor()} ${
             disabled ? 'bg-gray-100 cursor-not-allowed opacity-60' : ''
-          } ${inputClassName}`}
+          } ${autoResize ? 'overflow-hidden' : 'overflow-auto'} ${textareaClassName}`}
+          style={autoResize ? { minHeight: `${rows * 24}px` } : {}}
         />
-        {StatusIcon && (
-          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-            <StatusIcon className={`h-5 w-5 ${statusIconColor}`} />
-          </div>
-        )}
       </div>
       {hasError && (
         <p id={`${name}-error`} className="mt-1 text-sm text-red-600 flex items-start gap-1">
@@ -99,4 +92,4 @@ const Input = ({
   );
 };
 
-export default Input;
+export default Textarea;
