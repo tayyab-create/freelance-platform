@@ -13,9 +13,15 @@ const messageSchema = new mongoose.Schema({
   },
   content: {
     type: String,
-    required: [true, 'Message content is required'],
+    required: false, // Changed to false to allow messages with only attachments
     trim: true
   },
+  attachments: [{
+    filename: String,
+    path: String,
+    mimetype: String,
+    size: Number
+  }],
   isRead: {
     type: Boolean,
     default: false

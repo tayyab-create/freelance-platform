@@ -17,7 +17,7 @@ exports.getConversations = async (req, res) => {
     const conversationsWithProfiles = await Promise.all(
       conversations.map(async (conv) => {
         const convObj = conv.toObject();
-        
+
         // Get the other participant (not the current user)
         const otherParticipant = convObj.participants.find(
           p => p._id.toString() !== req.user._id.toString()
@@ -89,7 +89,7 @@ exports.getOrCreateConversation = async (req, res) => {
         participants: [req.user._id, otherUserId],
         job: jobId
       });
-      
+
       conversation = await Conversation.findById(conversation._id)
         .populate('participants', 'email role')
         .populate('job', 'title');
@@ -205,6 +205,7 @@ exports.sendMessage = async (req, res) => {
   try {
     const { conversationId } = req.params;
     const { content } = req.body;
+    const files = req.files;
 
     // Verify user is part of conversation
     const conversation = await Conversation.findOne({
@@ -214,8 +215,6 @@ exports.sendMessage = async (req, res) => {
 
     if (!conversation) {
       return res.status(404).json({
-        success: false,
-        message: 'Conversation not found'
       });
     }
 
@@ -223,7 +222,8 @@ exports.sendMessage = async (req, res) => {
     const message = await Message.create({
       conversation: conversationId,
       sender: req.user._id,
-      content
+      content,
+      attachments
     });
 
     // Update conversation

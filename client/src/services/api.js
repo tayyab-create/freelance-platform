@@ -137,7 +137,12 @@ export const messageAPI = {
     getConversations: () => api.get('/messages/conversations'),
     getOrCreateConversation: (data) => api.post('/messages/conversations', data),
     getMessages: (conversationId, params) => api.get(`/messages/${conversationId}`, { params }),
-    sendMessage: (conversationId, data) => api.post(`/messages/${conversationId}`, data),
+    sendMessage: (conversationId, data) => {
+        const isFormData = data instanceof FormData;
+        return api.post(`/messages/${conversationId}`, data, {
+            headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : {}
+        });
+    },
 };
 
 export default api;

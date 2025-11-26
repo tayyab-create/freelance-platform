@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { messageAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
-import { FiSend, FiArrowLeft, FiUser } from 'react-icons/fi';
+import { FiSend, FiArrowLeft, FiUser, FiPaperclip, FiX, FiFile } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { useSocket } from '../../context/SocketContext';
 import { Avatar } from '../../components/shared';
@@ -22,9 +22,11 @@ const Chat = () => {
   const [sending, setSending] = useState(false);
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [files, setFiles] = useState([]);
 
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     fetchConversation();
@@ -101,19 +103,43 @@ const Chat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const handleFileSelect = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    if (selectedFiles.length + files.length > 5) {
+      toast.error('You can only attach up to 5 files');
+      return;
+    }
+    setFiles(prev => [...prev, ...selectedFiles]);
+  };
+
+  const removeFile = (index) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleSendMessage = async (e) => {
     e.preventDefault();
 
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() && files.length === 0) return;
 
     setSending(true);
     try {
-      const response = await messageAPI.sendMessage(conversationId, {
-        content: newMessage
-      });
+      let data;
+      if (files.length > 0) {
+        const formData = new FormData();
+        formData.append('content', newMessage);
+        files.forEach(file => {
+          formData.append('attachments', file);
+        });
+        data = formData;
+      } else {
+        data = { content: newMessage };
+      }
+
+      const response = await messageAPI.sendMessage(conversationId, data);
 
       const message = response.data.data;
       setNewMessage('');
+      setFiles([]);
 
       // Emit to socket - this will broadcast to ALL users including sender
       if (socket) {
@@ -127,6 +153,7 @@ const Chat = () => {
       // Scroll to bottom after sending
       setTimeout(() => scrollToBottom(), 100);
     } catch (error) {
+      console.error(error);
       toast.error('Failed to send message');
     } finally {
       setSending(false);
@@ -224,6 +251,23 @@ const Chat = () => {
                     : 'bg-gray-100 text-gray-900'
                     }`}
                 >
+                  {message.attachments && message.attachments.length > 0 && (
+                    <div className="mb-2 space-y-2">
+                      {message.attachments.map((att, idx) => (
+                        <div key={idx} className="flex items-center gap-2 bg-black/10 p-2 rounded">
+                          <FiFile className="h-4 w-4" />
+                          <a
+                            href={`http://localhost:5000/${att.path}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm underline truncate max-w-[150px]"
+                          >
+                            {att.filename}
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   <p className="break-words">{message.content}</p>
                   <p
                     className={`text-xs mt-1 ${isOwn ? 'text-primary-100' : 'text-gray-500'
@@ -239,8 +283,35 @@ const Chat = () => {
         </div>
 
         {/* Input */}
-        <form onSubmit={handleSendMessage} className="card">
-          <div className="flex gap-2">
+        <div className="card p-4">
+          {files.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-2">
+              {files.map((file, index) => (
+                <div key={index} className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-full text-sm">
+                  <span className="truncate max-w-[100px]">{file.name}</span>
+                  <button onClick={() => removeFile(index)} className="text-red-500 hover:text-red-700">
+                    <FiX className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          <form onSubmit={handleSendMessage} className="flex gap-2 items-end">
+            <input
+              type="file"
+              multiple
+              ref={fileInputRef}
+              className="hidden"
+              onChange={handleFileSelect}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="p-3 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Attach files"
+            >
+              <FiPaperclip className="h-5 w-5" />
+            </button>
             <input
               type="text"
               value={newMessage}
@@ -251,8 +322,8 @@ const Chat = () => {
             />
             <button
               type="submit"
-              disabled={sending || !newMessage.trim()}
-              className="btn-primary px-6"
+              disabled={sending || (!newMessage.trim() && files.length === 0)}
+              className="btn-primary px-6 py-2.5"
             >
               {sending ? (
                 <Spinner size="sm" />
@@ -260,8 +331,8 @@ const Chat = () => {
                 <FiSend className="h-5 w-5" />
               )}
             </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </DashboardLayout>
   );
