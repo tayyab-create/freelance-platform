@@ -9,14 +9,16 @@ import {
     FiClock,
     FiUser,
     FiFileText,
-    FiArrowRight
+    FiArrowRight,
+    FiPaperclip,
+    FiDownload,
+    FiEye
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import ReviewModal from '../../components/company/ReviewModal';
 import SubmissionDetailsModal from '../../components/company/SubmissionDetailsModal';
-import { SkeletonLoader } from '../../components/shared';
+import { SkeletonLoader, StatusBadge, Avatar } from '../../components/shared';
 import FilterBar from '../../components/shared/FilterBar';
-import StatusBadge from '../../components/shared/StatusBadge';
 
 const Submissions = () => {
     const [submissions, setSubmissions] = useState([]);
@@ -91,8 +93,6 @@ const Submissions = () => {
     };
 
     const handleRequestRevision = (submission) => {
-        // If called from details modal, close it first or keep it open?
-        // Let's close details modal and open feedback modal
         setShowDetailsModal(false);
         setSelectedSubmission(submission);
         setShowFeedbackModal(true);
@@ -116,15 +116,10 @@ const Submissions = () => {
         const query = searchQuery.toLowerCase();
         return (
             sub.job?.title?.toLowerCase().includes(query) ||
-            sub.worker?.email?.toLowerCase().includes(query)
+            sub.worker?.email?.toLowerCase().includes(query) ||
+            sub.workerInfo?.fullName?.toLowerCase().includes(query)
         );
     });
-
-    const statusCounts = {
-        all: submissions.length,
-        submitted: submissions.filter(s => s.status === 'submitted').length,
-        approved: submissions.filter(s => s.status === 'approved').length,
-    };
 
     const filterOptions = [
         {
@@ -137,11 +132,11 @@ const Submissions = () => {
 
     return (
         <DashboardLayout>
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
                 {/* Header */}
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900">Submissions</h1>
-                    <p className="text-gray-500 mt-1">Review and manage work submissions</p>
+                    <p className="text-gray-500 mt-1">Review work submitted by freelancers</p>
                 </div>
 
                 {/* Filter Bar */}
@@ -150,19 +145,19 @@ const Submissions = () => {
                         onSearch={setSearchQuery}
                         onFilterChange={(filters) => setFilter(filters.status || 'all')}
                         filters={filterOptions}
-                        searchPlaceholder="Search by job or worker..."
+                        searchPlaceholder="Search by job, worker name or email..."
                     />
                 </div>
 
                 {/* Submissions Grid */}
                 {loading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <SkeletonLoader type="card" count={4} />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <SkeletonLoader type="card" count={6} />
                     </div>
                 ) : filteredSubmissions.length === 0 ? (
                     <div className="text-center py-20 bg-white rounded-2xl border border-gray-200 shadow-sm">
-                        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-50 mb-6">
-                            <FiFileText className="w-10 h-10 text-gray-400" />
+                        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-indigo-50 mb-6">
+                            <FiFileText className="w-10 h-10 text-indigo-400" />
                         </div>
                         <h3 className="text-xl font-bold text-gray-900 mb-2">No submissions found</h3>
                         <p className="text-gray-500">
@@ -170,67 +165,103 @@ const Submissions = () => {
                         </p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filteredSubmissions.map((submission) => (
                             <div
                                 key={submission._id}
-                                className="bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 group"
+                                onClick={() => handleViewDetails(submission)}
+                                className="group relative bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer flex flex-col"
                             >
-                                <div className="flex items-start justify-between mb-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-12 h-12 rounded-xl bg-primary-50 flex items-center justify-center text-primary-600 font-bold text-xl">
-                                            {submission.job?.title?.charAt(0)}
-                                        </div>
-                                        <div>
-                                            <h3 className="font-bold text-gray-900 line-clamp-1" title={submission.job?.title}>
-                                                {submission.job?.title}
-                                            </h3>
-                                            <div className="flex items-center gap-2 text-sm text-gray-500">
-                                                <FiUser className="w-3.5 h-3.5" />
-                                                <span className="truncate max-w-[150px]">{submission.worker?.email}</span>
+                                {/* Decorative Gradient Blob */}
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary-50 to-transparent rounded-bl-full opacity-50 group-hover:opacity-100 transition-opacity" />
+
+                                <div className="relative flex flex-col h-full">
+                                    {/* Card Header */}
+                                    <div className="p-5 border-b border-gray-50 bg-gray-50/50">
+                                        <div className="flex justify-between items-start gap-3 mb-3">
+                                            <div className="flex-1">
+                                                <h3 className="font-bold text-gray-900 line-clamp-2 leading-tight group-hover:text-primary-600 transition-colors" title={submission.job?.title}>
+                                                    {submission.job?.title}
+                                                </h3>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <StatusBadge status={submission.status} size="sm" />
+                                                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:bg-primary-50 group-hover:text-primary-600 transition-colors">
+                                                    <FiArrowRight className="w-4 h-4 text-gray-400 group-hover:text-primary-600" />
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <StatusBadge status={submission.status} />
-                                </div>
-
-                                <div className="mb-6">
-                                    <p className="text-gray-600 text-sm line-clamp-2 mb-3">
-                                        {submission.description || 'No description provided.'}
-                                    </p>
-                                    <div className="flex items-center gap-4 text-xs font-medium text-gray-500">
-                                        <div className="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1 rounded-lg">
+                                        <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
                                             <FiClock className="w-3.5 h-3.5" />
-                                            {new Date(submission.createdAt).toLocaleDateString()}
+                                            Submitted {new Date(submission.createdAt).toLocaleDateString()}
                                         </div>
+                                    </div>
+
+                                    {/* Worker Info */}
+                                    <div className="px-5 py-4 flex items-center gap-3">
+                                        {submission.workerInfo?.profilePicture ? (
+                                            <img
+                                                src={submission.workerInfo.profilePicture}
+                                                alt={submission.workerInfo.fullName}
+                                                className="w-10 h-10 rounded-full object-cover border border-gray-200"
+                                            />
+                                        ) : (
+                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center text-indigo-600 font-bold text-sm">
+                                                {submission.workerInfo?.fullName?.charAt(0) || submission.worker?.email?.charAt(0) || 'U'}
+                                            </div>
+                                        )}
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-bold text-gray-900 truncate">
+                                                {submission.workerInfo?.fullName || 'Freelancer'}
+                                            </p>
+                                            <p className="text-xs text-gray-500 truncate">
+                                                {submission.worker?.email}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Content Snippet */}
+                                    <div className="px-5 pb-4 flex-1">
+                                        <div className="bg-gray-50 rounded-xl p-3 mb-3 border border-gray-100 group-hover:border-primary-100 transition-colors">
+                                            <p className="text-sm text-gray-600 line-clamp-3 italic">
+                                                "{submission.description || 'No description provided.'}"
+                                            </p>
+                                        </div>
+
                                         {submission.files?.length > 0 && (
-                                            <div className="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1 rounded-lg">
-                                                <FiFileText className="w-3.5 h-3.5" />
-                                                {submission.files.length} Attachments
+                                            <div className="flex items-center gap-2 text-xs font-medium text-gray-500">
+                                                <FiPaperclip className="w-3.5 h-3.5" />
+                                                {submission.files.length} file{submission.files.length !== 1 ? 's' : ''} attached
                                             </div>
                                         )}
                                     </div>
-                                </div>
 
-                                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                                    <div className="flex gap-2">
+                                    {/* Actions Footer */}
+                                    <div className="p-4 border-t border-gray-100 mt-auto flex items-center gap-3 bg-gray-50/30">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleViewDetails(submission);
+                                            }}
+                                            className="flex-1 btn-primary py-2 text-sm flex items-center justify-center gap-2 shadow-none hover:shadow-lg"
+                                        >
+                                            <FiEye className="w-4 h-4" />
+                                            View Details
+                                        </button>
+
                                         {submission.status === 'approved' && !submission.hasReview && (
                                             <button
-                                                onClick={() => handleOpenReviewModal(submission)}
-                                                className="text-sm font-semibold text-primary-600 hover:text-primary-700 flex items-center gap-1.5"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleOpenReviewModal(submission);
+                                                }}
+                                                className="p-2 text-yellow-500 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
+                                                title="Leave a Review"
                                             >
-                                                <FiStar className="w-4 h-4" />
-                                                Review
+                                                <FiStar className="w-5 h-5" />
                                             </button>
                                         )}
                                     </div>
-                                    <button
-                                        onClick={() => handleViewDetails(submission)}
-                                        className="btn-secondary py-2 px-4 text-sm flex items-center gap-2 group-hover:bg-primary-50 group-hover:text-primary-700 group-hover:border-primary-200 transition-all"
-                                    >
-                                        View Details
-                                        <FiArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                    </button>
                                 </div>
                             </div>
                         ))}

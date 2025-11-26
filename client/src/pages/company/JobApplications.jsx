@@ -14,20 +14,27 @@ import {
     FiDollarSign,
     FiClock,
     FiBriefcase,
-    FiMapPin
+    FiMapPin,
+    FiDownload,
+    FiPaperclip,
+    FiEye
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { SkeletonLoader, StatusBadge } from '../../components/shared';
 import FilterBar from '../../components/shared/FilterBar';
+import SubmissionDetailsModal from '../../components/company/SubmissionDetailsModal';
 
 const JobApplications = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [job, setJob] = useState(null);
     const [applications, setApplications] = useState([]);
+    const [submission, setSubmission] = useState(null);
     const [loading, setLoading] = useState(true);
     const [assigningTo, setAssigningTo] = useState(null);
     const [messagingWorker, setMessagingWorker] = useState(null);
+    const [showSubmissionModal, setShowSubmissionModal] = useState(false);
+    const [processingSubmission, setProcessingSubmission] = useState(null);
 
     // Filters
     const [filter, setFilter] = useState('all');
@@ -43,10 +50,24 @@ const JobApplications = () => {
                 jobAPI.getJobById(id),
                 companyAPI.getJobApplications(id),
             ]);
-            setJob(jobResponse.data.data);
+
+            const jobData = jobResponse.data.data;
+            setJob(jobData);
             setApplications(applicationsResponse.data.data);
+
+            // If job is assigned or completed, fetch submissions to check for any work
+            if (jobData.status === 'assigned' || jobData.status === 'completed') {
+                try {
+                    const submissionsResponse = await companyAPI.getSubmissions();
+                    const jobSubmission = submissionsResponse.data.data.find(s => s.job._id === id);
+                    setSubmission(jobSubmission);
+                } catch (err) {
+                    console.error("Failed to fetch submissions", err);
+                }
+            }
+
         } catch (error) {
-            toast.error('Failed to load applications');
+            toast.error('Failed to load job details');
         } finally {
             setLoading(false);
         }
@@ -85,6 +106,29 @@ const JobApplications = () => {
         } finally {
             setMessagingWorker(null);
         }
+    };
+
+    const handleApproveSubmission = async (jobId) => {
+        if (!window.confirm('Are you sure you want to approve this submission and mark the job as complete?')) {
+            return;
+        }
+
+        setProcessingSubmission(jobId);
+        try {
+            await companyAPI.completeJob(jobId);
+            toast.success('Job completed successfully!');
+            setShowSubmissionModal(false);
+            fetchData();
+        } catch (error) {
+            toast.error('Failed to complete job');
+        } finally {
+            setProcessingSubmission(null);
+        }
+    };
+
+    const handleRequestRevision = (submission) => {
+        toast.info('Revision request feature coming soon!');
+        // Implement revision logic here
     };
 
     const filteredApplications = applications.filter(app => {
@@ -183,6 +227,53 @@ const JobApplications = () => {
                     </div>
                 </div>
 
+                {/* Submission Section */}
+                {submission && (
+                    <div className="mb-8">
+                        <h2 className="text-xl font-bold text-gray-900 mb-6">Current Work</h2>
+                        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                            <div className="flex items-start justify-between mb-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
+                                        <FiFileText className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-bold text-gray-900">Work Submitted</h3>
+                                        <p className="text-sm text-gray-500">
+                                            Submitted on {new Date(submission.createdAt).toLocaleDateString()}
+                                        </p>
+                                    </div>
+                                </div>
+                                <StatusBadge status={submission.status} />
+                            </div>
+
+                            <div className="bg-gray-50 rounded-xl p-4 mb-6">
+                                <p className="text-gray-600 italic line-clamp-2">
+                                    "{submission.description || 'No description provided.'}"
+                                </p>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4 text-sm text-gray-500">
+                                    {submission.files?.length > 0 && (
+                                        <div className="flex items-center gap-2">
+                                            <FiPaperclip className="w-4 h-4" />
+                                            {submission.files.length} Attachments
+                                        </div>
+                                    )}
+                                </div>
+                                <Button
+                                    variant="primary"
+                                    icon={FiEye}
+                                    onClick={() => setShowSubmissionModal(true)}
+                                >
+                                    View Submission
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Applications Section */}
                 <div className="mb-6">
                     <h2 className="text-xl font-bold text-gray-900 mb-6">
@@ -214,7 +305,7 @@ const JobApplications = () => {
                         {filteredApplications.map((application) => (
                             <div
                                 key={application._id}
-                                className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300"
+                                className={`bg-white rounded-2xl border ${application.status === 'accepted' ? 'border-green-200 ring-4 ring-green-50' : 'border-gray-200'} overflow-hidden hover:shadow-lg transition-all duration-300`}
                             >
                                 {/* Applicant Header */}
                                 <div className="p-6 border-b border-gray-100">
@@ -331,6 +422,16 @@ const JobApplications = () => {
                         ))}
                     </div>
                 )}
+
+                {/* Submission Details Modal */}
+                <SubmissionDetailsModal
+                    isOpen={showSubmissionModal}
+                    onClose={() => setShowSubmissionModal(false)}
+                    submission={submission}
+                    onApprove={handleApproveSubmission}
+                    onRequestRevision={handleRequestRevision}
+                    processing={processingSubmission}
+                />
             </div>
         </DashboardLayout>
     );
