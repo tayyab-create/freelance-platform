@@ -119,12 +119,24 @@ const JobDetailsModal = ({
                         </div>
                         <p className="text-lg font-bold text-gray-900 capitalize">{selectedJob.experienceLevel}</p>
                     </div>
-                    <div className={`p-4 rounded-2xl border ${isDeadlineApproaching(selectedJob.deadline) ? 'bg-red-50 border-red-100' : 'bg-gray-50 border-gray-100'}`}>
-                        <div className={`flex items-center gap-2 mb-1 ${isDeadlineApproaching(selectedJob.deadline) ? 'text-red-600' : 'text-gray-500'}`}>
+                    <div className={`p-4 rounded-2xl border ${
+                        isDeadlineApproaching(selectedJob.deadline) && (selectedJob.status === 'assigned' || selectedJob.status === 'in-progress')
+                            ? 'bg-red-50 border-red-100'
+                            : 'bg-gray-50 border-gray-100'
+                    }`}>
+                        <div className={`flex items-center gap-2 mb-1 ${
+                            isDeadlineApproaching(selectedJob.deadline) && (selectedJob.status === 'assigned' || selectedJob.status === 'in-progress')
+                                ? 'text-red-600'
+                                : 'text-gray-500'
+                        }`}>
                             <FiCalendar className="h-4 w-4" />
                             <span className="text-xs font-bold uppercase tracking-wider">Deadline</span>
                         </div>
-                        <p className={`text-lg font-bold ${isDeadlineApproaching(selectedJob.deadline) ? 'text-red-700' : 'text-gray-900'}`}>
+                        <p className={`text-lg font-bold ${
+                            isDeadlineApproaching(selectedJob.deadline) && (selectedJob.status === 'assigned' || selectedJob.status === 'in-progress')
+                                ? 'text-red-700'
+                                : 'text-gray-900'
+                        }`}>
                             {selectedJob.deadline ? new Date(selectedJob.deadline).toLocaleDateString() : 'None'}
                         </p>
                     </div>

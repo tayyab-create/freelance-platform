@@ -15,8 +15,8 @@ const JobCard = ({
             onClick={() => handleViewDetails(job)}
             className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 group relative overflow-hidden cursor-pointer"
         >
-            {/* Deadline Indicator Strip */}
-            {isDeadlineApproaching(job.deadline) && (
+            {/* Deadline Indicator Strip - Only show for active jobs */}
+            {isDeadlineApproaching(job.deadline) && (job.status === 'assigned' || job.status === 'in-progress') && (
                 <div className="absolute top-0 left-0 w-1 h-full bg-red-500"></div>
             )}
 
@@ -60,8 +60,8 @@ const JobCard = ({
                         </div>
                     </div>
 
-                    {/* Deadline Warning Inline */}
-                    {isDeadlineApproaching(job.deadline) && (
+                    {/* Deadline Warning Inline - Only show for active jobs */}
+                    {isDeadlineApproaching(job.deadline) && (job.status === 'assigned' || job.status === 'in-progress') && (
                         <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-700 rounded-lg text-sm font-medium mb-4">
                             <FiAlertCircle className="h-4 w-4" />
                             Deadline: {new Date(job.deadline).toLocaleDateString()}
