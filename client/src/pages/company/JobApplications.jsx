@@ -232,6 +232,44 @@ const JobApplications = () => {
                             <div className="text-lg font-bold text-gray-900">{applications.length}</div>
                         </div>
                     </div>
+
+                    {/* Attachments */}
+                    {job?.attachments && job.attachments.length > 0 && (
+                        <div className="pt-8 mt-8 border-t border-gray-100">
+                            <div className="flex items-center gap-2 text-gray-700 text-sm font-bold uppercase tracking-wider mb-4">
+                                <FiPaperclip className="w-4 h-4" />
+                                Job Attachments
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                {job.attachments.map((file, index) => (
+                                    <a
+                                        key={index}
+                                        href={file.fileUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-3 p-4 bg-gray-50 hover:bg-indigo-50 rounded-xl border border-gray-200 hover:border-indigo-300 transition-all group"
+                                    >
+                                        <div className="p-2.5 bg-white rounded-lg border border-gray-200 text-indigo-600 group-hover:bg-indigo-100 transition-colors">
+                                            <FiDownload className="w-5 h-5" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium text-gray-900 truncate group-hover:text-indigo-600 transition-colors">
+                                                {file.fileName}
+                                            </p>
+                                            <p className="text-xs text-gray-500">
+                                                {file.fileSize ? `${(file.fileSize / 1024 / 1024).toFixed(2)} MB` : 'Download'}
+                                            </p>
+                                        </div>
+                                        <div className="text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                            </svg>
+                                        </div>
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Submission Section */}
@@ -419,6 +457,39 @@ const JobApplications = () => {
                                                         >
                                                             {skill}
                                                         </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Attachments */}
+                                        {application.attachments && application.attachments.length > 0 && (
+                                            <div className="mt-6 pt-6 border-t border-gray-100">
+                                                <div className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                                    <FiPaperclip className="w-4 h-4" />
+                                                    Attachments
+                                                </div>
+                                                <div className="space-y-2">
+                                                    {application.attachments.map((file, index) => (
+                                                        <a
+                                                            key={index}
+                                                            href={file.fileUrl}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="flex items-center gap-3 p-3 bg-white hover:bg-indigo-50 rounded-lg border border-gray-200 hover:border-indigo-300 transition-all group"
+                                                        >
+                                                            <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600 group-hover:bg-indigo-100 transition-colors">
+                                                                <FiDownload className="w-4 h-4" />
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className="text-sm font-medium text-gray-900 truncate group-hover:text-indigo-600 transition-colors">
+                                                                    {file.fileName}
+                                                                </p>
+                                                                <p className="text-xs text-gray-500">
+                                                                    {file.fileSize ? `${(file.fileSize / 1024 / 1024).toFixed(2)} MB` : 'Download'}
+                                                                </p>
+                                                            </div>
+                                                        </a>
                                                     ))}
                                                 </div>
                                             </div>

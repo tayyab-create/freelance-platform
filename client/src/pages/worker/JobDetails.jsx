@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { jobAPI, workerAPI, messageAPI } from '../../services/api';
+import { jobAPI, workerAPI, messageAPI, uploadAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import {
     FiDollarSign,
@@ -16,10 +16,13 @@ import {
     FiFileText,
     FiSend,
     FiX,
-    FiArrowLeft
+    FiArrowLeft,
+    FiPaperclip,
+    FiFile
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { SkeletonLoader, StatusBadge, Avatar, PageHeader } from '../../components/shared';
+import FileUpload from '../../components/common/FileUpload';
 import { getWorkerBreadcrumbs } from '../../utils/breadcrumbUtils';
 
 const JobDetails = () => {
@@ -31,6 +34,10 @@ const JobDetails = () => {
     const [showApplyModal, setShowApplyModal] = useState(false);
     const [proposal, setProposal] = useState('');
     const [proposedRate, setProposedRate] = useState('');
+    const [uploadedFiles, setUploadedFiles] = useState([]);
+    const [uploadingFiles, setUploadingFiles] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const API_BASE_URL = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
     useEffect(() => {
         fetchJob();
@@ -102,6 +109,63 @@ const JobDetails = () => {
         }
     };
 
+    const handleFileUpload = async (filesInput) => {
+        let files;
+        if (Array.isArray(filesInput)) {
+            files = filesInput;
+        } else if (filesInput?.target?.files) {
+            files = Array.from(filesInput.target.files);
+        } else {
+            return;
+        }
+
+        if (files.length === 0) return;
+
+        setUploadingFiles(true);
+        setUploadProgress(0);
+
+        try {
+            let completedUploads = 0;
+            const totalFiles = files.length;
+
+            const uploadPromises = files.map(async (file) => {
+                const response = await uploadAPI.uploadSingle(
+                    file,
+                    'documents',
+                    (progress) => {
+                        const overallProgress = Math.round(
+                            ((completedUploads + (progress / 100)) / totalFiles) * 100
+                        );
+                        setUploadProgress(overallProgress);
+                    }
+                );
+                completedUploads++;
+                return response;
+            });
+
+            const responses = await Promise.all(uploadPromises);
+
+            const newFiles = responses.map(res => ({
+                fileName: res.data.data.originalName,
+                fileUrl: `${API_BASE_URL}${res.data.data.fileUrl}`,
+                fileType: res.data.data.mimeType,
+                fileSize: res.data.data.fileSize
+            }));
+
+            setUploadedFiles(prev => [...prev, ...newFiles]);
+            toast.success(`${newFiles.length} file(s) uploaded successfully!`);
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to upload files');
+        } finally {
+            setUploadingFiles(false);
+            setUploadProgress(0);
+        }
+    };
+
+    const handleRemoveFile = (index) => {
+        setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+    };
+
     const handleApply = async (e) => {
         e.preventDefault();
         if (!proposal || proposal.length < 50) {
@@ -111,9 +175,16 @@ const JobDetails = () => {
 
         setApplying(true);
         try {
-            await workerAPI.applyForJob(id, { proposal, proposedRate });
+            await workerAPI.applyForJob(id, {
+                proposal,
+                proposedRate,
+                attachments: uploadedFiles
+            });
             toast.success('Application submitted successfully!');
             setShowApplyModal(false);
+            setProposal('');
+            setProposedRate('');
+            setUploadedFiles([]);
             navigate('/worker/applications');
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to apply');
@@ -335,6 +406,48 @@ const JobDetails = () => {
                                 </ul>
                             </div>
                         )}
+
+                        {/* Attachments */}
+                        {job.attachments && job.attachments.length > 0 && (
+                            <div className="bg-white rounded-2xl border border-gray-200 p-8">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center">
+                                        <FiPaperclip className="w-5 h-5 text-indigo-600" />
+                                    </div>
+                                    <h2 className="text-xl font-bold text-gray-900">Attachments</h2>
+                                </div>
+                                <div className="space-y-3">
+                                    {job.attachments.map((file, index) => (
+                                        <a
+                                            key={index}
+                                            href={file.fileUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-indigo-300 transition-all group"
+                                        >
+                                            <div className="flex items-center gap-3 overflow-hidden flex-1">
+                                                <div className="p-2.5 bg-white rounded-lg border border-gray-200 text-indigo-600 group-hover:bg-indigo-50 transition-colors">
+                                                    <FiFile className="h-5 w-5" />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-medium text-gray-900 truncate group-hover:text-indigo-600 transition-colors">
+                                                        {file.fileName}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500">
+                                                        {file.fileSize ? `${(file.fileSize / 1024 / 1024).toFixed(2)} MB` : 'Unknown size'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                </svg>
+                                            </div>
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Right Column - Sidebar */}
@@ -510,6 +623,78 @@ const JobDetails = () => {
                                         <p className="text-xs text-gray-500">
                                             Client's budget: <span className="font-semibold text-gray-900">${job.salary}</span> {job.salaryType}
                                         </p>
+                                    </div>
+                                </div>
+
+                                {/* Attachments */}
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                                        Attachments (Optional)
+                                    </label>
+
+                                    <div className="space-y-3">
+                                        {!uploadingFiles && (
+                                            <FileUpload
+                                                onFileSelect={handleFileUpload}
+                                                multiple={true}
+                                                accept="*/*"
+                                                maxSize={10}
+                                                showProgress={false}
+                                            >
+                                                <div className="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center hover:bg-gray-50 hover:border-primary-300 transition-all cursor-pointer group">
+                                                    <div className="h-10 w-10 bg-primary-50 text-primary-600 rounded-full flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform">
+                                                        <FiPaperclip className="h-5 w-5" />
+                                                    </div>
+                                                    <p className="text-sm font-medium text-gray-700">Click to attach files</p>
+                                                    <p className="text-xs text-gray-400 mt-1">Portfolio, resume, or relevant documents</p>
+                                                </div>
+                                            </FileUpload>
+                                        )}
+
+                                        {uploadingFiles && (
+                                            <div className="border-2 border-dashed border-gray-200 rounded-xl p-4">
+                                                <div className="space-y-2">
+                                                    <div className="flex items-center justify-center gap-2 text-primary-600">
+                                                        <div className="h-4 w-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+                                                        <span className="text-sm font-medium">Uploading...</span>
+                                                    </div>
+                                                    <div className="w-full bg-gray-200 rounded-full h-1.5">
+                                                        <div
+                                                            className="bg-primary-600 h-1.5 rounded-full transition-all duration-300"
+                                                            style={{ width: `${uploadProgress}%` }}
+                                                        ></div>
+                                                    </div>
+                                                    <p className="text-xs text-center text-gray-500">{uploadProgress}%</p>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {uploadedFiles.length > 0 && (
+                                            <div className="space-y-2">
+                                                {uploadedFiles.map((file, index) => (
+                                                    <div key={index} className="flex items-center justify-between bg-gray-50 p-2.5 rounded-lg border border-gray-200">
+                                                        <div className="flex items-center gap-2 overflow-hidden flex-1">
+                                                            <div className="p-1.5 bg-white rounded border border-gray-100 text-blue-600">
+                                                                <FiFile className="h-3.5 w-3.5" />
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className="text-xs font-medium text-gray-700 truncate">{file.fileName}</p>
+                                                                <p className="text-xs text-gray-500">
+                                                                    {(file.fileSize / 1024 / 1024).toFixed(2)} MB
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleRemoveFile(index)}
+                                                            className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                                                        >
+                                                            <FiX className="h-4 w-4" />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 

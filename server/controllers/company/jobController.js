@@ -16,6 +16,7 @@ exports.postJob = async (req, res) => {
             experienceLevel,
             requirements,
             deadline,
+            attachments,
         } = req.body;
 
         const job = await Job.create({
@@ -30,6 +31,7 @@ exports.postJob = async (req, res) => {
             experienceLevel,
             requirements,
             deadline,
+            attachments,
         });
 
         // Update company's total jobs posted

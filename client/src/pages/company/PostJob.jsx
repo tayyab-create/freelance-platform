@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { companyAPI } from '../../services/api';
+import { companyAPI, uploadAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import {
     FiBriefcase,
@@ -11,12 +11,16 @@ import {
     FiTag,
     FiAward,
     FiArrowLeft,
-    FiSend
+    FiSend,
+    FiPaperclip,
+    FiX,
+    FiFile
 } from 'react-icons/fi';
 import { toast } from '../../utils/toast';
 import { Select, PageHeader, ConfirmationModal, SuccessAnimation } from '../../components/shared';
 import Input from '../../components/common/Input';
 import Textarea from '../../components/common/Textarea';
+import FileUpload from '../../components/common/FileUpload';
 import AutoSaveIndicator from '../../components/common/AutoSaveIndicator';
 import UnsavedChangesModal from '../../components/common/UnsavedChangesModal';
 import { useFormValidation } from '../../hooks/useFormValidation';
@@ -30,6 +34,10 @@ const PostJob = () => {
     const [pendingNavigation, setPendingNavigation] = useState(null);
     const [draftToRestore, setDraftToRestore] = useState(null);
     const [showSuccess, setShowSuccess] = useState(false);
+    const [uploadedFiles, setUploadedFiles] = useState([]);
+    const [uploadingFiles, setUploadingFiles] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const API_BASE_URL = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
     // Validation schema
     const validationSchema = new ValidationSchema()
@@ -115,6 +123,63 @@ const PostJob = () => {
         setDraftToRestore(null);
     };
 
+    const handleFileUpload = async (filesInput) => {
+        let files;
+        if (Array.isArray(filesInput)) {
+            files = filesInput;
+        } else if (filesInput?.target?.files) {
+            files = Array.from(filesInput.target.files);
+        } else {
+            return;
+        }
+
+        if (files.length === 0) return;
+
+        setUploadingFiles(true);
+        setUploadProgress(0);
+
+        try {
+            let completedUploads = 0;
+            const totalFiles = files.length;
+
+            const uploadPromises = files.map(async (file) => {
+                const response = await uploadAPI.uploadSingle(
+                    file,
+                    'documents',
+                    (progress) => {
+                        const overallProgress = Math.round(
+                            ((completedUploads + (progress / 100)) / totalFiles) * 100
+                        );
+                        setUploadProgress(overallProgress);
+                    }
+                );
+                completedUploads++;
+                return response;
+            });
+
+            const responses = await Promise.all(uploadPromises);
+
+            const newFiles = responses.map(res => ({
+                fileName: res.data.data.originalName,
+                fileUrl: `${API_BASE_URL}${res.data.data.fileUrl}`,
+                fileType: res.data.data.mimeType,
+                fileSize: res.data.data.fileSize
+            }));
+
+            setUploadedFiles(prev => [...prev, ...newFiles]);
+            toast.success(`${newFiles.length} file(s) uploaded successfully!`);
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to upload files');
+        } finally {
+            setUploadingFiles(false);
+            setUploadProgress(0);
+        }
+    };
+
+    const handleRemoveFile = (index) => {
+        setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+    };
+
     const onSubmit = async (values) => {
         try {
             // Convert tags and requirements to arrays
@@ -123,6 +188,7 @@ const PostJob = () => {
                 tags: values.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
                 requirements: values.requirements.split('\n').filter(req => req.trim()),
                 salary: Number(values.salary),
+                attachments: uploadedFiles
             };
 
             await companyAPI.postJob(jobData);
@@ -412,6 +478,84 @@ const PostJob = () => {
                                 showCharacterCount
                                 className="mb-0"
                             />
+                        </div>
+
+                        {/* Attachments */}
+                        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center">
+                                    <FiPaperclip className="w-5 h-5 text-indigo-600" />
+                                </div>
+                                <h2 className="text-xl font-bold text-gray-900">Attachments (Optional)</h2>
+                            </div>
+
+                            <div className="space-y-3">
+                                {/* Upload Area */}
+                                {!uploadingFiles && (
+                                    <FileUpload
+                                        onFileSelect={handleFileUpload}
+                                        multiple={true}
+                                        accept="*/*"
+                                        maxSize={10}
+                                        showProgress={false}
+                                    >
+                                        <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:bg-gray-50 hover:border-primary-300 transition-all cursor-pointer group">
+                                            <div className="h-12 w-12 bg-primary-50 text-primary-600 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                                                <FiPaperclip className="h-6 w-6" />
+                                            </div>
+                                            <p className="text-sm font-medium text-gray-700">Click to attach files</p>
+                                            <p className="text-xs text-gray-400 mt-1">Documents, specifications, or references (max 10MB per file)</p>
+                                        </div>
+                                    </FileUpload>
+                                )}
+
+                                {/* Upload Progress */}
+                                {uploadingFiles && (
+                                    <div className="border-2 border-dashed border-gray-200 rounded-xl p-6">
+                                        <div className="space-y-3">
+                                            <div className="flex items-center justify-center gap-2 text-primary-600">
+                                                <div className="h-5 w-5 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+                                                <span className="text-sm font-medium">Uploading files...</span>
+                                            </div>
+                                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                                <div
+                                                    className="bg-primary-600 h-2 rounded-full transition-all duration-300"
+                                                    style={{ width: `${uploadProgress}%` }}
+                                                ></div>
+                                            </div>
+                                            <p className="text-xs text-center text-gray-500">{uploadProgress}%</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* File List */}
+                                {uploadedFiles.length > 0 && (
+                                    <div className="space-y-2">
+                                        {uploadedFiles.map((file, index) => (
+                                            <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-xl border border-gray-200">
+                                                <div className="flex items-center gap-3 overflow-hidden flex-1">
+                                                    <div className="p-2 bg-white rounded-lg border border-gray-100 text-blue-600">
+                                                        <FiFile className="h-4 w-4" />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm font-medium text-gray-700 truncate">{file.fileName}</p>
+                                                        <p className="text-xs text-gray-500">
+                                                            {(file.fileSize / 1024 / 1024).toFixed(2)} MB
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveFile(index)}
+                                                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                >
+                                                    <FiX className="h-4 w-4" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* Action Buttons */}

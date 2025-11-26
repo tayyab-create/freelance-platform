@@ -6,7 +6,7 @@ const { enrichWithCompanyInfo, getCompanyProfile } = require('../../utils/compan
 // @access  Private/Worker
 exports.applyForJob = async (req, res) => {
     try {
-        const { proposal, proposedRate, coverLetter, estimatedDuration } = req.body;
+        const { proposal, proposedRate, coverLetter, estimatedDuration, attachments } = req.body;
         const jobId = req.params.jobId;
 
         // Check if job exists
@@ -46,7 +46,8 @@ exports.applyForJob = async (req, res) => {
             proposal,
             proposedRate,
             coverLetter,
-            estimatedDuration
+            estimatedDuration,
+            attachments
         });
 
         // Update job's total applications count

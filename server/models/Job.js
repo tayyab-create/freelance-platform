@@ -69,6 +69,12 @@ const jobSchema = new mongoose.Schema({
   requirements: [{
     type: String
   }],
+  attachments: [{
+    fileName: String,
+    fileUrl: String,
+    fileType: String,
+    fileSize: Number
+  }],
   isActive: {
     type: Boolean,
     default: true

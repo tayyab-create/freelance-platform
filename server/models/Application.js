@@ -36,7 +36,9 @@ const applicationSchema = new mongoose.Schema({
   },
   attachments: [{
     fileName: String,
-    fileUrl: String
+    fileUrl: String,
+    fileType: String,
+    fileSize: Number
   }]
 }, {
   timestamps: true
