@@ -86,14 +86,12 @@ const JobDetails = () => {
     if (loading) {
         return (
             <DashboardLayout>
-                <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-                    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                        <SkeletonLoader type="card" count={1} />
-                        <div className="grid grid-cols-4 gap-4 mt-6">
-                            <SkeletonLoader type="stat" count={4} />
-                        </div>
-                        <SkeletonLoader type="card" count={2} />
+                <div className="space-y-6">
+                    <SkeletonLoader type="card" count={1} />
+                    <div className="grid grid-cols-4 gap-4">
+                        <SkeletonLoader type="stat" count={4} />
                     </div>
+                    <SkeletonLoader type="card" count={2} />
                 </div>
             </DashboardLayout>
         );
@@ -102,7 +100,7 @@ const JobDetails = () => {
     if (!job) {
         return (
             <DashboardLayout>
-                <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
+                <div className="flex items-center justify-center min-h-[60vh]">
                     <div className="text-center">
                         <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 mb-4">
                             <FiBriefcase className="w-10 h-10 text-gray-400" />
@@ -126,279 +124,277 @@ const JobDetails = () => {
 
     return (
         <DashboardLayout>
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    {/* Breadcrumbs with Back Button */}
-                    <PageHeader
-                        breadcrumbs={getWorkerBreadcrumbs('job-details', { jobTitle: job?.title })}
-                        backButton={{
-                            onClick: () => navigate(-1)
-                        }}
-                    />
+            <div className="space-y-8">
+                {/* Breadcrumbs with Back Button */}
+                <PageHeader
+                    breadcrumbs={getWorkerBreadcrumbs('job-details', { jobTitle: job?.title })}
+                    backButton={{
+                        onClick: () => navigate(-1)
+                    }}
+                />
 
-                    {/* Main Content Grid */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Left Column - Main Content */}
-                        <div className="lg:col-span-2 space-y-6">
-                            {/* Header Card */}
-                            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-                                {/* Company Header */}
-                                <div className="p-8 border-b border-gray-100">
-                                    <div className="flex items-start gap-5 mb-6">
-                                        {job.companyInfo?.logo ? (
-                                            <Avatar
-                                                src={job.companyInfo.logo}
-                                                name={job.companyInfo.companyName}
-                                                size="xl"
-                                                shape="square"
-                                                className="border border-gray-200"
-                                            />
-                                        ) : (
-                                            <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center">
-                                                <FiBriefcase className="h-8 w-8 text-white" />
-                                            </div>
-                                        )}
-
-                                        <div className="flex-1 min-w-0">
-                                            <h1 className="text-3xl font-bold text-gray-900 mb-2 leading-tight">
-                                                {job.title}
-                                            </h1>
-                                            <div className="flex flex-wrap items-center gap-3 text-gray-600">
-                                                <span className="font-medium text-gray-900">
-                                                    {job.companyInfo?.companyName || 'Unknown Company'}
-                                                </span>
-                                                {job.companyInfo?.location && (
-                                                    <>
-                                                        <span className="text-gray-300">•</span>
-                                                        <span className="flex items-center gap-1.5 text-sm">
-                                                            <FiMapPin className="w-4 h-4" />
-                                                            {job.companyInfo.location}
-                                                        </span>
-                                                    </>
-                                                )}
-                                                <span className="text-gray-300">•</span>
-                                                <span className="text-sm text-gray-500">
-                                                    Posted {new Date(job.createdAt).toLocaleDateString('en-US', {
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                        year: 'numeric'
-                                                    })}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <StatusBadge status={job.status} size="md" />
-                                    </div>
-
-                                    {/* Quick Stats */}
-                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                                        <div className="bg-green-50 rounded-xl p-4 border border-green-100">
-                                            <div className="flex items-center gap-2 text-green-700 mb-1">
-                                                <FiDollarSign className="w-4 h-4" />
-                                                <span className="text-xs font-semibold uppercase tracking-wide">Budget</span>
-                                            </div>
-                                            <p className="text-xl font-bold text-gray-900">${job.salary}</p>
-                                            <p className="text-xs text-gray-600 mt-0.5">{job.salaryType}</p>
-                                        </div>
-
-                                        <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
-                                            <div className="flex items-center gap-2 text-blue-700 mb-1">
-                                                <FiClock className="w-4 h-4" />
-                                                <span className="text-xs font-semibold uppercase tracking-wide">Duration</span>
-                                            </div>
-                                            <p className="text-xl font-bold text-gray-900">{job.duration}</p>
-                                        </div>
-
-                                        <div className="bg-purple-50 rounded-xl p-4 border border-purple-100">
-                                            <div className="flex items-center gap-2 text-purple-700 mb-1">
-                                                <FiAward className="w-4 h-4" />
-                                                <span className="text-xs font-semibold uppercase tracking-wide">Level</span>
-                                            </div>
-                                            <p className="text-sm font-bold text-gray-900">{job.experienceLevel}</p>
-                                        </div>
-
-                                        {job.deadline && (
-                                            <div className="bg-orange-50 rounded-xl p-4 border border-orange-100">
-                                                <div className="flex items-center gap-2 text-orange-700 mb-1">
-                                                    <FiCalendar className="w-4 h-4" />
-                                                    <span className="text-xs font-semibold uppercase tracking-wide">Deadline</span>
-                                                </div>
-                                                <p className="text-sm font-bold text-gray-900">
-                                                    {new Date(job.deadline).toLocaleDateString('en-US', {
-                                                        month: 'short',
-                                                        day: 'numeric'
-                                                    })}
-                                                </p>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Action Buttons */}
-                                <div className="p-6 bg-gray-50 flex flex-col sm:flex-row gap-3">
-                                    {hasApplied ? (
-                                        <button
-                                            disabled
-                                            className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-gray-100 text-gray-500 rounded-xl font-semibold border border-gray-200 cursor-not-allowed"
-                                        >
-                                            <FiCheckCircle className="w-5 h-5" />
-                                            Application {job.applicationStatus.charAt(0).toUpperCase() + job.applicationStatus.slice(1)}
-                                        </button>
+                {/* Main Content Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Left Column - Main Content */}
+                    <div className="lg:col-span-2 space-y-6">
+                        {/* Header Card */}
+                        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+                            {/* Company Header */}
+                            <div className="p-8 border-b border-gray-100">
+                                <div className="flex items-start gap-5 mb-6">
+                                    {job.companyInfo?.logo ? (
+                                        <Avatar
+                                            src={job.companyInfo.logo}
+                                            name={job.companyInfo.companyName}
+                                            size="xl"
+                                            shape="square"
+                                            className="border border-gray-200"
+                                        />
                                     ) : (
-                                        <button
-                                            onClick={() => setShowApplyModal(true)}
-                                            className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-semibold shadow-lg shadow-primary-500/20 transition-all hover:shadow-xl hover:shadow-primary-500/30"
-                                        >
-                                            <FiSend className="w-5 h-5" />
-                                            Apply Now
-                                        </button>
-                                    )}
-                                    <button
-                                        onClick={handleStartConversation}
-                                        className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-white hover:bg-gray-50 text-gray-700 rounded-xl font-semibold border border-gray-200 transition-all"
-                                    >
-                                        <FiMessageCircle className="w-5 h-5" />
-                                        Message
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Job Description */}
-                            <div className="bg-white rounded-2xl border border-gray-200 p-8">
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center">
-                                        <FiFileText className="w-5 h-5 text-primary-600" />
-                                    </div>
-                                    <h2 className="text-xl font-bold text-gray-900">Job Description</h2>
-                                </div>
-                                <div className="prose prose-gray max-w-none">
-                                    <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                                        {job.description}
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Requirements */}
-                            {job.requirements && job.requirements.length > 0 && (
-                                <div className="bg-white rounded-2xl border border-gray-200 p-8">
-                                    <div className="flex items-center gap-3 mb-6">
-                                        <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                                            <FiCheckCircle className="w-5 h-5 text-green-600" />
+                                        <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center">
+                                            <FiBriefcase className="h-8 w-8 text-white" />
                                         </div>
-                                        <h2 className="text-xl font-bold text-gray-900">Requirements</h2>
+                                    )}
+
+                                    <div className="flex-1 min-w-0">
+                                        <h1 className="text-3xl font-bold text-gray-900 mb-2 leading-tight">
+                                            {job.title}
+                                        </h1>
+                                        <div className="flex flex-wrap items-center gap-3 text-gray-600">
+                                            <span className="font-medium text-gray-900">
+                                                {job.companyInfo?.companyName || 'Unknown Company'}
+                                            </span>
+                                            {job.companyInfo?.location && (
+                                                <>
+                                                    <span className="text-gray-300">•</span>
+                                                    <span className="flex items-center gap-1.5 text-sm">
+                                                        <FiMapPin className="w-4 h-4" />
+                                                        {job.companyInfo.location}
+                                                    </span>
+                                                </>
+                                            )}
+                                            <span className="text-gray-300">•</span>
+                                            <span className="text-sm text-gray-500">
+                                                Posted {new Date(job.createdAt).toLocaleDateString('en-US', {
+                                                    month: 'short',
+                                                    day: 'numeric',
+                                                    year: 'numeric'
+                                                })}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <ul className="space-y-3">
-                                        {job.requirements.map((req, index) => (
-                                            <li key={index} className="flex items-start gap-3 group">
-                                                <div className="mt-0.5 w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 group-hover:bg-green-200 transition-colors">
-                                                    <div className="w-2 h-2 rounded-full bg-green-600"></div>
-                                                </div>
-                                                <span className="text-gray-700 leading-relaxed">{req}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
+
+                                    <StatusBadge status={job.status} size="md" />
                                 </div>
-                            )}
+
+                                {/* Quick Stats */}
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                    <div className="bg-green-50 rounded-xl p-4 border border-green-100">
+                                        <div className="flex items-center gap-2 text-green-700 mb-1">
+                                            <FiDollarSign className="w-4 h-4" />
+                                            <span className="text-xs font-semibold uppercase tracking-wide">Budget</span>
+                                        </div>
+                                        <p className="text-xl font-bold text-gray-900">${job.salary}</p>
+                                        <p className="text-xs text-gray-600 mt-0.5">{job.salaryType}</p>
+                                    </div>
+
+                                    <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                                        <div className="flex items-center gap-2 text-blue-700 mb-1">
+                                            <FiClock className="w-4 h-4" />
+                                            <span className="text-xs font-semibold uppercase tracking-wide">Duration</span>
+                                        </div>
+                                        <p className="text-xl font-bold text-gray-900">{job.duration}</p>
+                                    </div>
+
+                                    <div className="bg-purple-50 rounded-xl p-4 border border-purple-100">
+                                        <div className="flex items-center gap-2 text-purple-700 mb-1">
+                                            <FiAward className="w-4 h-4" />
+                                            <span className="text-xs font-semibold uppercase tracking-wide">Level</span>
+                                        </div>
+                                        <p className="text-sm font-bold text-gray-900">{job.experienceLevel}</p>
+                                    </div>
+
+                                    {job.deadline && (
+                                        <div className="bg-orange-50 rounded-xl p-4 border border-orange-100">
+                                            <div className="flex items-center gap-2 text-orange-700 mb-1">
+                                                <FiCalendar className="w-4 h-4" />
+                                                <span className="text-xs font-semibold uppercase tracking-wide">Deadline</span>
+                                            </div>
+                                            <p className="text-sm font-bold text-gray-900">
+                                                {new Date(job.deadline).toLocaleDateString('en-US', {
+                                                    month: 'short',
+                                                    day: 'numeric'
+                                                })}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="p-6 bg-gray-50 flex flex-col sm:flex-row gap-3">
+                                {hasApplied ? (
+                                    <button
+                                        disabled
+                                        className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-gray-100 text-gray-500 rounded-xl font-semibold border border-gray-200 cursor-not-allowed"
+                                    >
+                                        <FiCheckCircle className="w-5 h-5" />
+                                        Application {job.applicationStatus.charAt(0).toUpperCase() + job.applicationStatus.slice(1)}
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => setShowApplyModal(true)}
+                                        className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-semibold shadow-lg shadow-primary-500/20 transition-all hover:shadow-xl hover:shadow-primary-500/30"
+                                    >
+                                        <FiSend className="w-5 h-5" />
+                                        Apply Now
+                                    </button>
+                                )}
+                                <button
+                                    onClick={handleStartConversation}
+                                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-white hover:bg-gray-50 text-gray-700 rounded-xl font-semibold border border-gray-200 transition-all"
+                                >
+                                    <FiMessageCircle className="w-5 h-5" />
+                                    Message
+                                </button>
+                            </div>
                         </div>
 
-                        {/* Right Column - Sidebar */}
-                        <div className="space-y-6">
-                            {/* Skills Required */}
-                            {job.tags && job.tags.length > 0 && (
-                                <div className="bg-white rounded-2xl border border-gray-200 p-6 sticky top-24 z-10">
-                                    <div className="flex items-center gap-3 mb-5">
-                                        <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                                            <FiTrendingUp className="w-5 h-5 text-blue-600" />
-                                        </div>
-                                        <h3 className="text-lg font-bold text-gray-900">Skills Required</h3>
-                                    </div>
-                                    <div className="flex flex-wrap gap-2">
-                                        {job.tags.map((tag, index) => (
-                                            <span
-                                                key={index}
-                                                className="inline-flex items-center px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-sm font-medium text-gray-700 transition-colors"
-                                            >
-                                                {tag}
-                                            </span>
-                                        ))}
-                                    </div>
+                        {/* Job Description */}
+                        <div className="bg-white rounded-2xl border border-gray-200 p-8">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center">
+                                    <FiFileText className="w-5 h-5 text-primary-600" />
                                 </div>
-                            )}
+                                <h2 className="text-xl font-bold text-gray-900">Job Description</h2>
+                            </div>
+                            <div className="prose prose-gray max-w-none">
+                                <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                                    {job.description}
+                                </p>
+                            </div>
+                        </div>
 
-                            {/* About Company */}
-                            {job.companyInfo && (
-                                <div className="bg-white rounded-2xl border border-gray-200 p-6">
-                                    <div className="flex items-center gap-3 mb-5">
-                                        <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                                            <FiBriefcase className="w-5 h-5 text-purple-600" />
-                                        </div>
-                                        <h3 className="text-lg font-bold text-gray-900">About Company</h3>
+                        {/* Requirements */}
+                        {job.requirements && job.requirements.length > 0 && (
+                            <div className="bg-white rounded-2xl border border-gray-200 p-8">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+                                        <FiCheckCircle className="w-5 h-5 text-green-600" />
                                     </div>
+                                    <h2 className="text-xl font-bold text-gray-900">Requirements</h2>
+                                </div>
+                                <ul className="space-y-3">
+                                    {job.requirements.map((req, index) => (
+                                        <li key={index} className="flex items-start gap-3 group">
+                                            <div className="mt-0.5 w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 group-hover:bg-green-200 transition-colors">
+                                                <div className="w-2 h-2 rounded-full bg-green-600"></div>
+                                            </div>
+                                            <span className="text-gray-700 leading-relaxed">{req}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
 
-                                    <div className="space-y-4">
-                                        <div>
-                                            <p className="text-sm font-semibold text-gray-900 mb-1">
-                                                {job.companyInfo.companyName}
+                    {/* Right Column - Sidebar */}
+                    <div className="space-y-6">
+                        {/* Skills Required */}
+                        {job.tags && job.tags.length > 0 && (
+                            <div className="bg-white rounded-2xl border border-gray-200 p-6 sticky top-24 z-10">
+                                <div className="flex items-center gap-3 mb-5">
+                                    <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                                        <FiTrendingUp className="w-5 h-5 text-blue-600" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-gray-900">Skills Required</h3>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {job.tags.map((tag, index) => (
+                                        <span
+                                            key={index}
+                                            className="inline-flex items-center px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-sm font-medium text-gray-700 transition-colors"
+                                        >
+                                            {tag}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* About Company */}
+                        {job.companyInfo && (
+                            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+                                <div className="flex items-center gap-3 mb-5">
+                                    <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+                                        <FiBriefcase className="w-5 h-5 text-purple-600" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-gray-900">About Company</h3>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div>
+                                        <p className="text-sm font-semibold text-gray-900 mb-1">
+                                            {job.companyInfo.companyName}
+                                        </p>
+                                        {job.companyInfo.tagline && (
+                                            <p className="text-sm text-gray-600">
+                                                {job.companyInfo.tagline}
                                             </p>
-                                            {job.companyInfo.tagline && (
-                                                <p className="text-sm text-gray-600">
-                                                    {job.companyInfo.tagline}
-                                                </p>
-                                            )}
+                                        )}
+                                    </div>
+
+                                    {job.companyInfo.industry && (
+                                        <div className="flex items-start gap-3 text-sm">
+                                            <FiTrendingUp className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                            <div>
+                                                <p className="text-gray-500 text-xs mb-0.5">Industry</p>
+                                                <p className="text-gray-900 font-medium">{job.companyInfo.industry}</p>
+                                            </div>
                                         </div>
+                                    )}
 
-                                        {job.companyInfo.industry && (
-                                            <div className="flex items-start gap-3 text-sm">
-                                                <FiTrendingUp className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                                                <div>
-                                                    <p className="text-gray-500 text-xs mb-0.5">Industry</p>
-                                                    <p className="text-gray-900 font-medium">{job.companyInfo.industry}</p>
-                                                </div>
+                                    {job.companyInfo.size && (
+                                        <div className="flex items-start gap-3 text-sm">
+                                            <FiUsers className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                            <div>
+                                                <p className="text-gray-500 text-xs mb-0.5">Company Size</p>
+                                                <p className="text-gray-900 font-medium">{job.companyInfo.size} employees</p>
                                             </div>
-                                        )}
+                                        </div>
+                                    )}
 
-                                        {job.companyInfo.size && (
-                                            <div className="flex items-start gap-3 text-sm">
-                                                <FiUsers className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                                                <div>
-                                                    <p className="text-gray-500 text-xs mb-0.5">Company Size</p>
-                                                    <p className="text-gray-900 font-medium">{job.companyInfo.size} employees</p>
-                                                </div>
+                                    {job.companyInfo.location && (
+                                        <div className="flex items-start gap-3 text-sm">
+                                            <FiMapPin className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                            <div>
+                                                <p className="text-gray-500 text-xs mb-0.5">Location</p>
+                                                <p className="text-gray-900 font-medium">{job.companyInfo.location}</p>
                                             </div>
-                                        )}
-
-                                        {job.companyInfo.location && (
-                                            <div className="flex items-start gap-3 text-sm">
-                                                <FiMapPin className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                                                <div>
-                                                    <p className="text-gray-500 text-xs mb-0.5">Location</p>
-                                                    <p className="text-gray-900 font-medium">{job.companyInfo.location}</p>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Job Insights */}
-                            <div className="bg-gradient-to-br from-primary-50 to-blue-50 rounded-2xl border border-primary-100 p-6">
-                                <h3 className="text-lg font-bold text-gray-900 mb-4">Job Insights</h3>
-                                <div className="space-y-3">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-sm text-gray-600">Status</span>
-                                        <StatusBadge status={job.status} size="sm" />
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-sm text-gray-600">Job Type</span>
-                                        <span className="text-sm font-semibold text-gray-900">{job.salaryType}</span>
-                                    </div>
-                                    {job.applicantCount !== undefined && (
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm text-gray-600">Applicants</span>
-                                            <span className="text-sm font-semibold text-gray-900">{job.applicantCount}</span>
                                         </div>
                                     )}
                                 </div>
+                            </div>
+                        )}
+
+                        {/* Job Insights */}
+                        <div className="bg-gradient-to-br from-primary-50 to-blue-50 rounded-2xl border border-primary-100 p-6">
+                            <h3 className="text-lg font-bold text-gray-900 mb-4">Job Insights</h3>
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-sm text-gray-600">Status</span>
+                                    <StatusBadge status={job.status} size="sm" />
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-sm text-gray-600">Job Type</span>
+                                    <span className="text-sm font-semibold text-gray-900">{job.salaryType}</span>
+                                </div>
+                                {job.applicantCount !== undefined && (
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm text-gray-600">Applicants</span>
+                                        <span className="text-sm font-semibold text-gray-900">{job.applicantCount}</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
