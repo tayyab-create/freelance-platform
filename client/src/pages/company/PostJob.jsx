@@ -14,6 +14,7 @@ import {
     FiSend
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { Select, PageHeader } from '../../components/shared';
 
 const PostJob = () => {
     const navigate = useNavigate();
@@ -63,23 +64,28 @@ const PostJob = () => {
 
     return (
         <DashboardLayout>
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    {/* Back Button */}
-                    <button
-                        onClick={() => navigate('/company/jobs')}
-                        className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 font-medium mb-6 transition-colors group"
-                    >
-                        <FiArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                        Back to My Jobs
-                    </button>
+            <div className="space-y-8 pb-8">
+                {/* Header */}
+                <PageHeader
+                    title="Post a New Job"
+                    subtitle="Fill in the details to find the perfect freelancer"
+                    breadcrumbs={[
+                        { label: 'Dashboard', href: '/company/dashboard' },
+                        { label: 'My Jobs', href: '/company/jobs' },
+                        { label: 'Post Job' }
+                    ]}
+                    actions={
+                        <button
+                            onClick={() => navigate('/company/jobs')}
+                            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 font-semibold transition-colors group"
+                        >
+                            <FiArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                            Back to Jobs
+                        </button>
+                    }
+                />
 
-                    {/* Header */}
-                    <div className="mb-8">
-                        <h1 className="text-4xl font-bold text-gray-900 mb-2">Post a New Job</h1>
-                        <p className="text-lg text-gray-600">Fill in the details to find the perfect freelancer</p>
-                    </div>
-
+                <div className="max-w-4xl mx-auto">
                     {/* Form */}
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Job Title */}
@@ -129,21 +135,22 @@ const PostJob = () => {
                                     </div>
                                     <h2 className="text-lg font-bold text-gray-900">Category</h2>
                                 </div>
-                                <select
+                                <Select
                                     name="category"
                                     value={formData.category}
                                     onChange={handleChange}
                                     required
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all outline-none text-gray-700 bg-white"
-                                >
-                                    <option value="">Select Category</option>
-                                    <option value="Web Development">Web Development</option>
-                                    <option value="Mobile Development">Mobile Development</option>
-                                    <option value="Design">Design</option>
-                                    <option value="Writing">Writing</option>
-                                    <option value="Marketing">Marketing</option>
-                                    <option value="Data Science">Data Science</option>
-                                </select>
+                                    icon={FiTag}
+                                    options={[
+                                        { value: '', label: 'Select Category' },
+                                        { value: 'Web Development', label: 'Web Development' },
+                                        { value: 'Mobile Development', label: 'Mobile Development' },
+                                        { value: 'Design', label: 'Design' },
+                                        { value: 'Writing', label: 'Writing' },
+                                        { value: 'Marketing', label: 'Marketing' },
+                                        { value: 'Data Science', label: 'Data Science' }
+                                    ]}
+                                />
                             </div>
 
                             <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
@@ -153,17 +160,18 @@ const PostJob = () => {
                                     </div>
                                     <h2 className="text-lg font-bold text-gray-900">Experience Level</h2>
                                 </div>
-                                <select
+                                <Select
                                     name="experienceLevel"
                                     value={formData.experienceLevel}
                                     onChange={handleChange}
                                     required
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all outline-none text-gray-700 bg-white"
-                                >
-                                    <option value="entry">Entry Level</option>
-                                    <option value="intermediate">Intermediate</option>
-                                    <option value="expert">Expert</option>
-                                </select>
+                                    icon={FiAward}
+                                    options={[
+                                        { value: 'entry', label: 'Entry Level' },
+                                        { value: 'intermediate', label: 'Intermediate' },
+                                        { value: 'expert', label: 'Expert' }
+                                    ]}
+                                />
                             </div>
                         </div>
 
@@ -218,15 +226,16 @@ const PostJob = () => {
                                     </div>
                                     <h2 className="text-lg font-bold text-gray-900">Payment Type</h2>
                                 </div>
-                                <select
+                                <Select
                                     name="salaryType"
                                     value={formData.salaryType}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all outline-none text-gray-700 bg-white"
-                                >
-                                    <option value="fixed">Fixed Price</option>
-                                    <option value="hourly">Hourly Rate</option>
-                                </select>
+                                    icon={FiDollarSign}
+                                    options={[
+                                        { value: 'fixed', label: 'Fixed Price' },
+                                        { value: 'hourly', label: 'Hourly Rate' }
+                                    ]}
+                                />
                             </div>
                         </div>
 

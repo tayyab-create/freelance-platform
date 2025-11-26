@@ -3,7 +3,7 @@ import { workerAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { FiStar, FiBriefcase, FiCheckCircle, FiTrendingUp, FiAward } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import { SkeletonLoader } from '../../components/shared';
+import { SkeletonLoader, PageHeader } from '../../components/shared';
 import { useNavigate } from 'react-router-dom';
 
 const MyReviews = () => {
@@ -76,12 +76,24 @@ const MyReviews = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header Section */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">My Reviews</h1>
-          <p className="text-gray-500 mt-1">See what clients think about your work</p>
-        </div>
+      <div className="space-y-8 pb-8">
+        {/* Header */}
+        <PageHeader
+          title="My Reviews"
+          subtitle="See what clients think about your work"
+          breadcrumbs={[
+            { label: 'Dashboard', href: '/worker/dashboard' },
+            { label: 'Reviews' }
+          ]}
+          actions={
+            reviews.length > 0 && (
+              <div className="flex items-center gap-2 bg-gradient-to-br from-yellow-500 to-orange-600 px-6 py-3 rounded-2xl shadow-lg">
+                <FiStar className="w-5 h-5 text-white fill-white" />
+                <p className="text-white font-bold text-lg">{stats.averageRating} Rating</p>
+              </div>
+            )
+          }
+        />
 
         {loading ? (
           <SkeletonLoader type="card" count={3} />
@@ -89,7 +101,7 @@ const MyReviews = () => {
           <>
             {/* Statistics Cards */}
             {reviews.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Average Rating Card */}
                 <div className="bg-white rounded-xl border border-gray-200 p-6">
                   <div className="flex items-center gap-3 mb-4">

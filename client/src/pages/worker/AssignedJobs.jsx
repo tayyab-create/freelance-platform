@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { workerAPI, uploadAPI, messageAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
-import { FiDollarSign, FiClock, FiBriefcase, FiUpload, FiFile, FiX, FiCalendar, FiAlertCircle, FiMessageCircle, FiCheckCircle, FiMoreVertical, FiFilter, FiAward, FiTag, FiSearch, FiPlay } from 'react-icons/fi';
+import { FiBriefcase } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import { PageHeader, EmptyState, SkeletonLoader, Modal, StatusBadge } from '../../components/shared';
+import { PageHeader, EmptyState, SkeletonLoader } from '../../components/shared';
 import { useNavigate } from 'react-router-dom';
+
+// Import new modular components
+import JobFilters from '../../components/worker/assigned-jobs/JobFilters';
+import JobCard from '../../components/worker/assigned-jobs/JobCard';
+import JobDetailsModal from '../../components/worker/assigned-jobs/JobDetailsModal';
+import SubmitWorkModal from '../../components/worker/assigned-jobs/SubmitWorkModal';
 
 const AssignedJobs = () => {
   const navigate = useNavigate();
@@ -229,47 +235,13 @@ const AssignedJobs = () => {
         />
 
         {/* Search & Filter Bar */}
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-          {/* Search Input */}
-          <div className="relative w-full md:w-96">
-            <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
-            <input
-              type="text"
-              placeholder="Search jobs by title or company..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-2xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all shadow-sm"
-            />
-          </div>
-
-          {/* Filter Tabs */}
-          <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-sm border border-gray-200 p-1.5 overflow-x-auto w-full md:w-auto">
-            <div className="flex gap-1 min-w-max">
-              {[
-                { key: 'all', label: 'All Jobs' },
-                { key: 'assigned', label: 'Assigned' },
-                { key: 'in-progress', label: 'In Progress' },
-                { key: 'submitted', label: 'Submitted' },
-                { key: 'completed', label: 'Completed' },
-              ].map((tab) => (
-                <button
-                  key={tab.key}
-                  onClick={() => setFilter(tab.key)}
-                  className={`px-4 py-2 rounded-xl font-bold text-sm transition-all duration-200 flex items-center gap-2 ${filter === tab.key
-                      ? 'bg-white text-primary-600 shadow-sm border border-gray-100'
-                      : 'bg-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-700'
-                    }`}
-                >
-                  {tab.label}
-                  <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-extrabold ${filter === tab.key ? 'bg-primary-50 text-primary-600' : 'bg-gray-100 text-gray-500'
-                    }`}>
-                    {counts[tab.key] || 0}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+        <JobFilters
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          filter={filter}
+          setFilter={setFilter}
+          counts={counts}
+        />
 
         {loading ? (
           <SkeletonLoader type="card" count={3} />
@@ -284,642 +256,47 @@ const AssignedJobs = () => {
         ) : (
           <div className="grid grid-cols-1 gap-6">
             {filteredJobs.map((job) => (
-              <div
+              <JobCard
                 key={job._id}
-                onClick={() => handleViewDetails(job)}
-                className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 group relative overflow-hidden cursor-pointer"
-              >
-                {/* Deadline Indicator Strip */}
-                {isDeadlineApproaching(job.deadline) && (
-                  <div className="absolute top-0 left-0 w-1 h-full bg-red-500"></div>
-                )}
-
-                <div className="flex flex-col md:flex-row gap-6">
-                  {/* Left: Company Logo */}
-                  <div className="flex-shrink-0">
-                    {job.companyInfo?.logo ? (
-                      <img
-                        src={job.companyInfo.logo}
-                        alt={job.companyInfo.companyName}
-                        className="h-14 w-14 rounded-xl object-cover border border-gray-100"
-                      />
-                    ) : (
-                      <div className="h-14 w-14 rounded-xl bg-gray-50 flex items-center justify-center border border-gray-100 text-gray-400">
-                        <FiBriefcase className="h-6 w-6" />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Middle: Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2">
-                      <h3 className="text-xl font-bold text-gray-900 truncate group-hover:text-primary-600 transition-colors">
-                        {job.title}
-                      </h3>
-                      <StatusBadge status={job.status} />
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500 mb-4">
-                      <span className="font-medium text-gray-900">{job.companyInfo?.companyName || 'Confidential Client'}</span>
-                      <span className="text-gray-300 hidden md:inline">•</span>
-                      <div className="flex items-center gap-1.5">
-                        <FiCalendar className="h-4 w-4" />
-                        <span>Assigned {new Date(job.assignedDate).toLocaleDateString()}</span>
-                      </div>
-                      <span className="text-gray-300 hidden md:inline">•</span>
-                      <div className="flex items-center gap-1.5">
-                        <FiDollarSign className="h-4 w-4" />
-                        <span className="font-medium text-gray-900">${job.salary}</span>
-                        <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-md uppercase">{job.salaryType}</span>
-                      </div>
-                    </div>
-
-                    {/* Deadline Warning Inline */}
-                    {isDeadlineApproaching(job.deadline) && (
-                      <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-700 rounded-lg text-sm font-medium mb-4">
-                        <FiAlertCircle className="h-4 w-4" />
-                        Deadline: {new Date(job.deadline).toLocaleDateString()}
-                      </div>
-                    )}
-
-                    <p className="text-gray-600 text-sm leading-relaxed line-clamp-2 mb-4">
-                      {job.description}
-                    </p>
-
-                    {/* Action Buttons */}
-                    <div className="flex flex-wrap gap-3">
-                      <button
-                        onClick={(e) => handleStartConversation(job, e)}
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-gray-700 text-sm font-bold hover:bg-gray-50 hover:border-gray-300 transition-all"
-                      >
-                        <FiMessageCircle className="h-4 w-4" />
-                        Message Company
-                      </button>
-
-                      {job.status === 'assigned' && (
-                        <button
-                          onClick={(e) => handleStartJob(job, e)}
-                          className="flex items-center gap-2 px-5 py-2 rounded-lg bg-purple-600 text-white text-sm font-bold hover:bg-purple-700 shadow-md shadow-purple-500/20 transition-all"
-                        >
-                          <FiPlay className="h-4 w-4" />
-                          Start Working
-                        </button>
-                      )}
-
-                      {job.status === 'in-progress' && (
-                        <button
-                          onClick={(e) => handleOpenSubmitModal(job, e)}
-                          className="flex items-center gap-2 px-5 py-2 rounded-lg bg-primary-600 text-white text-sm font-bold hover:bg-primary-700 shadow-md shadow-primary-500/20 transition-all"
-                        >
-                          <FiUpload className="h-4 w-4" />
-                          Submit Work
-                        </button>
-                      )}
-
-                      {job.status === 'submitted' && (
-                        <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-teal-50 border border-teal-200 text-teal-700 text-sm font-bold">
-                          <FiCheckCircle className="h-4 w-4" />
-                          Submitted - Under Review
-                        </div>
-                      )}
-
-                      {job.status === 'completed' && (
-                        <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-100 border border-green-200 text-green-800 text-sm font-bold">
-                          <FiCheckCircle className="h-4 w-4" />
-                          Completed
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
+                job={job}
+                handleViewDetails={handleViewDetails}
+                handleStartConversation={handleStartConversation}
+                handleStartJob={handleStartJob}
+                handleOpenSubmitModal={handleOpenSubmitModal}
+                isDeadlineApproaching={isDeadlineApproaching}
+              />
             ))}
           </div>
         )}
 
         {/* Job Details Modal */}
-        <Modal
+        <JobDetailsModal
           isOpen={showDetailsModal}
           onClose={handleCloseDetailsModal}
-          title="Job Details"
-          size="lg"
-          footer={
-            selectedJob && (
-              <div className="flex justify-between w-full gap-4">
-                <button
-                  onClick={() => handleStartConversation(selectedJob)}
-                  className="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition-colors flex items-center gap-2"
-                >
-                  <FiMessageCircle className="h-5 w-5" />
-                  Message
-                </button>
-                <div className="flex gap-3">
-                  <button
-                    onClick={handleCloseDetailsModal}
-                    className="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition-colors"
-                  >
-                    Close
-                  </button>
-                  {selectedJob.status === 'assigned' && (
-                    <button
-                      onClick={() => handleStartJob(selectedJob)}
-                      className="px-6 py-2.5 rounded-xl bg-purple-600 text-white font-bold hover:bg-purple-700 transition-colors shadow-lg shadow-purple-500/30 flex items-center gap-2"
-                    >
-                      <FiPlay className="h-5 w-5" />
-                      Start Working
-                    </button>
-                  )}
-                  {selectedJob.status === 'in-progress' && (
-                    <button
-                      onClick={() => handleOpenSubmitModal(selectedJob)}
-                      className="px-6 py-2.5 rounded-xl bg-primary-600 text-white font-bold hover:bg-primary-700 transition-colors shadow-lg shadow-primary-500/30 flex items-center gap-2"
-                    >
-                      <FiUpload className="h-5 w-5" />
-                      Submit Work
-                    </button>
-                  )}
-                </div>
-              </div>
-            )
-          }
-        >
-          {selectedJob && (
-            <div className="space-y-8">
-              {/* Header with Company Info */}
-              <div className="flex flex-col md:flex-row gap-6 pb-6 border-b border-gray-100">
-                <div className="flex-shrink-0">
-                  {selectedJob.companyInfo?.logo ? (
-                    <img
-                      src={selectedJob.companyInfo.logo}
-                      alt={selectedJob.companyInfo.companyName}
-                      className="h-20 w-20 rounded-2xl object-cover border border-gray-100 shadow-sm"
-                    />
-                  ) : (
-                    <div className="h-20 w-20 rounded-2xl bg-gray-50 flex items-center justify-center border border-gray-100 text-gray-400">
-                      <FiBriefcase className="h-10 w-10" />
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-2xl font-black text-gray-900 mb-2 leading-tight">{selectedJob.title}</h2>
-                  <div className="flex flex-wrap items-center gap-3 text-gray-600">
-                    <span className="font-bold text-gray-900">{selectedJob.companyInfo?.companyName}</span>
-                    {selectedJob.companyInfo?.tagline && (
-                      <>
-                        <span className="text-gray-300">•</span>
-                        <span className="text-sm">{selectedJob.companyInfo.tagline}</span>
-                      </>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 mt-3 text-sm text-gray-500">
-                    <FiClock className="h-4 w-4" />
-                    <span>Assigned on {new Date(selectedJob.assignedDate).toLocaleDateString()}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Key Stats Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                  <div className="flex items-center gap-2 text-gray-500 mb-1">
-                    <FiDollarSign className="h-4 w-4" />
-                    <span className="text-xs font-bold uppercase tracking-wider">Budget</span>
-                  </div>
-                  <p className="text-lg font-black text-gray-900">${selectedJob.salary}</p>
-                  <p className="text-xs text-gray-500 capitalize">{selectedJob.salaryType}</p>
-                </div>
-                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                  <div className="flex items-center gap-2 text-gray-500 mb-1">
-                    <FiClock className="h-4 w-4" />
-                    <span className="text-xs font-bold uppercase tracking-wider">Duration</span>
-                  </div>
-                  <p className="text-lg font-bold text-gray-900">{selectedJob.duration || 'N/A'}</p>
-                </div>
-                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                  <div className="flex items-center gap-2 text-gray-500 mb-1">
-                    <FiBriefcase className="h-4 w-4" />
-                    <span className="text-xs font-bold uppercase tracking-wider">Level</span>
-                  </div>
-                  <p className="text-lg font-bold text-gray-900 capitalize">{selectedJob.experienceLevel}</p>
-                </div>
-                <div className={`p-4 rounded-2xl border ${isDeadlineApproaching(selectedJob.deadline) ? 'bg-red-50 border-red-100' : 'bg-gray-50 border-gray-100'}`}>
-                  <div className={`flex items-center gap-2 mb-1 ${isDeadlineApproaching(selectedJob.deadline) ? 'text-red-600' : 'text-gray-500'}`}>
-                    <FiCalendar className="h-4 w-4" />
-                    <span className="text-xs font-bold uppercase tracking-wider">Deadline</span>
-                  </div>
-                  <p className={`text-lg font-bold ${isDeadlineApproaching(selectedJob.deadline) ? 'text-red-700' : 'text-gray-900'}`}>
-                    {selectedJob.deadline ? new Date(selectedJob.deadline).toLocaleDateString() : 'None'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Description */}
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-                  <FiFile className="h-5 w-5 text-gray-400" />
-                  Job Description
-                </h3>
-                <div className="prose prose-sm max-w-none text-gray-600 bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
-                  <p className="whitespace-pre-line leading-relaxed">{selectedJob.description}</p>
-                </div>
-              </div>
-
-              {/* Skills & Tags */}
-              {selectedJob.tags && selectedJob.tags.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-                    <FiAward className="h-5 w-5 text-gray-400" />
-                    Skills & Tags
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedJob.tags.map((tag, index) => (
-                      <span
-                        key={index}
-                        className="px-4 py-2 text-sm font-semibold rounded-xl bg-white text-gray-700 border border-gray-200 shadow-sm"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Submission Details - For Submitted Jobs */}
-              {selectedJob.status === 'submitted' && (
-                <div className="border-t border-gray-200 pt-6 mt-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <FiCheckCircle className="h-5 w-5 text-teal-500" />
-                    Your Submission
-                  </h3>
-                  {loadingSubmission ? (
-                    <div className="flex items-center justify-center py-8">
-                      <div className="h-8 w-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
-                    </div>
-                  ) : submissionDetails ? (
-                    <div className="space-y-4 bg-green-50/50 p-6 rounded-2xl border border-green-100">
-                      <div className="flex items-center gap-2 text-green-700 text-sm font-bold">
-                        <FiCheckCircle className="h-5 w-5" />
-                        Submitted on {new Date(submissionDetails.createdAt).toLocaleDateString()} at {new Date(submissionDetails.createdAt).toLocaleTimeString()}
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">Description</label>
-                        <p className="text-gray-600 text-sm whitespace-pre-line bg-white p-4 rounded-xl border border-gray-200">
-                          {submissionDetails.description}
-                        </p>
-                      </div>
-
-                      {submissionDetails.links && submissionDetails.links.length > 0 && (
-                        <div>
-                          <label className="block text-sm font-bold text-gray-700 mb-2">Links</label>
-                          <div className="space-y-2">
-                            {submissionDetails.links.map((link, index) => (
-                              <a
-                                key={index}
-                                href={link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-2 text-primary-600 hover:text-primary-700 text-sm font-medium break-all bg-white p-3 rounded-xl border border-gray-200 hover:border-primary-300 transition-colors"
-                              >
-                                <FiUpload className="h-4 w-4 flex-shrink-0" />
-                                {link}
-                              </a>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {submissionDetails.files && submissionDetails.files.length > 0 && (
-                        <div>
-                          <label className="block text-sm font-bold text-gray-700 mb-2">Attachments ({submissionDetails.files.length})</label>
-                          <div className="space-y-2">
-                            {submissionDetails.files.map((file, index) => (
-                              <a
-                                key={index}
-                                href={file.fileUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center justify-between bg-white p-3 rounded-xl border border-gray-200 hover:border-primary-300 transition-colors group"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <div className="p-2 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-100 transition-colors">
-                                    <FiFile className="h-4 w-4" />
-                                  </div>
-                                  <span className="text-sm font-semibold text-gray-700 group-hover:text-primary-600 transition-colors">
-                                    {file.fileName}
-                                  </span>
-                                </div>
-                                <FiUpload className="h-4 w-4 text-gray-400 group-hover:text-primary-600 transition-colors" />
-                              </a>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="pt-3 border-t border-green-200">
-                        <div className="flex items-center gap-2 text-sm">
-                          <span className={`px-3 py-1.5 rounded-lg font-bold ${
-                            submissionDetails.status === 'approved' ? 'bg-green-100 text-green-700' :
-                            submissionDetails.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                            'bg-yellow-100 text-yellow-700'
-                          }`}>
-                            {submissionDetails.status === 'pending' ? 'Under Review' : submissionDetails.status.charAt(0).toUpperCase() + submissionDetails.status.slice(1)}
-                          </span>
-                          {submissionDetails.reviewedAt && (
-                            <span className="text-gray-500">
-                              Reviewed on {new Date(submissionDetails.reviewedAt).toLocaleDateString()}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-center py-6 text-gray-500">
-                      <FiAlertCircle className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                      <p className="text-sm">Unable to load submission details</p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Completion Details - For Completed Jobs */}
-              {selectedJob.status === 'completed' && (
-                <div className="border-t border-gray-200 pt-6 mt-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <FiCheckCircle className="h-5 w-5 text-green-600" />
-                    Job Completed
-                  </h3>
-                  {loadingSubmission ? (
-                    <div className="flex items-center justify-center py-8">
-                      <div className="h-8 w-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
-                    </div>
-                  ) : submissionDetails ? (
-                    <div className="space-y-6">
-                      {/* Completion Success Banner */}
-                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-2xl border-2 border-green-200">
-                        <div className="flex items-start gap-4">
-                          <div className="p-3 bg-green-100 rounded-full">
-                            <FiCheckCircle className="h-6 w-6 text-green-600" />
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="text-lg font-bold text-green-900 mb-2">Successfully Completed!</h4>
-                            <div className="space-y-1 text-sm text-green-700">
-                              <p className="flex items-center gap-2">
-                                <FiCalendar className="h-4 w-4" />
-                                <span className="font-semibold">Submitted on:</span>
-                                {new Date(submissionDetails.createdAt).toLocaleDateString()} at {new Date(submissionDetails.createdAt).toLocaleTimeString()}
-                              </p>
-                              {submissionDetails.reviewedAt && (
-                                <p className="flex items-center gap-2">
-                                  <FiCheckCircle className="h-4 w-4" />
-                                  <span className="font-semibold">Approved on:</span>
-                                  {new Date(submissionDetails.reviewedAt).toLocaleDateString()} at {new Date(submissionDetails.reviewedAt).toLocaleTimeString()}
-                                </p>
-                              )}
-                              {selectedJob.completedDate && (
-                                <p className="flex items-center gap-2">
-                                  <FiCheckCircle className="h-4 w-4" />
-                                  <span className="font-semibold">Completed on:</span>
-                                  {new Date(selectedJob.completedDate).toLocaleDateString()} at {new Date(selectedJob.completedDate).toLocaleTimeString()}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Submission Details */}
-                      <div className="bg-white p-6 rounded-2xl border border-gray-200">
-                        <h4 className="text-md font-bold text-gray-900 mb-4 flex items-center gap-2">
-                          <FiFile className="h-5 w-5 text-gray-400" />
-                          Your Submission
-                        </h4>
-
-                        <div className="space-y-4">
-                          <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-2">Description</label>
-                            <p className="text-gray-600 text-sm whitespace-pre-line bg-gray-50 p-4 rounded-xl border border-gray-200">
-                              {submissionDetails.description}
-                            </p>
-                          </div>
-
-                          {submissionDetails.links && submissionDetails.links.length > 0 && (
-                            <div>
-                              <label className="block text-sm font-bold text-gray-700 mb-2">Links ({submissionDetails.links.length})</label>
-                              <div className="space-y-2">
-                                {submissionDetails.links.map((link, index) => (
-                                  <a
-                                    key={index}
-                                    href={link}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-2 text-primary-600 hover:text-primary-700 text-sm font-medium break-all bg-gray-50 p-3 rounded-xl border border-gray-200 hover:border-primary-300 transition-colors"
-                                  >
-                                    <FiUpload className="h-4 w-4 flex-shrink-0" />
-                                    {link}
-                                  </a>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {submissionDetails.files && submissionDetails.files.length > 0 && (
-                            <div>
-                              <label className="block text-sm font-bold text-gray-700 mb-2">Attachments ({submissionDetails.files.length})</label>
-                              <div className="space-y-2">
-                                {submissionDetails.files.map((file, index) => (
-                                  <a
-                                    key={index}
-                                    href={file.fileUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center justify-between bg-gray-50 p-3 rounded-xl border border-gray-200 hover:border-primary-300 transition-colors group"
-                                  >
-                                    <div className="flex items-center gap-3">
-                                      <div className="p-2 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-100 transition-colors">
-                                        <FiFile className="h-4 w-4" />
-                                      </div>
-                                      <span className="text-sm font-semibold text-gray-700 group-hover:text-primary-600 transition-colors">
-                                        {file.fileName}
-                                      </span>
-                                    </div>
-                                    <FiUpload className="h-4 w-4 text-gray-400 group-hover:text-primary-600 transition-colors" />
-                                  </a>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Payment & Stats */}
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-green-50 p-4 rounded-2xl border border-green-200">
-                          <div className="flex items-center gap-2 text-green-600 mb-1">
-                            <FiDollarSign className="h-4 w-4" />
-                            <span className="text-xs font-bold uppercase tracking-wider">Payment</span>
-                          </div>
-                          <p className="text-2xl font-black text-green-700">${selectedJob.salary}</p>
-                          <p className="text-xs text-green-600 capitalize">{selectedJob.salaryType}</p>
-                        </div>
-
-                        <div className="bg-blue-50 p-4 rounded-2xl border border-blue-200">
-                          <div className="flex items-center gap-2 text-blue-600 mb-1">
-                            <FiClock className="h-4 w-4" />
-                            <span className="text-xs font-bold uppercase tracking-wider">Duration</span>
-                          </div>
-                          <p className="text-lg font-bold text-blue-700">
-                            {selectedJob.assignedDate && selectedJob.completedDate
-                              ? `${Math.ceil((new Date(selectedJob.completedDate) - new Date(selectedJob.assignedDate)) / (1000 * 60 * 60 * 24))} days`
-                              : 'N/A'}
-                          </p>
-                          <p className="text-xs text-blue-600">From assignment to completion</p>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-center py-6 text-gray-500">
-                      <FiAlertCircle className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                      <p className="text-sm">Unable to load completion details</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-        </Modal>
+          selectedJob={selectedJob}
+          handleStartConversation={handleStartConversation}
+          handleStartJob={handleStartJob}
+          handleOpenSubmitModal={handleOpenSubmitModal}
+          loadingSubmission={loadingSubmission}
+          submissionDetails={submissionDetails}
+          isDeadlineApproaching={isDeadlineApproaching}
+        />
 
         {/* Submit Work Modal */}
-        <Modal
+        <SubmitWorkModal
           isOpen={showSubmitModal}
           onClose={handleCloseSubmitModal}
-          title="Submit Your Work"
-          size="lg"
-        >
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Description */}
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Work Description *</label>
-              <textarea
-                value={submitData.description}
-                onChange={(e) => setSubmitData({ ...submitData, description: e.target.value })}
-                placeholder="Describe what you've completed and any important details..."
-                rows="6"
-                required
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all resize-none"
-              />
-              <div className="flex justify-between items-center mt-2">
-                <p className={`text-xs font-bold ${submitData.description.length >= 20 ? 'text-green-600' : 'text-gray-400'}`}>
-                  {submitData.description.length >= 20 ? '✓ Ready to submit' : `${submitData.description.length} / 20 characters minimum`}
-                </p>
-              </div>
-            </div>
-
-            {/* Links */}
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Links (Optional)</label>
-              <textarea
-                value={submitData.links}
-                onChange={(e) => setSubmitData({ ...submitData, links: e.target.value })}
-                placeholder="https://github.com/yourrepo&#10;https://demo.yourproject.com"
-                rows="3"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all resize-none font-mono text-sm"
-              />
-              <p className="text-xs text-gray-500 mt-2">
-                Add links to your work (GitHub, live demo, drive, etc.). One per line.
-              </p>
-            </div>
-
-            {/* File Upload */}
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Attachments</label>
-              <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-primary-400 transition-colors bg-gray-50/50">
-                <input
-                  type="file"
-                  multiple
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  id="file-upload"
-                  disabled={uploadingFiles}
-                  accept=".pdf,.doc,.docx,.zip,.jpg,.jpeg,.png"
-                />
-                <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center gap-2">
-                  <div className="p-3 bg-white rounded-full shadow-sm">
-                    <FiUpload className="h-6 w-6 text-primary-600" />
-                  </div>
-                  <span className="text-sm font-bold text-gray-700">Click to upload files</span>
-                  <span className="text-xs text-gray-400">PDF, DOC, ZIP, Images (Max 5MB)</span>
-                </label>
-              </div>
-
-              {uploadingFiles && (
-                <div className="mt-3 flex items-center gap-2 text-sm text-primary-600 font-medium animate-pulse">
-                  <div className="h-2 w-2 bg-primary-600 rounded-full animate-bounce"></div>
-                  Uploading files...
-                </div>
-              )}
-            </div>
-
-            {/* Uploaded Files List */}
-            {submitData.uploadedFiles.length > 0 && (
-              <div className="space-y-3">
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">Uploaded Files ({submitData.uploadedFiles.length})</label>
-                <div className="space-y-2">
-                  {submitData.uploadedFiles.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                          <FiFile className="h-4 w-4" />
-                        </div>
-                        <span className="text-sm font-semibold text-gray-700 truncate max-w-[200px]">{file.fileName}</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveFile(index)}
-                        className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                        title="Remove file"
-                      >
-                        <FiX className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Footer Actions */}
-            <div className="flex gap-3 pt-4 border-t border-gray-100">
-              <button
-                type="button"
-                onClick={handleCloseSubmitModal}
-                className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition-colors"
-                disabled={submitting}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={submitting || uploadingFiles}
-                className="flex-1 py-3 rounded-xl bg-primary-600 text-white font-bold hover:bg-primary-700 transition-colors shadow-lg shadow-primary-500/30 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                {submitting ? (
-                  <>
-                    <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    <FiCheckCircle className="h-5 w-5" />
-                    Submit Work
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        </Modal>
+          handleSubmit={handleSubmit}
+          submitData={submitData}
+          setSubmitData={setSubmitData}
+          handleFileUpload={handleFileUpload}
+          handleRemoveFile={handleRemoveFile}
+          submitting={submitting}
+          uploadingFiles={uploadingFiles}
+        />
       </div>
     </DashboardLayout>
   );
 };
 
-export default AssignedJobs;
+export default AssignedJobs;  

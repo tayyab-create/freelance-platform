@@ -183,27 +183,26 @@ const MyApplications = () => {
         </div>
 
         {/* Filter Tabs */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/60 p-6">
-          <div className="flex gap-3 overflow-x-auto">
+        <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-sm border border-gray-200 p-1.5 overflow-x-auto">
+          <div className="flex gap-1 min-w-max">
             {[
-              { key: 'all', label: 'All', icon: FiFileText },
-              { key: 'pending', label: 'Pending', icon: FiClock },
-              { key: 'accepted', label: 'Accepted', icon: FiCheckCircle },
-              { key: 'rejected', label: 'Rejected', icon: FiAward }
-            ].map(({ key, label, icon: Icon }) => (
+              { key: 'all', label: 'All Applications' },
+              { key: 'pending', label: 'Pending' },
+              { key: 'accepted', label: 'Accepted' },
+              { key: 'rejected', label: 'Rejected' }
+            ].map(({ key, label }) => (
               <button
                 key={key}
                 onClick={() => setFilter(key)}
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${filter === key
-                  ? 'bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg shadow-primary-500/30 scale-105'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
+                className={`px-4 py-2 rounded-xl font-bold text-sm transition-all duration-200 flex items-center gap-2 ${filter === key
+                  ? 'bg-white text-primary-600 shadow-sm border border-gray-100'
+                  : 'bg-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-700'
                   }`}
               >
-                <Icon className="h-5 w-5" />
-                <span>{label}</span>
-                <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${filter === key ? 'bg-white/20' : 'bg-gray-200'
+                {label}
+                <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-extrabold ${filter === key ? 'bg-primary-50 text-primary-600' : 'bg-gray-100 text-gray-500'
                   }`}>
-                  {counts[key]}
+                  {counts[key] || 0}
                 </span>
               </button>
             ))}
