@@ -10,8 +10,7 @@ import CompanyProfile from "./pages/company/CompanyProfile";
 import Submissions from "./pages/company/Submissions";
 import MyReviews from "./pages/worker/MyReviews";
 
-import Conversations from "./pages/messages/Conversations";
-import Chat from "./pages/messages/Chat";
+import Messages from "./pages/shared/Messages";
 
 // Auth Pages
 import Login from "./pages/auth/Login";
@@ -244,15 +243,23 @@ function App() {
           path="/messages"
           element={
             <ProtectedRoute allowedRoles={["worker", "company"]}>
-              <Conversations />
+              <Messages />
             </ProtectedRoute>
           }
         />
         <Route
-          path="/messages/:conversationId"
+          path="/worker/messages"
           element={
-            <ProtectedRoute allowedRoles={["worker", "company"]}>
-              <Chat />
+            <ProtectedRoute allowedRoles={["worker"]}>
+              <Messages />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/company/messages"
+          element={
+            <ProtectedRoute allowedRoles={["company"]}>
+              <Messages />
             </ProtectedRoute>
           }
         />

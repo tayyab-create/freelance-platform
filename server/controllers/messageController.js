@@ -153,13 +153,40 @@ exports.getMessages = async (req, res) => {
       }
     );
 
+    // Populate sender profile information
+    const messagesWithProfiles = await Promise.all(
+      messages.map(async (msg) => {
+        const msgObj = msg.toObject();
+
+        if (msgObj.sender) {
+          if (msgObj.sender.role === 'worker') {
+            const profile = await WorkerProfile.findOne({ user: msgObj.sender._id });
+            msgObj.sender = {
+              ...msgObj.sender,
+              name: profile?.fullName,
+              avatar: profile?.profilePicture
+            };
+          } else if (msgObj.sender.role === 'company') {
+            const profile = await CompanyProfile.findOne({ user: msgObj.sender._id });
+            msgObj.sender = {
+              ...msgObj.sender,
+              name: profile?.companyName,
+              avatar: profile?.logo
+            };
+          }
+        }
+
+        return msgObj;
+      })
+    );
+
     res.status(200).json({
       success: true,
-      count: messages.length,
+      count: messagesWithProfiles.length,
       total,
       pages: Math.ceil(total / limit),
       currentPage: Number(page),
-      data: messages.reverse() // Reverse to show oldest first
+      data: messagesWithProfiles.reverse() // Reverse to show oldest first
     });
   } catch (error) {
     console.error('Get Messages Error:', error);
@@ -208,9 +235,29 @@ exports.sendMessage = async (req, res) => {
     const populatedMessage = await Message.findById(message._id)
       .populate('sender', 'email role');
 
+    // Add sender profile information
+    const msgObj = populatedMessage.toObject();
+    if (msgObj.sender) {
+      if (msgObj.sender.role === 'worker') {
+        const profile = await WorkerProfile.findOne({ user: msgObj.sender._id });
+        msgObj.sender = {
+          ...msgObj.sender,
+          name: profile?.fullName,
+          avatar: profile?.profilePicture
+        };
+      } else if (msgObj.sender.role === 'company') {
+        const profile = await CompanyProfile.findOne({ user: msgObj.sender._id });
+        msgObj.sender = {
+          ...msgObj.sender,
+          name: profile?.companyName,
+          avatar: profile?.logo
+        };
+      }
+    }
+
     res.status(201).json({
       success: true,
-      data: populatedMessage
+      data: msgObj
     });
   } catch (error) {
     console.error('Send Message Error:', error);
