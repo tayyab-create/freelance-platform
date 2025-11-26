@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { adminAPI } from '../../services/api';
-import { toast } from 'react-toastify';
+import { toast } from '../../utils/toast';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
 import { FiCheck, FiX, FiUser, FiBriefcase, FiClock } from 'react-icons/fi';
-import { PageHeader, SkeletonLoader, EmptyState, StatusBadge, Avatar, ActionDropdown } from '../../components/shared';
+import { PageHeader, SkeletonLoader, EmptyState, StatusBadge, Avatar, ActionDropdown, ConfirmationModal } from '../../components/shared';
 
 const PendingApprovals = () => {
   const [pendingUsers, setPendingUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterRole, setFilterRole] = useState('all');
+  const [confirmAction, setConfirmAction] = useState(null); // { type: 'approve' | 'reject', userId: string }
 
   useEffect(() => {
     fetchPendingUsers();
@@ -26,23 +27,30 @@ const PendingApprovals = () => {
     }
   };
 
-  const handleApprove = async (userId) => {
-    try {
-      await adminAPI.approveUser(userId);
-      toast.success('User approved!');
-      fetchPendingUsers();
-    } catch (error) {
-      toast.error('Failed to approve user');
-    }
+  const handleApproveClick = (userId) => {
+    setConfirmAction({ type: 'approve', userId });
   };
 
-  const handleReject = async (userId) => {
+  const handleRejectClick = (userId) => {
+    setConfirmAction({ type: 'reject', userId });
+  };
+
+  const executeConfirmAction = async () => {
+    if (!confirmAction) return;
+    const { type, userId } = confirmAction;
+    setConfirmAction(null);
+
     try {
-      await adminAPI.rejectUser(userId);
-      toast.success('User rejected');
+      if (type === 'approve') {
+        await adminAPI.approveUser(userId);
+        toast.success('User approved successfully!');
+      } else {
+        await adminAPI.rejectUser(userId);
+        toast.success('User rejected');
+      }
       fetchPendingUsers();
     } catch (error) {
-      toast.error('Failed to reject user');
+      toast.error(`Failed to ${type} user`);
     }
   };
 
@@ -101,8 +109,8 @@ const PendingApprovals = () => {
                   <div className="flex items-center gap-4">
                     {/* Avatar/Icon */}
                     <div className={`h-12 w-12 rounded-xl flex items-center justify-center text-xl font-bold ${user.role === 'worker'
-                        ? 'bg-purple-100 text-purple-600'
-                        : 'bg-blue-100 text-blue-600'
+                      ? 'bg-purple-100 text-purple-600'
+                      : 'bg-blue-100 text-blue-600'
                       }`}>
                       {user.role === 'worker' ? <FiUser /> : <FiBriefcase />}
                     </div>
@@ -126,14 +134,14 @@ const PendingApprovals = () => {
                   {/* Actions */}
                   <div className="flex items-center gap-3">
                     <button
-                      onClick={() => handleReject(user._id)}
+                      onClick={() => handleRejectClick(user._id)}
                       className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors flex items-center gap-2"
                     >
                       <FiX className="h-4 w-4" />
                       Reject
                     </button>
                     <button
-                      onClick={() => handleApprove(user._id)}
+                      onClick={() => handleApproveClick(user._id)}
                       className="px-6 py-2 rounded-lg text-sm font-medium bg-gray-900 text-white hover:bg-gray-800 transition-all shadow-lg shadow-gray-200 flex items-center gap-2"
                     >
                       <FiCheck className="h-4 w-4" />
@@ -145,6 +153,18 @@ const PendingApprovals = () => {
             </div>
           </div>
         )}
+
+        <ConfirmationModal
+          isOpen={!!confirmAction}
+          onClose={() => setConfirmAction(null)}
+          onConfirm={executeConfirmAction}
+          title={confirmAction?.type === 'approve' ? 'Approve User?' : 'Reject User?'}
+          message={confirmAction?.type === 'approve'
+            ? 'Are you sure you want to approve this user? They will be granted access to the platform.'
+            : 'Are you sure you want to reject this user? They will not be able to access the platform.'}
+          confirmText={confirmAction?.type === 'approve' ? 'Approve' : 'Reject'}
+          variant={confirmAction?.type === 'approve' ? 'success' : 'danger'}
+        />
       </div>
     </DashboardLayout>
   );

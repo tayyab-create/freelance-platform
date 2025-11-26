@@ -6,11 +6,12 @@ import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import { FiEdit2, FiSave, FiX, FiTrash2, FiBriefcase, FiCheckCircle, FiStar, FiMapPin, FiGlobe, FiLinkedin, FiUsers, FiMail, FiPhone } from 'react-icons/fi';
 import { FaBuilding } from 'react-icons/fa'
-import { toast } from 'react-toastify';
+import { toast } from '../../utils/toast';
 import FileUpload from '../../components/common/FileUpload';
 import { uploadAPI } from '../../services/api';
-import { SkeletonLoader, PageHeader } from '../../components/shared';
+import { SkeletonLoader, PageHeader, DeleteConfirmationModal } from '../../components/shared';
 import { getCompanyBreadcrumbs } from '../../utils/breadcrumbUtils';
+import useUndo from '../../hooks/useUndo';
 
 const CompanyProfile = () => {
     const [profile, setProfile] = useState(null);
@@ -20,6 +21,10 @@ const CompanyProfile = () => {
     const [uploadingLogo, setUploadingLogo] = useState(false);
     const [uploadKey, setUploadKey] = useState(0);
     const [activeTab, setActiveTab] = useState('overview');
+
+    // Delete Modal State
+    const [showDeleteLogoModal, setShowDeleteLogoModal] = useState(false);
+    const { executeWithUndo } = useUndo();
 
     const [formData, setFormData] = useState({
         companyName: '',
@@ -102,15 +107,28 @@ const CompanyProfile = () => {
         }
     };
 
-    const handleDeleteLogo = async () => {
-        if (!window.confirm('Delete company logo?')) return;
-        try {
-            await companyAPI.updateProfile({ logo: '' });
-            toast.success('Logo removed');
-            fetchProfile();
-        } catch (error) {
-            toast.error('Failed to remove logo');
-        }
+    const handleDeleteLogoClick = () => {
+        setShowDeleteLogoModal(true);
+    };
+
+    const confirmDeleteLogo = () => {
+        setShowDeleteLogoModal(false);
+        const previousLogo = profile.logo;
+
+        // Optimistic update
+        setProfile(prev => ({ ...prev, logo: '' }));
+
+        executeWithUndo({
+            action: async () => {
+                await companyAPI.updateProfile({ logo: '' });
+                fetchProfile();
+            },
+            message: 'Company logo removed',
+            onUndo: () => {
+                setProfile(prev => ({ ...prev, logo: previousLogo }));
+            },
+            undoMessage: 'Company logo restored'
+        });
     };
 
     const handleChange = (e) => {
@@ -262,7 +280,7 @@ const CompanyProfile = () => {
                                     {/* Remove Button (Only in Edit Mode) */}
                                     {editing && profile?.logo && (
                                         <button
-                                            onClick={(e) => { e.stopPropagation(); handleDeleteLogo(); }}
+                                            onClick={(e) => { e.stopPropagation(); handleDeleteLogoClick(); }}
                                             className="absolute -top-2 -right-2 p-1.5 bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600 transition-colors z-30"
                                             title="Remove Logo"
                                         >
@@ -317,8 +335,8 @@ const CompanyProfile = () => {
                             key={tab}
                             onClick={() => setActiveTab(tab)}
                             className={`px-6 py-3 font-bold text-sm capitalize transition-all border-b-2 ${activeTab === tab
-                                    ? 'border-primary-600 text-primary-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                ? 'border-primary-600 text-primary-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
                         >
                             {tab}
@@ -564,6 +582,15 @@ const CompanyProfile = () => {
                         </div>
                     )}
                 </div>
+
+                {/* Delete Confirmation Modal */}
+                <DeleteConfirmationModal
+                    isOpen={showDeleteLogoModal}
+                    onClose={() => setShowDeleteLogoModal(false)}
+                    onConfirm={confirmDeleteLogo}
+                    itemName="Company Logo"
+                    itemType="image"
+                />
             </div>
         </DashboardLayout>
     );

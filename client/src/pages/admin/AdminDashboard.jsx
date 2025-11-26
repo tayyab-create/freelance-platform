@@ -1,20 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import DashboardLayout from '../../components/layout/DashboardLayout'
+import { PageHeader, StatCard, SkeletonLoader } from '../../components/shared';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { useState } from 'react';
+import { useEffect } from 'react';
+import { toast } from '../../utils/toast';
 import { adminAPI } from '../../services/api';
-import DashboardLayout from '../../components/layout/DashboardLayout';
-import Spinner from '../../components/common/Spinner';
-import { StatCard, SkeletonLoader, DataTable, PageHeader } from '../../components/shared';
 import { getAdminBreadcrumbs } from '../../utils/breadcrumbUtils';
-import {
-  FiUsers, FiBriefcase, FiFileText, FiClock, FiCheckCircle,
-  FiXCircle, FiActivity, FiArrowRight, FiShield, FiDollarSign
-} from 'react-icons/fi';
-import { toast } from 'react-toastify';
-import {
-  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Legend
-} from 'recharts';
+import { FiUsers, FiClock, FiBriefcase, FiDollarSign, FiShield, FiArrowRight, FiCheckCircle, FiXCircle } from 'react-icons/fi';
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, BarChart, CartesianGrid, XAxis, YAxis, Bar } from 'recharts';
 
 const AdminDashboard = () => {
   const { user } = useSelector((state) => state.auth);

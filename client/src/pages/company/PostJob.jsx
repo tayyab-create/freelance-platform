@@ -13,8 +13,8 @@ import {
     FiArrowLeft,
     FiSend
 } from 'react-icons/fi';
-import { toast } from 'react-toastify';
-import { Select, PageHeader } from '../../components/shared';
+import { toast } from '../../utils/toast';
+import { Select, PageHeader, ConfirmationModal, SuccessAnimation } from '../../components/shared';
 import Input from '../../components/common/Input';
 import Textarea from '../../components/common/Textarea';
 import AutoSaveIndicator from '../../components/common/AutoSaveIndicator';
@@ -28,6 +28,8 @@ const PostJob = () => {
     const navigate = useNavigate();
     const [showUnsavedModal, setShowUnsavedModal] = useState(false);
     const [pendingNavigation, setPendingNavigation] = useState(null);
+    const [draftToRestore, setDraftToRestore] = useState(null);
+    const [showSuccess, setShowSuccess] = useState(false);
 
     // Validation schema
     const validationSchema = new ValidationSchema()
@@ -84,7 +86,7 @@ const PostJob = () => {
 
     // Unsaved changes warning
     useUnsavedChangesWarning(
-        isDirty && !isSubmitting,
+        isDirty && !isSubmitting && !showSuccess,
         'You have unsaved changes. Are you sure you want to leave?'
     );
 
@@ -93,20 +95,25 @@ const PostJob = () => {
         if (hasSavedData) {
             const restored = restoreFromStorage();
             if (restored) {
-                const shouldRestore = window.confirm(
-                    `We found a draft from ${new Date(restored.timestamp).toLocaleString()}. Would you like to restore it?`
-                );
-                if (shouldRestore) {
-                    Object.keys(restored.data).forEach((key) => {
-                        setFieldValue(key, restored.data[key]);
-                    });
-                    toast.success('Draft restored successfully!');
-                } else {
-                    clearSaved();
-                }
+                setDraftToRestore(restored);
             }
         }
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const handleRestoreDraft = () => {
+        if (draftToRestore) {
+            Object.keys(draftToRestore.data).forEach((key) => {
+                setFieldValue(key, draftToRestore.data[key]);
+            });
+            toast.success('Draft restored successfully!');
+            setDraftToRestore(null);
+        }
+    };
+
+    const handleDiscardDraft = () => {
+        clearSaved();
+        setDraftToRestore(null);
+    };
 
     const onSubmit = async (values) => {
         try {
@@ -120,8 +127,7 @@ const PostJob = () => {
 
             await companyAPI.postJob(jobData);
             clearSaved(); // Clear draft after successful submission
-            toast.success('Job posted successfully!');
-            navigate('/company/jobs');
+            setShowSuccess(true);
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to post job');
             throw error;
@@ -445,6 +451,30 @@ const PostJob = () => {
                 isOpen={showUnsavedModal}
                 onConfirm={confirmLeave}
                 onCancel={cancelLeave}
+            />
+
+            {/* Draft Restore Confirmation */}
+            <ConfirmationModal
+                isOpen={!!draftToRestore}
+                onClose={handleDiscardDraft}
+                onConfirm={handleRestoreDraft}
+                title="Restore Draft?"
+                message={`We found a draft from ${draftToRestore ? new Date(draftToRestore.timestamp).toLocaleString() : ''}. Would you like to restore it?`}
+                confirmText="Restore Draft"
+                cancelText="Discard"
+                variant="info"
+            />
+
+            {/* Success Animation */}
+            <SuccessAnimation
+                show={showSuccess}
+                message="Job Posted Successfully!"
+                description="Your job is now live and visible to workers."
+                showConfetti={true}
+                onComplete={() => {
+                    setShowSuccess(false);
+                    navigate('/company/jobs');
+                }}
             />
         </DashboardLayout>
     );

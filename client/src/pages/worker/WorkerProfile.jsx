@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { workerAPI, uploadAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
-import { toast } from 'react-toastify';
+import { toast } from '../../utils/toast';
 
 // Import new modular components
 import ProfileHeader from '../../components/worker/profile/ProfileHeader';
@@ -11,8 +11,9 @@ import PortfolioTab from '../../components/worker/profile/PortfolioTab';
 import ReviewsTab from '../../components/worker/profile/ReviewsTab';
 import ExperienceModal from '../../components/worker/profile/ExperienceModal';
 import CertificationModal from '../../components/worker/profile/CertificationModal';
-import { PageHeader } from '../../components/shared';
+import { PageHeader, DeleteConfirmationModal } from '../../components/shared';
 import { getWorkerBreadcrumbs } from '../../utils/breadcrumbUtils';
+import useUndo from '../../hooks/useUndo';
 
 const WorkerProfile = () => {
     const [profile, setProfile] = useState(null);
@@ -57,6 +58,10 @@ const WorkerProfile = () => {
     const [editingCertId, setEditingCertId] = useState(null);
     const [uploadKey, setUploadKey] = useState(0);
 
+    // Delete State
+    const [itemToDelete, setItemToDelete] = useState(null);
+    const { executeWithUndo } = useUndo();
+
     useEffect(() => {
         fetchProfile();
     }, []);
@@ -81,15 +86,58 @@ const WorkerProfile = () => {
         }
     };
 
-    const handleDeleteProfilePicture = async () => {
-        if (!window.confirm('Delete profile picture?')) return;
-        try {
-            await workerAPI.updateProfile({ profilePicture: '' });
-            toast.success('Profile picture removed');
-            fetchProfile();
-        } catch (error) {
-            toast.error('Failed to remove profile picture');
+    const handleDeleteProfilePicture = () => {
+        setItemToDelete({ type: 'profilePicture', name: 'Profile Picture' });
+    };
+
+    const handleDeleteExperience = (id) => {
+        const exp = profile.experience.find(e => e._id === id);
+        setItemToDelete({ type: 'experience', id, name: exp?.title || 'Experience' });
+    };
+
+    const handleDeleteCertification = (id) => {
+        const cert = profile.certifications.find(c => c._id === id);
+        setItemToDelete({ type: 'certification', id, name: cert?.title || 'Certification' });
+    };
+
+    const handleDeleteConfirm = () => {
+        const item = itemToDelete;
+        setItemToDelete(null);
+        const previousProfile = { ...profile };
+
+        // Optimistic Updates
+        if (item.type === 'profilePicture') {
+            setProfile(prev => ({ ...prev, profilePicture: '' }));
+        } else if (item.type === 'experience') {
+            setProfile(prev => ({
+                ...prev,
+                experience: prev.experience.filter(e => e._id !== item.id)
+            }));
+        } else if (item.type === 'certification') {
+            setProfile(prev => ({
+                ...prev,
+                certifications: prev.certifications.filter(c => c._id !== item.id)
+            }));
         }
+
+        executeWithUndo({
+            action: async () => {
+                if (item.type === 'profilePicture') {
+                    await workerAPI.updateProfile({ profilePicture: '' });
+                } else if (item.type === 'experience') {
+                    await workerAPI.deleteExperience(item.id);
+                } else if (item.type === 'certification') {
+                    await workerAPI.deleteCertification(item.id);
+                }
+                // Fetch profile to sync state after actual deletion
+                fetchProfile();
+            },
+            message: `${item.name} deleted`,
+            onUndo: () => {
+                setProfile(previousProfile);
+            },
+            undoMessage: `${item.name} restored`
+        });
     };
 
     const fetchProfile = async () => {
@@ -181,17 +229,6 @@ const WorkerProfile = () => {
         setShowExpModal(true);
     };
 
-    const handleDeleteExperience = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this experience?')) return;
-        try {
-            await workerAPI.deleteExperience(id);
-            toast.success('Experience deleted successfully');
-            fetchProfile();
-        } catch (error) {
-            toast.error('Failed to delete experience');
-        }
-    };
-
     const handleSaveCertification = async (e) => {
         e.preventDefault();
         try {
@@ -225,17 +262,6 @@ const WorkerProfile = () => {
         });
         setEditingCertId(cert._id);
         setShowCertModal(true);
-    };
-
-    const handleDeleteCertification = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this certification?')) return;
-        try {
-            await workerAPI.deleteCertification(id);
-            toast.success('Certification deleted successfully');
-            fetchProfile();
-        } catch (error) {
-            toast.error('Failed to delete certification');
-        }
     };
 
     if (loading) {
@@ -338,6 +364,15 @@ const WorkerProfile = () => {
                     certificationForm={certificationForm}
                     setCertificationForm={setCertificationForm}
                     handleSaveCertification={handleSaveCertification}
+                />
+
+                {/* Delete Confirmation Modal */}
+                <DeleteConfirmationModal
+                    isOpen={!!itemToDelete}
+                    onClose={() => setItemToDelete(null)}
+                    onConfirm={handleDeleteConfirm}
+                    itemName={itemToDelete?.name}
+                    itemType={itemToDelete?.type === 'profilePicture' ? 'image' : itemToDelete?.type}
                 />
             </div>
         </DashboardLayout>

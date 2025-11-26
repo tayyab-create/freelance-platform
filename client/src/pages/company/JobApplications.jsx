@@ -20,8 +20,8 @@ import {
     FiEye,
     FiSearch
 } from 'react-icons/fi';
-import { toast } from 'react-toastify';
-import { SkeletonLoader, StatusBadge, PageHeader } from '../../components/shared';
+import { toast } from '../../utils/toast';
+import { SkeletonLoader, StatusBadge, PageHeader, ConfirmationModal, SuccessAnimation } from '../../components/shared';
 import SubmissionDetailsModal from '../../components/company/SubmissionDetailsModal';
 import { getCompanyBreadcrumbs } from '../../utils/breadcrumbUtils';
 
@@ -40,6 +40,11 @@ const JobApplications = () => {
     // Filters
     const [filter, setFilter] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
+
+    // Confirmation States
+    const [assignConfirmation, setAssignConfirmation] = useState(null);
+    const [approveConfirmation, setApproveConfirmation] = useState(null);
+    const [successState, setSuccessState] = useState(null); // { type: 'assign' | 'approve', message: string }
 
     useEffect(() => {
         fetchData();
@@ -74,15 +79,22 @@ const JobApplications = () => {
         }
     };
 
-    const handleAssignJob = async (workerId, applicationId) => {
-        if (!window.confirm('Are you sure you want to assign this job to this freelancer?')) {
-            return;
-        }
+    const handleAssignJobClick = (workerId, applicationId) => {
+        setAssignConfirmation({ workerId, applicationId });
+    };
 
+    const confirmAssignJob = async () => {
+        const { workerId, applicationId } = assignConfirmation;
         setAssigningTo(applicationId);
+        setAssignConfirmation(null);
+
         try {
             await companyAPI.assignJob(id, { workerId, applicationId });
-            toast.success('Job assigned successfully!');
+            setSuccessState({
+                type: 'assign',
+                message: 'Job Assigned Successfully!',
+                description: 'The freelancer has been notified and can start working.'
+            });
             fetchData();
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to assign job');
@@ -109,16 +121,23 @@ const JobApplications = () => {
         }
     };
 
-    const handleApproveSubmission = async (jobId) => {
-        if (!window.confirm('Are you sure you want to approve this submission and mark the job as complete?')) {
-            return;
-        }
+    const handleApproveSubmissionClick = (jobId) => {
+        setApproveConfirmation(jobId);
+    };
 
+    const confirmApproveSubmission = async () => {
+        const jobId = approveConfirmation;
         setProcessingSubmission(jobId);
+        setApproveConfirmation(null);
+
         try {
             await companyAPI.completeJob(jobId);
-            toast.success('Job completed successfully!');
             setShowSubmissionModal(false);
+            setSuccessState({
+                type: 'approve',
+                message: 'Job Completed!',
+                description: 'The submission has been approved and payment released.'
+            });
             fetchData();
         } catch (error) {
             toast.error('Failed to complete job');
@@ -141,16 +160,6 @@ const JobApplications = () => {
             app.worker?.email?.toLowerCase().includes(query)
         );
     });
-
-    const filterOptions = [
-        {
-            key: 'status', label: 'Status', type: 'select', options: [
-                { value: 'pending', label: 'Pending' },
-                { value: 'accepted', label: 'Accepted' },
-                { value: 'rejected', label: 'Rejected' }
-            ]
-        }
-    ];
 
     if (loading) {
         return (
@@ -440,7 +449,7 @@ const JobApplications = () => {
                                                 <Button
                                                     variant="primary"
                                                     icon={FiCheckCircle}
-                                                    onClick={() => handleAssignJob(application.worker._id, application._id)}
+                                                    onClick={() => handleAssignJobClick(application.worker._id, application._id)}
                                                     loading={assigningTo === application._id}
                                                     disabled={assigningTo !== null}
                                                     className="w-full justify-center"
@@ -461,9 +470,41 @@ const JobApplications = () => {
                     isOpen={showSubmissionModal}
                     onClose={() => setShowSubmissionModal(false)}
                     submission={submission}
-                    onApprove={handleApproveSubmission}
+                    onApprove={handleApproveSubmissionClick}
                     onRequestRevision={handleRequestRevision}
                     processing={processingSubmission}
+                />
+
+                {/* Confirmation Modals */}
+                <ConfirmationModal
+                    isOpen={!!assignConfirmation}
+                    onClose={() => setAssignConfirmation(null)}
+                    onConfirm={confirmAssignJob}
+                    title="Assign Job?"
+                    message="Are you sure you want to assign this job to this freelancer? This action cannot be undone."
+                    confirmText="Assign Job"
+                    cancelText="Cancel"
+                    variant="primary"
+                />
+
+                <ConfirmationModal
+                    isOpen={!!approveConfirmation}
+                    onClose={() => setApproveConfirmation(null)}
+                    onConfirm={confirmApproveSubmission}
+                    title="Approve Submission?"
+                    message="Are you sure you want to approve this submission? This will mark the job as complete and release payment to the freelancer."
+                    confirmText="Approve & Complete"
+                    cancelText="Cancel"
+                    variant="success"
+                />
+
+                {/* Success Animation */}
+                <SuccessAnimation
+                    show={!!successState}
+                    message={successState?.message}
+                    description={successState?.description}
+                    showConfetti={true}
+                    onComplete={() => setSuccessState(null)}
                 />
             </div>
         </DashboardLayout>

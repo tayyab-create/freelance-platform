@@ -15,10 +15,10 @@ import {
     FiEye,
     FiSearch
 } from 'react-icons/fi';
-import { toast } from 'react-toastify';
+import { toast } from '../../utils/toast';
 import ReviewModal from '../../components/company/ReviewModal';
 import SubmissionDetailsModal from '../../components/company/SubmissionDetailsModal';
-import { SkeletonLoader, StatusBadge, Avatar, PageHeader } from '../../components/shared';
+import { SkeletonLoader, StatusBadge, Avatar, PageHeader, ConfirmationModal, SuccessAnimation } from '../../components/shared';
 
 const Submissions = () => {
     const [submissions, setSubmissions] = useState([]);
@@ -36,6 +36,10 @@ const Submissions = () => {
     const [reviewingSubmission, setReviewingSubmission] = useState(null);
     const [submittingReview, setSubmittingReview] = useState(false);
 
+    // Confirmation & Success
+    const [submissionToApprove, setSubmissionToApprove] = useState(null);
+    const [showSuccess, setShowSuccess] = useState(false);
+
     useEffect(() => {
         fetchSubmissions();
     }, []);
@@ -51,16 +55,19 @@ const Submissions = () => {
         }
     };
 
-    const handleApprove = async (jobId) => {
-        if (!window.confirm('Are you sure you want to approve this submission and mark the job as complete?')) {
-            return;
-        }
+    const handleApproveClick = (jobId) => {
+        setSubmissionToApprove(jobId);
+    };
 
+    const handleApproveConfirm = async () => {
+        const jobId = submissionToApprove;
         setProcessing(jobId);
+        setSubmissionToApprove(null);
+
         try {
             await companyAPI.completeJob(jobId);
-            toast.success('Job completed successfully!');
             setShowDetailsModal(false);
+            setShowSuccess(true);
             fetchSubmissions();
         } catch (error) {
             toast.error('Failed to complete job');
@@ -120,15 +127,6 @@ const Submissions = () => {
             sub.workerInfo?.fullName?.toLowerCase().includes(query)
         );
     });
-
-    const filterOptions = [
-        {
-            key: 'status', label: 'Status', type: 'select', options: [
-                { value: 'submitted', label: 'New' },
-                { value: 'approved', label: 'Approved' }
-            ]
-        }
-    ];
 
     return (
         <DashboardLayout>
@@ -315,7 +313,7 @@ const Submissions = () => {
                 isOpen={showDetailsModal}
                 onClose={() => setShowDetailsModal(false)}
                 submission={selectedSubmission}
-                onApprove={handleApprove}
+                onApprove={handleApproveClick}
                 onRequestRevision={handleRequestRevision}
                 processing={processing}
             />
@@ -371,6 +369,27 @@ const Submissions = () => {
                     loading={submittingReview}
                 />
             )}
+
+            {/* Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={!!submissionToApprove}
+                onClose={() => setSubmissionToApprove(null)}
+                onConfirm={handleApproveConfirm}
+                title="Approve Submission?"
+                message="Are you sure you want to approve this submission? This will mark the job as complete and release payment to the freelancer."
+                confirmText="Approve & Complete"
+                cancelText="Cancel"
+                variant="success"
+            />
+
+            {/* Success Animation */}
+            <SuccessAnimation
+                show={showSuccess}
+                message="Job Completed!"
+                description="The submission has been approved and the job is now marked as complete."
+                showConfetti={true}
+                onComplete={() => setShowSuccess(false)}
+            />
         </DashboardLayout>
     );
 };
