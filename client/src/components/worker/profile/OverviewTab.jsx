@@ -1,7 +1,7 @@
 import React from 'react';
 import { FiDollarSign, FiBriefcase, FiStar, FiCheckCircle, FiGithub, FiLinkedin } from 'react-icons/fi';
 import Input from '../../common/Input';
-import Select from '../../shared/Select';
+import { Select } from '../../shared';
 
 const OverviewTab = ({
     profile,

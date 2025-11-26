@@ -26,8 +26,23 @@ const io = socketIo(server, {
 connectDB();
 
 // Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Apply JSON and URL-encoded parsers to all routes EXCEPT /api/upload
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/upload')) {
+    // Skip body parsers for upload routes - let multer handle them
+    return next();
+  }
+  express.json()(req, res, next);
+});
+
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/upload')) {
+    // Skip body parsers for upload routes - let multer handle them
+    return next();
+  }
+  express.urlencoded({ extended: true })(req, res, next);
+});
+
 app.use(
   cors({
     origin: process.env.CLIENT_URL,

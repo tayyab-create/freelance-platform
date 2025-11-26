@@ -37,6 +37,7 @@ const WorkerProfile = () => {
     const [showExpModal, setShowExpModal] = useState(false);
     const [showCertModal, setShowCertModal] = useState(false);
     const [uploadingImage, setUploadingImage] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
 
     const [experienceForm, setExperienceForm] = useState({
         title: '',
@@ -70,8 +71,13 @@ const WorkerProfile = () => {
         if (!file) return;
 
         setUploadingImage(true);
+        setUploadProgress(0);
         try {
-            const response = await uploadAPI.uploadSingle(file, 'profiles');
+            const response = await uploadAPI.uploadSingle(
+                file,
+                'profiles',
+                (progress) => setUploadProgress(progress)
+            );
             const imageUrl = `http://localhost:5000${response.data.data.fileUrl}`;
 
             // Update profile with new image URL
@@ -79,9 +85,11 @@ const WorkerProfile = () => {
             toast.success('Profile picture updated!');
             fetchProfile();
         } catch (error) {
-            toast.error('Failed to upload image');
+            const errorMessage = error.response?.data?.message || 'Failed to upload image';
+            toast.error(errorMessage);
         } finally {
             setUploadingImage(false);
+            setUploadProgress(0);
             setUploadKey(prev => prev + 1);
         }
     };
@@ -292,6 +300,7 @@ const WorkerProfile = () => {
                     handleImageUpload={handleImageUpload}
                     handleDeleteProfilePicture={handleDeleteProfilePicture}
                     uploadingImage={uploadingImage}
+                    uploadProgress={uploadProgress}
                     basicInfo={basicInfo}
                     handleBasicInfoChange={handleBasicInfoChange}
                     uploadKey={uploadKey}

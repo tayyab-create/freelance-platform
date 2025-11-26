@@ -9,7 +9,7 @@ import { FaBuilding } from 'react-icons/fa'
 import { toast } from '../../utils/toast';
 import FileUpload from '../../components/common/FileUpload';
 import { uploadAPI } from '../../services/api';
-import { SkeletonLoader, PageHeader, DeleteConfirmationModal } from '../../components/shared';
+import { SkeletonLoader, PageHeader, DeleteConfirmationModal, Select } from '../../components/shared';
 import { getCompanyBreadcrumbs } from '../../utils/breadcrumbUtils';
 import useUndo from '../../hooks/useUndo';
 
@@ -19,6 +19,7 @@ const CompanyProfile = () => {
     const [editing, setEditing] = useState(false);
     const [saving, setSaving] = useState(false);
     const [uploadingLogo, setUploadingLogo] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
     const [uploadKey, setUploadKey] = useState(0);
     const [activeTab, setActiveTab] = useState('overview');
 
@@ -92,17 +93,24 @@ const CompanyProfile = () => {
         if (!file) return;
 
         setUploadingLogo(true);
+        setUploadProgress(0);
         try {
-            const response = await uploadAPI.uploadSingle(file, 'logos');
+            const response = await uploadAPI.uploadSingle(
+                file,
+                'logos',
+                (progress) => setUploadProgress(progress)
+            );
             const logoUrl = `http://localhost:5000${response.data.data.fileUrl}`;
 
             await companyAPI.updateProfile({ logo: logoUrl });
             toast.success('Logo updated!');
             fetchProfile();
         } catch (error) {
-            toast.error('Failed to upload logo');
+            const errorMessage = error.response?.data?.message || 'Failed to upload logo';
+            toast.error(errorMessage);
         } finally {
             setUploadingLogo(false);
+            setUploadProgress(0);
             setUploadKey(prev => prev + 1);
         }
     };
@@ -237,7 +245,9 @@ const CompanyProfile = () => {
                                             key={uploadKey}
                                             onFileSelect={handleLogoUpload}
                                             accept="image/*"
-                                            loading={uploadingLogo}
+                                            isUploading={uploadingLogo}
+                                            uploadProgress={uploadProgress}
+                                            showProgress={true}
                                         >
                                             <div className="relative h-32 w-32 rounded-xl overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-gray-300 transition-all bg-white flex items-center justify-center group">
                                                 {profile?.logo ? (
@@ -469,18 +479,18 @@ const CompanyProfile = () => {
                                             />
                                             <div>
                                                 <label className="label text-sm font-bold text-gray-700 mb-1 block">Company Size</label>
-                                                <select
+                                                <Select
                                                     name="companySize"
                                                     value={formData.companySize}
                                                     onChange={handleChange}
-                                                    className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:border-primary-500 outline-none"
-                                                >
-                                                    <option value="1-10">1-10 employees</option>
-                                                    <option value="11-50">11-50 employees</option>
-                                                    <option value="51-200">51-200 employees</option>
-                                                    <option value="201-500">201-500 employees</option>
-                                                    <option value="500+">500+ employees</option>
-                                                </select>
+                                                    options={[
+                                                        { value: "1-10", label: "1-10 employees" },
+                                                        { value: "11-50", label: "11-50 employees" },
+                                                        { value: "51-200", label: "51-200 employees" },
+                                                        { value: "201-500", label: "201-500 employees" },
+                                                        { value: "500+", label: "500+ employees" }
+                                                    ]}
+                                                />
                                             </div>
                                         </>
                                     ) : (

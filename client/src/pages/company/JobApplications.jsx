@@ -485,6 +485,7 @@ const JobApplications = () => {
                     confirmText="Assign Job"
                     cancelText="Cancel"
                     variant="primary"
+
                 />
 
                 <ConfirmationModal

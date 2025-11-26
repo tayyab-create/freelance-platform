@@ -14,6 +14,7 @@ const ProfileHeader = ({
     handleImageUpload,
     handleDeleteProfilePicture,
     uploadingImage,
+    uploadProgress = 0,
     basicInfo,
     handleBasicInfoChange,
     uploadKey
@@ -66,7 +67,9 @@ const ProfileHeader = ({
                                         key={uploadKey}
                                         onFileSelect={handleImageUpload}
                                         accept="image/*"
-                                        loading={uploadingImage}
+                                        isUploading={uploadingImage}
+                                        uploadProgress={uploadProgress}
+                                        showProgress={true}
                                     >
                                         <div className="relative h-32 w-32 rounded-xl overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-gray-300 transition-all bg-gray-50 flex items-center justify-center group">
                                             {profile?.profilePicture ? (

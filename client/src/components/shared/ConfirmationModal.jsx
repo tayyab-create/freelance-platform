@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Modal from './Modal';
-import { FiAlertTriangle, FiInfo, FiAlertCircle, FiTrash2, FiX } from 'react-icons/fi';
+import { FiAlertTriangle, FiInfo, FiAlertCircle, FiTrash2, FiX, FiCheckCircle } from 'react-icons/fi';
 
 /**
  * Enhanced Confirmation Modal for destructive actions
@@ -53,10 +53,24 @@ const ConfirmationModal = ({
             iconColor: 'text-blue-600',
             buttonClass: 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/30',
             borderColor: 'border-blue-200'
+        },
+        success: {
+            icon: FiCheckCircle,
+            iconBg: 'bg-green-100',
+            iconColor: 'text-green-600',
+            buttonClass: 'bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-500/30',
+            borderColor: 'border-green-200'
+        },
+        primary: {
+            icon: FiInfo,
+            iconBg: 'bg-primary-100',
+            iconColor: 'text-primary-600',
+            buttonClass: 'bg-primary-600 hover:bg-primary-700 text-white shadow-lg shadow-primary-500/30',
+            borderColor: 'border-primary-200'
         }
     };
 
-    const config = variants[variant];
+    const config = variants[variant] || variants.danger;
     const Icon = config.icon;
 
     const handleConfirm = async () => {

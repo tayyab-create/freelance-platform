@@ -75,6 +75,16 @@ exports.getOrCreateConversation = async (req, res) => {
   try {
     const { otherUserId, jobId } = req.body;
 
+    console.log('Creating conversation:', { userId: req.user._id, otherUserId, jobId });
+
+    // Validate otherUserId
+    if (!otherUserId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Other user ID is required'
+      });
+    }
+
     // Check if conversation exists
     let conversation = await Conversation.findOne({
       participants: { $all: [req.user._id, otherUserId] },
@@ -83,17 +93,49 @@ exports.getOrCreateConversation = async (req, res) => {
       .populate('participants', 'email role')
       .populate('job', 'title');
 
+    console.log('Existing conversation found:', conversation ? conversation._id : 'None');
+
     // Create new conversation if it doesn't exist
     if (!conversation) {
-      conversation = await Conversation.create({
-        participants: [req.user._id, otherUserId],
-        job: jobId
-      });
+      try {
+        conversation = await Conversation.create({
+          participants: [req.user._id, otherUserId],
+          job: jobId
+        });
 
-      conversation = await Conversation.findById(conversation._id)
-        .populate('participants', 'email role')
-        .populate('job', 'title');
+        console.log('New conversation created:', conversation._id);
+
+        conversation = await Conversation.findById(conversation._id)
+          .populate('participants', 'email role')
+          .populate('job', 'title');
+
+        console.log('Conversation after populate:', conversation ? 'Populated successfully' : 'POPULATE FAILED');
+      } catch (err) {
+        console.error('Conversation creation error:', err);
+        if (err.code === 11000) {
+          // Race condition: Conversation already created
+          conversation = await Conversation.findOne({
+            participants: { $all: [req.user._id, otherUserId] },
+            job: jobId || { $exists: false }
+          })
+            .populate('participants', 'email role')
+            .populate('job', 'title');
+        } else {
+          throw err;
+        }
+      }
     }
+
+    // Final validation
+    if (!conversation) {
+      console.error('Conversation is null after all attempts');
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to create or retrieve conversation'
+      });
+    }
+
+    console.log('Returning conversation:', conversation._id);
 
     res.status(200).json({
       success: true,

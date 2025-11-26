@@ -4,7 +4,7 @@ import { toast } from '../../utils/toast';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
 import { FiCheck, FiX, FiUser, FiBriefcase, FiClock } from 'react-icons/fi';
-import { PageHeader, SkeletonLoader, EmptyState, StatusBadge, Avatar, ActionDropdown, ConfirmationModal } from '../../components/shared';
+import { PageHeader, SkeletonLoader, EmptyState, StatusBadge, Avatar, ActionDropdown, ConfirmationModal, Select } from '../../components/shared';
 
 const PendingApprovals = () => {
   const [pendingUsers, setPendingUsers] = useState([]);
@@ -76,15 +76,17 @@ const PendingApprovals = () => {
             <p className="text-gray-500 text-sm mt-1">Review and manage registration requests</p>
           </div>
           <div className="flex items-center gap-3">
-            <select
-              value={filterRole}
-              onChange={(e) => setFilterRole(e.target.value)}
-              className="pl-3 pr-8 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-pointer"
-            >
-              <option value="all">All Roles</option>
-              <option value="worker">Workers</option>
-              <option value="company">Companies</option>
-            </select>
+            <div className="w-48">
+              <Select
+                value={filterRole}
+                onChange={(e) => setFilterRole(e.target.value)}
+                options={[
+                  { value: 'all', label: 'All Roles' },
+                  { value: 'worker', label: 'Workers' },
+                  { value: 'company', label: 'Companies' },
+                ]}
+              />
+            </div>
             <div className="bg-rose-100 text-rose-700 px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2">
               <FiClock />
               {filteredUsers.length} Pending

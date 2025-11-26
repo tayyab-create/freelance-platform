@@ -62,7 +62,7 @@ const CompanyDashboard = () => {
 
 
 
-  const profileCompletion = calculateCompanyProfileCompletion(stats.profile);
+  const profileCompletion = stats ? calculateCompanyProfileCompletion(stats.profile) : 0;
 
   return (
     <DashboardLayout>

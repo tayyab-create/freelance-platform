@@ -9,7 +9,8 @@ import {
     StatusBadge,
     ResponsiveTable,
     DeleteConfirmationModal,
-    Modal
+    Modal,
+    Select
 } from '../../components/shared';
 import useUndo from '../../hooks/useUndo';
 
@@ -170,31 +171,29 @@ const ManageJobs = () => {
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <div className="relative">
-                            <select
+                        <div className="w-48">
+                            <Select
                                 name="category"
                                 value={filters.category}
                                 onChange={handleFilterChange}
-                                className="pl-3 pr-8 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-pointer"
-                            >
-                                <option value="">All Categories</option>
-                                {categories.map((cat, index) => (
-                                    <option key={index} value={cat}>{cat}</option>
-                                ))}
-                            </select>
+                                options={[
+                                    { value: "", label: "All Categories" },
+                                    ...categories.map(cat => ({ value: cat, label: cat }))
+                                ]}
+                            />
                         </div>
-                        <div className="relative">
-                            <select
+                        <div className="w-40">
+                            <Select
                                 name="status"
                                 value={filters.status}
                                 onChange={handleFilterChange}
-                                className="pl-3 pr-8 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-pointer"
-                            >
-                                <option value="">All Status</option>
-                                <option value="posted">Active</option>
-                                <option value="assigned">In Progress</option>
-                                <option value="completed">Completed</option>
-                            </select>
+                                options={[
+                                    { value: "", label: "All Status" },
+                                    { value: "posted", label: "Active" },
+                                    { value: "assigned", label: "In Progress" },
+                                    { value: "completed", label: "Completed" }
+                                ]}
+                            />
                         </div>
                         <button onClick={fetchJobs} className="p-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">
                             <FiFilter className="h-4 w-4" />

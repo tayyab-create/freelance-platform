@@ -56,7 +56,7 @@ const CustomSelect = ({
       <select
         name={name}
         value={value}
-        onChange={() => {}}
+        onChange={() => { }}
         required={required}
         className="sr-only"
         tabIndex={-1}

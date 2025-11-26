@@ -43,11 +43,13 @@ const BrowseJobs = () => {
         setInitialLoad(false);
     }, [location.search]);
 
+    // Fetch jobs when filters change (after initial load)
     useEffect(() => {
         if (!initialLoad) {
             fetchJobs();
         }
-    }, [filters, initialLoad]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filters]);
 
     const fetchJobs = async () => {
         try {

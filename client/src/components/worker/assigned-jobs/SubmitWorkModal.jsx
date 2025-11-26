@@ -12,7 +12,8 @@ const SubmitWorkModal = ({
     handleFileUpload,
     handleRemoveFile,
     submitting,
-    uploadingFiles
+    uploadingFiles,
+    uploadProgress = 0
 }) => {
     return (
         <Modal
@@ -63,21 +64,44 @@ const SubmitWorkModal = ({
 
                     <div className="space-y-3">
                         {/* Upload Area */}
-                        <FileUpload
-                            onFileSelect={(file) => handleFileUpload({ target: { files: [file] } })}
-                            multiple={true}
-                            loading={uploadingFiles}
-                            accept="*/*"
-                            maxSize={10} // 10MB
-                        >
-                            <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:bg-gray-50 hover:border-primary-300 transition-all cursor-pointer group">
-                                <div className="h-12 w-12 bg-primary-50 text-primary-600 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                                    <FiUpload className="h-6 w-6" />
+                        {!uploadingFiles && (
+                            <FileUpload
+                                onFileSelect={handleFileUpload}
+                                multiple={true}
+                                isUploading={uploadingFiles}
+                                uploadProgress={uploadProgress}
+                                showProgress={false}
+                                accept="*/*"
+                                maxSize={10} // 10MB
+                            >
+                                <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:bg-gray-50 hover:border-primary-300 transition-all cursor-pointer group">
+                                    <div className="h-12 w-12 bg-primary-50 text-primary-600 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                                        <FiUpload className="h-6 w-6" />
+                                    </div>
+                                    <p className="text-sm font-bold text-gray-700">Click to upload files</p>
+                                    <p className="text-xs text-gray-400 mt-1">Max 10MB per file</p>
                                 </div>
-                                <p className="text-sm font-bold text-gray-700">Click to upload files</p>
-                                <p className="text-xs text-gray-400 mt-1">Max 10MB per file</p>
+                            </FileUpload>
+                        )}
+
+                        {/* Upload Progress */}
+                        {uploadingFiles && (
+                            <div className="border-2 border-dashed border-gray-200 rounded-xl p-6">
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-center gap-2 text-primary-600">
+                                        <div className="h-5 w-5 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+                                        <span className="text-sm font-medium">Uploading files...</span>
+                                    </div>
+                                    <div className="w-full bg-gray-200 rounded-full h-2">
+                                        <div
+                                            className="bg-primary-600 h-2 rounded-full transition-all duration-300"
+                                            style={{ width: `${uploadProgress}%` }}
+                                        ></div>
+                                    </div>
+                                    <p className="text-xs text-center text-gray-500">{uploadProgress}%</p>
+                                </div>
                             </div>
-                        </FileUpload>
+                        )}
 
                         {/* File List */}
                         {submitData.uploadedFiles.length > 0 && (

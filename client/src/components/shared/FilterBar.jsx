@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FiSearch, FiFilter, FiX } from 'react-icons/fi';
+import Select from './CustomSelect';
 
 const FilterBar = ({
     onSearch,
@@ -152,18 +153,14 @@ const FilterBar = ({
                                 <label className="label">{filter.label}</label>
 
                                 {filter.type === 'select' && (
-                                    <select
+                                    <Select
                                         value={activeFilters[filter.key] || ''}
                                         onChange={(e) => handleFilterChange(filter.key, e.target.value)}
-                                        className="input-field"
-                                    >
-                                        <option value="">All</option>
-                                        {filter.options.map((option) => (
-                                            <option key={option.value} value={option.value}>
-                                                {option.label}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        options={[
+                                            { value: "", label: "All" },
+                                            ...filter.options
+                                        ]}
+                                    />
                                 )}
 
                                 {filter.type === 'multiselect' && (

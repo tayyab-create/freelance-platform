@@ -50,16 +50,55 @@ const JobDetails = () => {
 
     const handleStartConversation = async () => {
         try {
+            // Validate job data before proceeding
+            if (!job) {
+                toast.error('Job data not loaded');
+                return;
+            }
+
+            if (!job.company || !job.company._id) {
+                toast.error('Company information not available');
+                console.error('Job company data:', job.company);
+                return;
+            }
+
+            console.log('Starting conversation with:', {
+                otherUserId: job.company._id,
+                jobId: job._id,
+                companyEmail: job.company.email
+            });
+
             const response = await messageAPI.getOrCreateConversation({
                 otherUserId: job.company._id,
                 jobId: job._id
             });
 
+            console.log('Conversation response:', response);
+            console.log('Response data:', response.data);
+            console.log('Conversation data:', response.data.data);
+
             const conversation = response.data.data;
+
+            if (!conversation) {
+                console.error('No conversation in response');
+                toast.error('Failed to create conversation');
+                return;
+            }
+
+            console.log('Conversation ID:', conversation._id);
+
+            if (!conversation._id) {
+                console.error('No conversation ID:', conversation);
+                toast.error('Invalid conversation data');
+                return;
+            }
+
             navigate(`/messages/${conversation._id}`);
             toast.success('Opening conversation...');
         } catch (error) {
-            toast.error('Failed to start conversation');
+            console.error('Start conversation error:', error);
+            console.error('Error response:', error.response?.data);
+            toast.error(error.response?.data?.message || 'Failed to start conversation');
         }
     };
 

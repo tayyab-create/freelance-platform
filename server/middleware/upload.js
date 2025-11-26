@@ -2,61 +2,117 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Ensure uploads directory exists
-const uploadsDir = './uploads';
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
+// Ensure uploads directory structure exists
+const createUploadDirectories = () => {
+  const baseDir = './uploads';
+  const subdirs = ['profiles', 'logos', 'submissions', 'documents', 'messages', 'general'];
 
-// Create subdirectories
-['profiles', 'logos', 'submissions', 'documents'].forEach(dir => {
-  const dirPath = path.join(uploadsDir, dir);
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
+  if (!fs.existsSync(baseDir)) {
+    fs.mkdirSync(baseDir, { recursive: true });
   }
-});
+
+  subdirs.forEach(dir => {
+    const dirPath = path.join(baseDir, dir);
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath, { recursive: true });
+    }
+  });
+};
+
+// Initialize directories
+createUploadDirectories();
 
 // Configure storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const type = req.body.type || 'general';
+    // Get upload type from query parameter or body
+    const type = req.query.type || req.body.type || 'general';
     const dir = path.join('./uploads', type);
-    
+
     // Create directory if it doesn't exist
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-    
+
     cb(null, dir);
   },
   filename: function (req, file, cb) {
-    // Generate unique filename
+    // Generate unique filename with timestamp and random string
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
+    const ext = path.extname(sanitizedName);
+    const basename = path.basename(sanitizedName, ext);
+    cb(null, `${basename}-${uniqueSuffix}${ext}`);
   }
 });
 
-// File filter
+// Comprehensive file filter
 const fileFilter = (req, file, cb) => {
-  // Allowed file types
-  const allowedTypes = /jpeg|jpg|png|gif|pdf|doc|docx|zip/;
-  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = allowedTypes.test(file.mimetype);
+  // Define allowed file types
+  const allowedMimeTypes = [
+    // Images
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/gif',
+    'image/webp',
+    'image/svg+xml',
+    // Documents
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'text/plain',
+    'text/csv',
+    // Archives
+    'application/zip',
+    'application/x-zip-compressed',
+    'application/x-rar-compressed',
+    'application/x-7z-compressed',
+    'application/octet-stream',
+    // Code files
+    'text/html',
+    'text/css',
+    'text/javascript',
+    'application/json',
+  ];
 
-  if (mimetype && extname) {
+  const allowedExtensions = /\.(jpg|jpeg|png|gif|webp|svg|pdf|doc|docx|xls|xlsx|ppt|pptx|txt|csv|zip|rar|7z|html|css|js|json)$/i;
+
+  // Check MIME type and extension
+  const mimeTypeAllowed = allowedMimeTypes.includes(file.mimetype) || file.mimetype.startsWith('image/');
+  const extname = allowedExtensions.test(path.extname(file.originalname).toLowerCase());
+
+  if (mimeTypeAllowed && extname) {
     return cb(null, true);
   } else {
-    cb(new Error('Invalid file type. Only images, PDFs, and documents are allowed.'));
+    cb(new Error(`Invalid file type "${file.mimetype}". Please upload a valid image, document, or archive file.`));
   }
 };
 
-// Create multer upload instance
-const upload = multer({
-  storage: storage,
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB max file size
-  },
-  fileFilter: fileFilter
-});
+// Create multer upload instance with different configurations
+const createUploadMiddleware = (options = {}) => {
+  const defaultOptions = {
+    storage: storage,
+    limits: {
+      fileSize: options.maxSize || 10 * 1024 * 1024, // Default 10MB
+      files: options.maxFiles || 10, // Default max 10 files
+    },
+    fileFilter: options.skipFilter ? undefined : fileFilter,
+  };
 
-module.exports = upload;
+  return multer(defaultOptions);
+};
+
+// Export default upload middleware
+const upload = createUploadMiddleware();
+
+// Export helper function to create custom upload middleware
+module.exports = {
+  upload,
+  createUploadMiddleware,
+  createUploadDirectories,
+};

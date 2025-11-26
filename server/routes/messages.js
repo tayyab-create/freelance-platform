@@ -6,7 +6,7 @@ const {
   getMessages,
   sendMessage
 } = require('../controllers/messageController');
-const upload = require('../middleware/upload');
+const { upload } = require('../middleware/upload');
 const { protect } = require('../middleware/auth');
 
 // All routes are protected

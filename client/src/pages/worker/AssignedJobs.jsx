@@ -32,6 +32,7 @@ const AssignedJobs = () => {
   // Submission State
   const [submitting, setSubmitting] = useState(false);
   const [uploadingFiles, setUploadingFiles] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [submitData, setSubmitData] = useState({
     description: '',
     links: '',
@@ -111,13 +112,43 @@ const AssignedJobs = () => {
     }, 300);
   };
 
-  const handleFileUpload = async (e) => {
-    const files = Array.from(e.target.files);
+  const handleFileUpload = async (filesInput) => {
+    // Handle both array of files (from FileUpload) and event object (legacy)
+    let files;
+    if (Array.isArray(filesInput)) {
+      files = filesInput;
+    } else if (filesInput?.target?.files) {
+      files = Array.from(filesInput.target.files);
+    } else {
+      console.error('Invalid file input:', filesInput);
+      return;
+    }
+
     if (files.length === 0) return;
 
     setUploadingFiles(true);
+    setUploadProgress(0);
+
     try {
-      const uploadPromises = files.map(file => uploadAPI.uploadSingle(file, 'submissions'));
+      let completedUploads = 0;
+      const totalFiles = files.length;
+
+      const uploadPromises = files.map(async (file) => {
+        const response = await uploadAPI.uploadSingle(
+          file,
+          'submissions',
+          (progress) => {
+            // Update overall progress based on individual file progress
+            const overallProgress = Math.round(
+              ((completedUploads + (progress / 100)) / totalFiles) * 100
+            );
+            setUploadProgress(overallProgress);
+          }
+        );
+        completedUploads++;
+        return response;
+      });
+
       const responses = await Promise.all(uploadPromises);
 
       const newFiles = responses.map(res => ({
@@ -131,11 +162,14 @@ const AssignedJobs = () => {
         uploadedFiles: [...prev.uploadedFiles, ...newFiles],
       }));
 
-      toast.success('Files uploaded successfully!');
+      toast.success(`${newFiles.length} file(s) uploaded successfully!`);
     } catch (error) {
-      toast.error('Failed to upload files');
+      console.error('File upload error:', error);
+      const errorMessage = error.response?.data?.message || 'Failed to upload files';
+      toast.error(errorMessage);
     } finally {
       setUploadingFiles(false);
+      setUploadProgress(0);
     }
   };
 
@@ -293,6 +327,7 @@ const AssignedJobs = () => {
           handleRemoveFile={handleRemoveFile}
           submitting={submitting}
           uploadingFiles={uploadingFiles}
+          uploadProgress={uploadProgress}
         />
       </div>
     </DashboardLayout>

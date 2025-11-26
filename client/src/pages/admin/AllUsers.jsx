@@ -4,7 +4,7 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
 import { FiUser, FiBriefcase, FiFilter, FiCheckCircle, FiXCircle, FiAlertCircle, FiEye, FiX, FiGlobe, FiMapPin, FiPhone, FiCalendar } from 'react-icons/fi';
 import { toast } from '../../utils/toast';
-import { PageHeader, ResponsiveTable, StatusBadge, SkeletonLoader, Modal } from '../../components/shared';
+import { PageHeader, ResponsiveTable, StatusBadge, SkeletonLoader, Modal, Select } from '../../components/shared';
 
 const AllUsers = () => {
   const [users, setUsers] = useState([]);
@@ -150,31 +150,31 @@ const AllUsers = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="relative">
-              <select
+            <div className="w-40">
+              <Select
                 name="role"
                 value={filters.role}
                 onChange={handleFilterChange}
-                className="pl-3 pr-8 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-pointer"
-              >
-                <option value="">All Roles</option>
-                <option value="worker">Workers</option>
-                <option value="company">Companies</option>
-                <option value="admin">Admins</option>
-              </select>
+                options={[
+                  { value: "", label: "All Roles" },
+                  { value: "worker", label: "Workers" },
+                  { value: "company", label: "Companies" },
+                  { value: "admin", label: "Admins" }
+                ]}
+              />
             </div>
-            <div className="relative">
-              <select
+            <div className="w-40">
+              <Select
                 name="status"
                 value={filters.status}
                 onChange={handleFilterChange}
-                className="pl-3 pr-8 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-pointer"
-              >
-                <option value="">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
-              </select>
+                options={[
+                  { value: "", label: "All Status" },
+                  { value: "pending", label: "Pending" },
+                  { value: "approved", label: "Approved" },
+                  { value: "rejected", label: "Rejected" }
+                ]}
+              />
             </div>
             <button onClick={fetchUsers} className="p-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">
               <FiFilter className="h-4 w-4" />

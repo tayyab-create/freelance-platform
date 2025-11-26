@@ -1,22 +1,24 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { FiUpload, FiX, FiImage, FiFile } from 'react-icons/fi';
+import { FiUpload, FiX, FiImage, FiFile, FiCheck } from 'react-icons/fi';
 import Button from './Button';
 import ProgressBar from './ProgressBar';
 
 const FileUpload = ({
   onFileSelect,
   accept = "image/*",
-  maxSize = 5, // MB
+  maxSize = 10, // MB
   preview = false,
   currentImage = null,
   label = "Upload File",
   children,
-  showProgress = false,
+  showProgress = true,
   uploadProgress = 0,
   isUploading = false,
   multiple = false,
   helperText,
   disabled = false,
+  onRemove = null,
+  loading = false,
 }) => {
   const fileInputRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -91,6 +93,9 @@ const FileUpload = ({
       if (onFileSelect) {
         onFileSelect(newFiles);
       }
+      if (onRemove) {
+        onRemove(index);
+      }
     } else {
       setSelectedFile(null);
       setSelectedFiles([]);
@@ -102,11 +107,14 @@ const FileUpload = ({
       if (onFileSelect) {
         onFileSelect(null);
       }
+      if (onRemove) {
+        onRemove();
+      }
     }
   };
 
   const handleClick = () => {
-    if (!disabled) {
+    if (!disabled && !loading && !isUploading) {
       fileInputRef.current?.click();
     }
   };
@@ -272,13 +280,21 @@ const FileUpload = ({
             </div>
           )}
 
-          {showProgress && isUploading && (
-            <ProgressBar
-              progress={uploadProgress}
-              label="Uploading"
-              color="primary"
-              size="md"
-            />
+          {showProgress && (isUploading || loading) && (
+            <div className="space-y-2">
+              <ProgressBar
+                progress={uploadProgress}
+                label={loading || isUploading ? "Uploading" : "Upload Complete"}
+                color="primary"
+                size="md"
+              />
+              {uploadProgress === 100 && !loading && !isUploading && (
+                <div className="flex items-center justify-center gap-2 text-sm text-green-600">
+                  <FiCheck className="h-4 w-4" />
+                  <span>Upload complete!</span>
+                </div>
+              )}
+            </div>
           )}
         </>
       )}

@@ -10,12 +10,40 @@ const api = axios.create({
 });
 
 // Request interceptor - Add token to requests
+// api.interceptors.request.use(
+//     (config) => {
+//         const token = localStorage.getItem('token');
+//         if (token) {
+//             config.headers.Authorization = `Bearer ${token}`;
+//         }
+
+//         // If sending FormData, delete Content-Type to let browser set it with boundary
+//         // if (config.data instanceof FormData) {
+//         //     delete config.headers['Content-Type'];
+//         // }
+
+//         return config;
+//     },
+//     (error) => {
+//         return Promise.reject(error);
+//     }
+// );
+
+// Request interceptor - Add token to requests
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
+
+        // FIX: Check if data is FormData and strictly unset Content-Type
+        if (config.data instanceof FormData) {
+            // Setting this to undefined lets the browser generate the correct 
+            // 'multipart/form-data; boundary=...' header automatically
+            config.headers['Content-Type'] = undefined;
+        }
+
         return config;
     },
     (error) => {
@@ -111,30 +139,65 @@ export const adminAPI = {
 };
 
 // Upload APIs
+// export const uploadAPI = {
+//     uploadSingle: (file, type = 'general') => {
+//         const formData = new FormData();
+//         formData.append('file', file);
+
+//         // Send type as QUERY PARAMETER - this is more reliable
+//         // DO NOT set Content-Type manually - let browser set it with boundary
+//         return api.post(`/upload/single?type=${type}`, formData);
+//     },
+//     uploadMultiple: (files, type = 'general') => {
+//         const formData = new FormData();
+//         files.forEach(file => {
+//             formData.append('files', file);
+//         });
+
+//         // Send type as QUERY PARAMETER
+//         // DO NOT set Content-Type manually - let browser set it with boundary
+//         return api.post(`/upload/multiple?type=${type}`, formData);
+//     },
+// };
+
+// Upload APIs
 export const uploadAPI = {
-    uploadSingle: (file, type = 'general') => {
+    uploadSingle: async (file, type = 'general', onProgress = null) => {
         const formData = new FormData();
         formData.append('file', file);
 
-        // Send type as QUERY PARAMETER - this is more reliable
-        return api.post(`/upload/single?type=${type}`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
+        const config = {
+            onUploadProgress: (progressEvent) => {
+                if (onProgress && progressEvent.total) {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    onProgress(percentCompleted);
+                }
+            }
+        };
+
+        return api.post(`/upload/single?type=${type}`, formData, config);
     },
-    uploadMultiple: (files, type = 'general') => {
+
+    uploadMultiple: async (files, type = 'general', onProgress = null) => {
         const formData = new FormData();
         files.forEach(file => {
             formData.append('files', file);
         });
 
-        // Send type as QUERY PARAMETER
-        return api.post(`/upload/multiple?type=${type}`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
+        const config = {
+            onUploadProgress: (progressEvent) => {
+                if (onProgress && progressEvent.total) {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    onProgress(percentCompleted);
+                }
+            }
+        };
+
+        return api.post(`/upload/multiple?type=${type}`, formData, config);
+    },
+
+    deleteFile: (type, filename) => {
+        return api.delete(`/upload/${type}/${filename}`);
     },
 };
 

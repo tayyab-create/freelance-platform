@@ -1,79 +1,51 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 const { protect } = require('../middleware/auth');
-
-// Custom storage for better control
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    // Get type from query parameter or body (more reliable)
-    const type = req.query.type || req.body.type || 'general';
-    const dir = path.join('./uploads', type);
-    
-    console.log('Upload type:', type);
-    console.log('Upload directory:', dir);
-    
-    // Create directory if it doesn't exist
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    
-    cb(null, dir);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-// File filter
-const fileFilter = (req, file, cb) => {
-  const allowedTypes = /jpeg|jpg|png|gif|pdf|doc|docx|zip/;
-  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = allowedTypes.test(file.mimetype);
-
-  if (mimetype && extname) {
-    return cb(null, true);
-  } else {
-    cb(new Error('Invalid file type. Only images, PDFs, and documents are allowed.'));
-  }
-};
-
-const upload = multer({
-  storage: storage,
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB
-  },
-  fileFilter: fileFilter
-});
+const { upload } = require('../middleware/upload');
 
 // @desc    Upload single file
 // @route   POST /api/upload/single
 // @access  Private
-router.post('/single', protect, (req, res, next) => {
-  // Pass type through middleware
-  upload.single('file')(req, res, (err) => {
+router.post('/single', protect, (req, res) => {
+  const uploadSingle = upload.single('file');
+
+  uploadSingle(req, res, (err) => {
+    // Handle multer errors
+    if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({
+          success: false,
+          message: 'File size exceeds the 10MB limit'
+        });
+      }
+      return res.status(400).json({
+        success: false,
+        message: `Upload error: ${err.message}`
+      });
+    }
+
+    // Handle other errors
     if (err) {
       return res.status(400).json({
         success: false,
-        message: err.message
+        message: err.message || 'Failed to upload file'
       });
     }
-    
+
+    // Check if file exists
     if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: 'No file uploaded'
+        message: 'No file uploaded. Please select a file.'
       });
     }
 
+    // Get upload type and construct file URL
     const type = req.query.type || req.body.type || 'general';
     const fileUrl = `/uploads/${type}/${req.file.filename}`;
 
-    console.log('File uploaded successfully:', fileUrl);
-
+    // Return success response
     res.status(200).json({
       success: true,
       message: 'File uploaded successfully',
@@ -91,15 +63,39 @@ router.post('/single', protect, (req, res, next) => {
 // @desc    Upload multiple files
 // @route   POST /api/upload/multiple
 // @access  Private
-router.post('/multiple', protect, (req, res, next) => {
-  upload.array('files', 5)(req, res, (err) => {
+router.post('/multiple', protect, (req, res) => {
+  const uploadMultiple = upload.array('files', 10);
+
+  uploadMultiple(req, res, (err) => {
+    // Handle multer errors
+    if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({
+          success: false,
+          message: 'One or more files exceed the 10MB limit'
+        });
+      }
+      if (err.code === 'LIMIT_FILE_COUNT') {
+        return res.status(400).json({
+          success: false,
+          message: 'Too many files. Maximum 10 files allowed.'
+        });
+      }
+      return res.status(400).json({
+        success: false,
+        message: `Upload error: ${err.message}`
+      });
+    }
+
+    // Handle other errors
     if (err) {
       return res.status(400).json({
         success: false,
-        message: err.message
+        message: err.message || 'Failed to upload files'
       });
     }
-    
+
+    // Check if files exist
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({
         success: false,
@@ -107,6 +103,7 @@ router.post('/multiple', protect, (req, res, next) => {
       });
     }
 
+    // Get upload type and map file data
     const type = req.query.type || req.body.type || 'general';
     const files = req.files.map(file => ({
       filename: file.filename,
@@ -116,12 +113,46 @@ router.post('/multiple', protect, (req, res, next) => {
       mimeType: file.mimetype
     }));
 
+    // Return success response
     res.status(200).json({
       success: true,
-      message: 'Files uploaded successfully',
+      message: `${files.length} file(s) uploaded successfully`,
       data: files
     });
   });
+});
+
+// @desc    Delete a file
+// @route   DELETE /api/upload/:filename
+// @access  Private
+router.delete('/:type/:filename', protect, (req, res) => {
+  const { type, filename } = req.params;
+  const fs = require('fs');
+  const path = require('path');
+
+  const filePath = path.join('./uploads', type, filename);
+
+  // Check if file exists
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({
+      success: false,
+      message: 'File not found'
+    });
+  }
+
+  try {
+    // Delete the file
+    fs.unlinkSync(filePath);
+    res.status(200).json({
+      success: true,
+      message: 'File deleted successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete file'
+    });
+  }
 });
 
 module.exports = router;

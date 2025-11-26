@@ -32,14 +32,22 @@ const Messages = () => {
   const fileInputRef = useRef(null);
   const { id } = useParams();
 
+  // Only sync from URL on initial load or when URL ID changes
   useEffect(() => {
     if (id && conversations.length > 0) {
       const conversation = conversations.find(c => c._id === id);
       if (conversation) {
-        setSelectedConversation(conversation);
+        // Only update if we don't have a selected conversation yet, or if the URL actually changed
+        setSelectedConversation(prev => {
+          // If no conversation selected yet, or URL changed to different conversation
+          if (!prev || prev._id !== id) {
+            return conversation;
+          }
+          return prev;
+        });
       }
     }
-  }, [id, conversations]);
+  }, [id]); // Only depend on id, not conversations
 
   useEffect(() => {
     fetchConversations();
@@ -96,7 +104,7 @@ const Messages = () => {
         const newMessages = data.data;
         setMessages(newMessages);
 
-        // Update conversation list if there are new messages
+        // Update conversation list if there are new messages (but don't refetch all conversations during silent polling)
         if (silent && newMessages.length > 0) {
           const lastMessage = newMessages[newMessages.length - 1];
           setSelectedConversation(prev => ({
@@ -104,7 +112,12 @@ const Messages = () => {
             lastMessage: lastMessage,
             lastMessageAt: lastMessage.createdAt
           }));
-          fetchConversations();
+          // Update the conversation in the list without refetching
+          setConversations(prev => prev.map(conv =>
+            conv._id === conversationId
+              ? { ...conv, lastMessage: lastMessage, lastMessageAt: lastMessage.createdAt }
+              : conv
+          ));
         }
       }
     } catch (error) {
