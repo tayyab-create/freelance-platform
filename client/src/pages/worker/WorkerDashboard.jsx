@@ -15,6 +15,8 @@ import RatingCard from '../../components/worker/dashboard/RatingCard';
 import QuickActions from '../../components/worker/dashboard/QuickActions';
 import Achievements from '../../components/worker/dashboard/Achievements';
 import RecentActivity from '../../components/worker/dashboard/RecentActivity';
+import { PageHeader } from '../../components/shared';
+import { getWorkerBreadcrumbs } from '../../utils/breadcrumbUtils';
 
 const WorkerDashboard = () => {
   const { user } = useSelector((state) => state.auth);
@@ -95,6 +97,11 @@ const WorkerDashboard = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
+        {/* Breadcrumbs */}
+        <PageHeader
+          breadcrumbs={getWorkerBreadcrumbs('dashboard')}
+        />
+
         {/* Enhanced Header with Profile Picture */}
         <DashboardHeader user={user} dashboardData={dashboardData} />
 

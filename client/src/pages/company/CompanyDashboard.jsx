@@ -5,6 +5,7 @@ import { companyAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
 import { StatCard, SkeletonLoader, Avatar, ProgressBar, EmptyState, PageHeader } from '../../components/shared';
+import { getCompanyBreadcrumbs } from '../../utils/breadcrumbUtils';
 
 import {
   FiBriefcase, FiUsers, FiCheckCircle, FiClock, FiPlus,
@@ -66,6 +67,11 @@ const CompanyDashboard = () => {
   return (
     <DashboardLayout>
       <div className="space-y-8 pb-8">
+        {/* Breadcrumbs */}
+        <PageHeader
+          breadcrumbs={getCompanyBreadcrumbs('dashboard')}
+        />
+
         {/* Enhanced Header */}
         <div className="card bg-gradient-to-r from-blue-600 to-indigo-700 text-white overflow-hidden relative shadow-xl">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -mr-32 -mt-32"></div>

@@ -15,3 +15,4 @@ export { default as JobMetaItem } from './JobMetaItem';
 export { default as SectionCard } from './SectionCard';
 export { default as ApplicationCard } from './ApplicationCard';
 export { default as Select } from './CustomSelect';
+export { default as GlobalSearch } from './GlobalSearch';

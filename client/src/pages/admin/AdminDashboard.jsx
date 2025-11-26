@@ -5,6 +5,7 @@ import { adminAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
 import { StatCard, SkeletonLoader, DataTable, PageHeader } from '../../components/shared';
+import { getAdminBreadcrumbs } from '../../utils/breadcrumbUtils';
 import {
   FiUsers, FiBriefcase, FiFileText, FiClock, FiCheckCircle,
   FiXCircle, FiActivity, FiArrowRight, FiShield, FiDollarSign
@@ -57,6 +58,11 @@ const AdminDashboard = () => {
   return (
     <DashboardLayout>
       <div className="space-y-8 pb-8">
+        {/* Breadcrumbs */}
+        <PageHeader
+          breadcrumbs={getAdminBreadcrumbs('dashboard')}
+        />
+
         {/* Enhanced Header */}
         <div className="card bg-gradient-to-r from-red-600 to-rose-700 text-white overflow-hidden relative shadow-xl">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -mr-32 -mt-32"></div>

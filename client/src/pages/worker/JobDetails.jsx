@@ -19,7 +19,8 @@ import {
     FiArrowLeft
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import { SkeletonLoader, StatusBadge, Avatar } from '../../components/shared';
+import { SkeletonLoader, StatusBadge, Avatar, PageHeader } from '../../components/shared';
+import { getWorkerBreadcrumbs } from '../../utils/breadcrumbUtils';
 
 const JobDetails = () => {
     const { id } = useParams();
@@ -127,14 +128,13 @@ const JobDetails = () => {
         <DashboardLayout>
             <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
                 <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    {/* Back Button */}
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 font-medium mb-6 transition-colors group"
-                    >
-                        <FiArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                        Back
-                    </button>
+                    {/* Breadcrumbs with Back Button */}
+                    <PageHeader
+                        breadcrumbs={getWorkerBreadcrumbs('job-details', { jobTitle: job?.title })}
+                        backButton={{
+                            onClick: () => navigate(-1)
+                        }}
+                    />
 
                     {/* Main Content Grid */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

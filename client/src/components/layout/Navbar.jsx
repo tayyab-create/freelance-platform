@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../redux/slices/authSlice';
-import { FiMenu, FiX, FiLogOut, FiUser, FiBriefcase, FiHome, FiFileText, FiCheckCircle, FiStar, FiMessageCircle, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiMenu, FiX, FiLogOut, FiUser, FiBriefcase, FiHome, FiFileText, FiCheckCircle, FiStar, FiMessageCircle, FiChevronLeft, FiChevronRight, FiSearch } from 'react-icons/fi';
+import GlobalSearch from '../shared/GlobalSearch';
 
 const Sidebar = () => {
   const dispatch = useDispatch();
@@ -11,6 +12,7 @@ const Sidebar = () => {
   const { user } = useSelector((state) => state.auth);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -54,8 +56,24 @@ const Sidebar = () => {
 
   const isActive = (path) => location.pathname === path;
 
+  // Handle Ctrl+K keyboard shortcut for global search
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsSearchOpen(true);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
     <>
+      {/* Global Search Modal */}
+      <GlobalSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+
       {/* Mobile Overlay */}
       {isMobileOpen && (
         <div
@@ -67,7 +85,8 @@ const Sidebar = () => {
       {/* Mobile Toggle Button */}
       <button
         onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-3 bg-white/80 backdrop-blur-lg rounded-xl shadow-lg border border-white/20 text-gray-700 hover:bg-white transition-all duration-300"
+        className="lg:hidden fixed top-4 left-4 z-50 p-3 bg-white/80 backdrop-blur-lg rounded-xl shadow-lg border border-white/20 text-gray-700 hover:bg-white hover:shadow-xl active:scale-95 transition-all duration-300 touch-manipulation"
+        aria-label={isMobileOpen ? 'Close menu' : 'Open menu'}
       >
         {isMobileOpen ? <FiX className="h-6 w-6" /> : <FiMenu className="h-6 w-6" />}
       </button>
@@ -92,6 +111,28 @@ const Sidebar = () => {
             </Link>
           </div>
 
+          {/* Global Search */}
+          <div className="px-4 pt-4">
+            <button
+              onClick={() => setIsSearchOpen(true)}
+              className={`
+                w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-300
+                bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 active:scale-95
+                ${isCollapsed ? 'justify-center' : ''}
+                touch-manipulation
+              `}
+              title={isCollapsed ? 'Search' : ''}
+            >
+              <FiSearch className={`${isCollapsed ? 'h-6 w-6' : 'h-5 w-5'} flex-shrink-0`} />
+              {!isCollapsed && <span>Search</span>}
+              {!isCollapsed && (
+                <kbd className="ml-auto px-2 py-1 bg-white rounded text-xs font-mono text-gray-500">
+                  Ctrl+K
+                </kbd>
+              )}
+            </button>
+          </div>
+
           {/* Navigation Links */}
           <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto scrollbar-thin">
             {links.map((link) => {
@@ -103,11 +144,13 @@ const Sidebar = () => {
                   onClick={() => setIsMobileOpen(false)}
                   className={`
                     flex items-center gap-4 px-4 py-3 rounded-xl font-medium transition-all duration-300
+                    group relative overflow-hidden
                     ${isLinkActive
-                      ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/30'
-                      : 'text-gray-700 hover:bg-primary-50 hover:text-primary-600'
+                      ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/30 scale-[1.02]'
+                      : 'text-gray-700 hover:bg-primary-50 hover:text-primary-600 active:scale-95 hover:shadow-md'
                     }
                     ${isCollapsed ? 'justify-center' : ''}
+                    touch-manipulation
                   `}
                   title={isCollapsed ? link.name : ''}
                 >
@@ -153,8 +196,9 @@ const Sidebar = () => {
               onClick={handleLogout}
               className={`
                 w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-300
-                text-gray-700 hover:bg-red-50 hover:text-red-600
+                text-gray-700 hover:bg-red-50 hover:text-red-600 active:scale-95 hover:shadow-md
                 ${isCollapsed ? 'justify-center' : ''}
+                touch-manipulation
               `}
               title={isCollapsed ? 'Logout' : ''}
             >

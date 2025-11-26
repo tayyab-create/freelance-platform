@@ -11,6 +11,8 @@ import PortfolioTab from '../../components/worker/profile/PortfolioTab';
 import ReviewsTab from '../../components/worker/profile/ReviewsTab';
 import ExperienceModal from '../../components/worker/profile/ExperienceModal';
 import CertificationModal from '../../components/worker/profile/CertificationModal';
+import { PageHeader } from '../../components/shared';
+import { getWorkerBreadcrumbs } from '../../utils/breadcrumbUtils';
 
 const WorkerProfile = () => {
     const [profile, setProfile] = useState(null);
@@ -249,6 +251,11 @@ const WorkerProfile = () => {
     return (
         <DashboardLayout>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 pb-8">
+                {/* Breadcrumbs */}
+                <PageHeader
+                    breadcrumbs={getWorkerBreadcrumbs('profile')}
+                />
+
                 {/* Modern Header Section - Minimalist */}
                 <ProfileHeader
                     profile={profile}

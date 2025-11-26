@@ -21,8 +21,9 @@ import {
     FiSearch
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import { SkeletonLoader, StatusBadge } from '../../components/shared';
+import { SkeletonLoader, StatusBadge, PageHeader } from '../../components/shared';
 import SubmissionDetailsModal from '../../components/company/SubmissionDetailsModal';
+import { getCompanyBreadcrumbs } from '../../utils/breadcrumbUtils';
 
 const JobApplications = () => {
     const { id } = useParams();
@@ -164,16 +165,13 @@ const JobApplications = () => {
     return (
         <DashboardLayout>
             <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-                {/* Back Button */}
-                <button
-                    onClick={() => navigate('/company/jobs')}
-                    className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-900 font-medium mb-6 transition-colors group"
-                >
-                    <div className="p-1 rounded-full bg-gray-100 group-hover:bg-gray-200 transition-colors">
-                        <FiArrowLeft className="w-4 h-4" />
-                    </div>
-                    Back to Jobs
-                </button>
+                {/* Breadcrumbs with Back Button */}
+                <PageHeader
+                    breadcrumbs={getCompanyBreadcrumbs('job-applications', { jobTitle: job?.title })}
+                    backButton={{
+                        onClick: () => navigate('/company/jobs')
+                    }}
+                />
 
                 {/* Job Details Card */}
                 <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-8 shadow-sm">

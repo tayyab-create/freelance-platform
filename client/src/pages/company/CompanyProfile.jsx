@@ -9,7 +9,8 @@ import { FaBuilding } from 'react-icons/fa'
 import { toast } from 'react-toastify';
 import FileUpload from '../../components/common/FileUpload';
 import { uploadAPI } from '../../services/api';
-import { SkeletonLoader } from '../../components/shared';
+import { SkeletonLoader, PageHeader } from '../../components/shared';
+import { getCompanyBreadcrumbs } from '../../utils/breadcrumbUtils';
 
 const CompanyProfile = () => {
     const [profile, setProfile] = useState(null);
@@ -166,6 +167,11 @@ const CompanyProfile = () => {
     return (
         <DashboardLayout>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 pb-8">
+                {/* Breadcrumbs */}
+                <PageHeader
+                    breadcrumbs={getCompanyBreadcrumbs('profile')}
+                />
+
                 {/* Modern Header Section - Minimalist */}
                 <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                     {/* Header Actions */}

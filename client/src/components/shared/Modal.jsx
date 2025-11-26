@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { FiX } from 'react-icons/fi';
 
 const Modal = ({
@@ -13,6 +13,9 @@ const Modal = ({
     footer,
     className = ''
 }) => {
+    const modalRef = useRef(null);
+    const previousFocusRef = useRef(null);
+
     const sizeClasses = {
         sm: 'max-w-md',
         md: 'max-w-2xl',
@@ -21,26 +24,73 @@ const Modal = ({
         full: 'max-w-[95vw]'
     };
 
-    // Handle escape key
+    // Handle keyboard navigation (Escape, Tab trapping)
     useEffect(() => {
-        if (!isOpen || !closeOnEscape) return;
+        if (!isOpen) return;
 
-        const handleEscape = (e) => {
-            if (e.key === 'Escape') {
+        const handleKeyDown = (e) => {
+            // Escape key to close
+            if (e.key === 'Escape' && closeOnEscape) {
                 onClose();
+                return;
+            }
+
+            // Tab key for focus trapping
+            if (e.key === 'Tab') {
+                const focusableElements = modalRef.current?.querySelectorAll(
+                    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                );
+
+                if (!focusableElements || focusableElements.length === 0) return;
+
+                const firstElement = focusableElements[0];
+                const lastElement = focusableElements[focusableElements.length - 1];
+
+                // Shift + Tab (backwards)
+                if (e.shiftKey) {
+                    if (document.activeElement === firstElement) {
+                        e.preventDefault();
+                        lastElement.focus();
+                    }
+                } else {
+                    // Tab (forwards)
+                    if (document.activeElement === lastElement) {
+                        e.preventDefault();
+                        firstElement.focus();
+                    }
+                }
             }
         };
 
-        document.addEventListener('keydown', handleEscape);
-        return () => document.removeEventListener('keydown', handleEscape);
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
     }, [isOpen, closeOnEscape, onClose]);
 
-    // Prevent body scroll when modal is open
+    // Prevent body scroll and manage focus
     useEffect(() => {
         if (isOpen) {
+            // Store current focused element
+            previousFocusRef.current = document.activeElement;
+
+            // Prevent body scroll
             document.body.style.overflow = 'hidden';
+
+            // Auto-focus first focusable element in modal
+            setTimeout(() => {
+                const focusableElements = modalRef.current?.querySelectorAll(
+                    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                );
+                if (focusableElements && focusableElements.length > 0) {
+                    focusableElements[0].focus();
+                }
+            }, 100);
         } else {
             document.body.style.overflow = 'unset';
+
+            // Restore focus to previously focused element
+            if (previousFocusRef.current) {
+                previousFocusRef.current.focus();
+            }
         }
 
         return () => {
@@ -72,6 +122,7 @@ const Modal = ({
             {/* Modal Container */}
             <div className="flex min-h-full items-center justify-center p-4">
                 <div
+                    ref={modalRef}
                     className={`
             relative bg-white rounded-2xl shadow-2xl w-full
             ${sizeClasses[size]}
