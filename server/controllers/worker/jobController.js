@@ -8,7 +8,7 @@ exports.getAssignedJobs = async (req, res) => {
     try {
         const jobs = await Job.find({
             assignedWorker: req.user._id,
-            status: { $in: ['assigned', 'in-progress'] }
+            status: { $in: ['assigned', 'in-progress', 'submitted', 'completed'] }
         })
             .populate('company', 'email')
             .sort('-assignedDate');
@@ -96,6 +96,100 @@ exports.submitWork = async (req, res) => {
         });
     } catch (error) {
         console.error('Submit Work Error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error',
+            error: error.message
+        });
+    }
+};
+
+// @desc    Get submission details for a job
+// @route   GET /api/workers/submission/:jobId
+// @access  Private/Worker
+exports.getSubmission = async (req, res) => {
+    try {
+        const jobId = req.params.jobId;
+
+        // Find the submission for this job
+        const submission = await Submission.findOne({
+            job: jobId,
+            worker: req.user._id
+        })
+            .populate('job', 'title description salary status')
+            .populate('company', 'email');
+
+        if (!submission) {
+            return res.status(404).json({
+                success: false,
+                message: 'Submission not found'
+            });
+        }
+
+        // Get company profile
+        const submissionObj = submission.toObject();
+        if (submissionObj.company) {
+            const companyProfile = await getCompanyProfile(submissionObj.company._id);
+            if (companyProfile) {
+                submissionObj.companyInfo = {
+                    companyName: companyProfile.companyName,
+                    logo: companyProfile.logo
+                };
+            }
+        }
+
+        res.status(200).json({
+            success: true,
+            data: submissionObj
+        });
+    } catch (error) {
+        console.error('Get Submission Error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error',
+            error: error.message
+        });
+    }
+};
+
+// @desc    Start working on a job (change status to in-progress)
+// @route   PUT /api/workers/jobs/:jobId/start
+// @access  Private/Worker
+exports.startJob = async (req, res) => {
+    try {
+        const jobId = req.params.jobId;
+
+        // Find the job and verify it's assigned to this worker
+        const job = await Job.findOne({
+            _id: jobId,
+            assignedWorker: req.user._id
+        });
+
+        if (!job) {
+            return res.status(404).json({
+                success: false,
+                message: 'Job not found or not assigned to you'
+            });
+        }
+
+        if (job.status !== 'assigned') {
+            return res.status(400).json({
+                success: false,
+                message: 'Job must be in assigned status to start working'
+            });
+        }
+
+        // Update job status to in-progress
+        job.status = 'in-progress';
+        await job.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Job started successfully',
+            data: job
+        });
+    } catch (error) {
+        console.error('Start Job Error:', error);
         res.status(500).json({
             success: false,
             message: 'Server error',

@@ -65,7 +65,7 @@ const ApplicationCard = ({ application, onViewJob }) => {
                 </div>
 
                 {/* Right: Actions */}
-                <div className="flex flex-col items-end justify-center gap-3 min-w-[140px]">
+                <div className="flex flex-col items-end justify-center gap-3 min-w-[160px]">
                     <button
                         onClick={() => onViewJob(application)}
                         className="w-full py-2.5 px-4 bg-white border border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-colors flex items-center justify-center gap-2 text-sm"
@@ -74,14 +74,14 @@ const ApplicationCard = ({ application, onViewJob }) => {
                         View Job
                     </button>
 
-                    {application.status === 'accepted' && (
-                        <Link
-                            to="/worker/jobs/assigned"
-                            className="w-full py-2.5 px-4 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition-colors flex items-center justify-center gap-2 text-sm shadow-sm shadow-green-200"
-                        >
-                            <FiCheckCircle className="h-4 w-4" />
-                            Start Work
-                        </Link>
+                    {application.status === 'accepted' && application.job?.status && (
+                        <div className="w-full">
+                            <StatusBadge
+                                status={application.job.status}
+                                size="md"
+                                className="!w-full !flex !justify-center"
+                            />
+                        </div>
                     )}
                 </div>
             </div>

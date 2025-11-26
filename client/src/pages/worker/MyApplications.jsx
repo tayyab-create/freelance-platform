@@ -144,35 +144,39 @@ const MyApplications = () => {
         )}
 
         {/* Simple Stats Row */}
-        <div className="flex flex-wrap gap-4 items-center justify-between bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-          <div className="flex gap-6">
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                <FiBriefcase className="h-4 w-4" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
+                <FiBriefcase className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Total</p>
-                <p className="text-lg font-bold text-gray-900">{counts.all}</p>
+                <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Total</p>
+                <p className="text-2xl font-black text-gray-900">{counts.all}</p>
               </div>
             </div>
-            <div className="w-px bg-gray-100 h-10"></div>
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-yellow-50 text-yellow-600 rounded-lg">
-                <FiClock className="h-4 w-4" />
+          </div>
+
+          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-yellow-50 text-yellow-600 rounded-xl">
+                <FiClock className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Pending</p>
-                <p className="text-lg font-bold text-gray-900">{counts.pending}</p>
+                <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Pending</p>
+                <p className="text-2xl font-black text-gray-900">{counts.pending}</p>
               </div>
             </div>
-            <div className="w-px bg-gray-100 h-10 hidden sm:block"></div>
-            <div className="flex items-center gap-2 hidden sm:flex">
-              <div className="p-2 bg-green-50 text-green-600 rounded-lg">
-                <FiCheckCircle className="h-4 w-4" />
+          </div>
+
+          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-green-50 text-green-600 rounded-xl">
+                <FiCheckCircle className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Accepted</p>
-                <p className="text-lg font-bold text-gray-900">{counts.accepted}</p>
+                <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Accepted</p>
+                <p className="text-2xl font-black text-gray-900">{counts.accepted}</p>
               </div>
             </div>
           </div>

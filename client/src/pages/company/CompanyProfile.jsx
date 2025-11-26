@@ -165,35 +165,48 @@ const CompanyProfile = () => {
 
     return (
         <DashboardLayout>
-            <div className="max-w-6xl mx-auto space-y-6 pb-8">
-                {/* Modern Header with Banner */}
-                <div className="relative bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                    {/* Banner/Cover Area */}
-                    <div className="h-48 bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 relative">
-                        <div className="absolute inset-0 bg-black/10"></div>
-                        <div className="absolute top-6 right-6 z-10">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 pb-8">
+                {/* Modern Header Section - Minimalist */}
+                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                    {/* Header Actions */}
+                    <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                        <h1 className="text-xl font-bold text-gray-900">Company Profile</h1>
+                        <div>
                             {!editing ? (
-                                <Button variant="white" icon={FiEdit2} onClick={() => setEditing(true)} className="px-5 py-2.5 rounded-xl shadow-lg border-0 text-gray-900 font-bold hover:bg-gray-50">
+                                <button
+                                    onClick={() => setEditing(true)}
+                                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-900 text-white font-medium hover:bg-gray-800 transition-colors"
+                                >
+                                    <FiEdit2 className="h-4 w-4" />
                                     Edit Profile
-                                </Button>
+                                </button>
                             ) : (
-                                <div className="flex gap-3">
-                                    <Button variant="white" icon={FiSave} onClick={handleSave} loading={saving} className="px-5 py-2.5 rounded-xl shadow-lg border-0 text-green-700 font-bold hover:bg-green-50">
-                                        Save Changes
-                                    </Button>
-                                    <Button variant="white" icon={FiX} onClick={() => setEditing(false)} className="px-5 py-2.5 rounded-xl shadow-lg border-0 text-red-600 font-bold hover:bg-red-50">
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={handleSave}
+                                        disabled={saving}
+                                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+                                    >
+                                        <FiSave className="h-4 w-4" />
+                                        {saving ? 'Saving...' : 'Save'}
+                                    </button>
+                                    <button
+                                        onClick={() => setEditing(false)}
+                                        className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                                    >
+                                        <FiX className="h-4 w-4" />
                                         Cancel
-                                    </Button>
+                                    </button>
                                 </div>
                             )}
                         </div>
                     </div>
 
                     {/* Profile Content */}
-                    <div className="px-8 pb-8">
-                        <div className="flex flex-col md:flex-row gap-6 items-start -mt-20">
+                    <div className="p-6">
+                        <div className="flex flex-col md:flex-row gap-6 items-start">
                             {/* Company Logo */}
-                            <div className="flex-shrink-0 relative z-20">
+                            <div className="flex-shrink-0">
                                 <div className="relative group">
                                     {editing ? (
                                         <FileUpload
@@ -202,7 +215,7 @@ const CompanyProfile = () => {
                                             accept="image/*"
                                             loading={uploadingLogo}
                                         >
-                                            <div className="relative h-40 w-40 rounded-3xl overflow-hidden border-4 border-white shadow-2xl cursor-pointer group-hover:ring-4 ring-primary-200 transition-all bg-white flex items-center justify-center">
+                                            <div className="relative h-32 w-32 rounded-xl overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-gray-300 transition-all bg-white flex items-center justify-center group">
                                                 {profile?.logo ? (
                                                     <img
                                                         src={profile.logo}
@@ -210,15 +223,13 @@ const CompanyProfile = () => {
                                                         className="h-full w-full object-cover"
                                                     />
                                                 ) : (
-                                                    <FaBuilding className="h-16 w-16 text-gray-300" />
+                                                    <FaBuilding className="h-12 w-12 text-gray-300" />
                                                 )}
 
-                                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">
+                                                <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <div className="text-white flex flex-col items-center gap-1">
-                                                        <div className="p-2 bg-white/20 rounded-full">
-                                                            <FiEdit2 className="h-6 w-6" />
-                                                        </div>
-                                                        <span className="text-xs font-bold">Change Logo</span>
+                                                        <FiEdit2 className="h-5 w-5" />
+                                                        <span className="text-xs font-medium">Change</span>
                                                     </div>
                                                 </div>
                                                 {uploadingLogo && (
@@ -229,7 +240,7 @@ const CompanyProfile = () => {
                                             </div>
                                         </FileUpload>
                                     ) : (
-                                        <div className="relative h-40 w-40 rounded-3xl overflow-hidden border-4 border-white shadow-2xl bg-white flex items-center justify-center">
+                                        <div className="relative h-32 w-32 rounded-xl overflow-hidden border-2 border-gray-200 bg-white flex items-center justify-center">
                                             {profile?.logo ? (
                                                 <img
                                                     src={profile.logo}
@@ -237,7 +248,7 @@ const CompanyProfile = () => {
                                                     className="h-full w-full object-cover"
                                                 />
                                             ) : (
-                                                <FaBuilding className="h-16 w-16 text-gray-300" />
+                                                <FaBuilding className="h-12 w-12 text-gray-300" />
                                             )}
                                         </div>
                                     )}
@@ -246,39 +257,46 @@ const CompanyProfile = () => {
                                     {editing && profile?.logo && (
                                         <button
                                             onClick={(e) => { e.stopPropagation(); handleDeleteLogo(); }}
-                                            className="absolute -top-2 -right-2 p-2 bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600 transition-all z-30"
+                                            className="absolute -top-2 -right-2 p-1.5 bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600 transition-colors z-30"
                                             title="Remove Logo"
                                         >
-                                            <FiTrash2 className="h-4 w-4" />
+                                            <FiTrash2 className="h-3.5 w-3.5" />
                                         </button>
                                     )}
                                 </div>
                             </div>
 
                             {/* Company Basic Info */}
-                            <div className="flex-1 w-full pt-2 md:pt-20 space-y-4">
+                            <div className="flex-1 w-full space-y-4">
                                 {editing ? (
                                     <div className="space-y-4">
-                                        <Input
-                                            label="Company Name"
-                                            name="companyName"
-                                            value={formData.companyName}
-                                            onChange={handleChange}
-                                            required
-                                            className="text-lg"
-                                        />
-                                        <Input
-                                            label="Tagline"
-                                            name="tagline"
-                                            value={formData.tagline}
-                                            onChange={handleChange}
-                                            placeholder="One-line description of your company"
-                                        />
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+                                            <input
+                                                type="text"
+                                                name="companyName"
+                                                value={formData.companyName}
+                                                onChange={handleChange}
+                                                required
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Tagline</label>
+                                            <input
+                                                type="text"
+                                                name="tagline"
+                                                value={formData.tagline}
+                                                onChange={handleChange}
+                                                placeholder="One-line description of your company"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                            />
+                                        </div>
                                     </div>
                                 ) : (
                                     <div>
-                                        <h2 className="text-3xl font-black text-gray-900 mb-2">{profile?.companyName}</h2>
-                                        {profile?.tagline && <p className="text-gray-500 text-lg font-medium">{profile.tagline}</p>}
+                                        <h2 className="text-2xl font-bold text-gray-900 mb-1">{profile?.companyName}</h2>
+                                        {profile?.tagline && <p className="text-gray-600">{profile.tagline}</p>}
                                     </div>
                                 )}
                             </div>

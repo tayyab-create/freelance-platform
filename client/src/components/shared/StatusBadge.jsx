@@ -24,13 +24,18 @@ const StatusBadge = ({
             icon: FiClock,
             defaultLabel: 'Pending'
         },
+        assigned: {
+            color: 'bg-blue-50 text-blue-600 border-blue-200',
+            icon: FiCheckCircle,
+            defaultLabel: 'Assigned'
+        },
         approved: {
-            color: 'bg-green-100 text-green-700 border-green-200',
+            color: 'bg-emerald-100 text-emerald-700 border-emerald-200',
             icon: FiCheckCircle,
             defaultLabel: 'Approved'
         },
         accepted: {
-            color: 'bg-green-100 text-green-700 border-green-200',
+            color: 'bg-emerald-100 text-emerald-700 border-emerald-200',
             icon: FiCheckCircle,
             defaultLabel: 'Accepted'
         },
@@ -45,7 +50,7 @@ const StatusBadge = ({
             defaultLabel: 'Active'
         },
         completed: {
-            color: 'bg-green-100 text-green-700 border-green-200',
+            color: 'bg-green-100 text-green-800 border-green-200',
             icon: FiCheckCircle,
             defaultLabel: 'Completed'
         },
@@ -53,6 +58,11 @@ const StatusBadge = ({
             color: 'bg-gray-100 text-gray-700 border-gray-200',
             icon: FiXCircle,
             defaultLabel: 'Cancelled'
+        },
+        submitted: {
+            color: 'bg-teal-100 text-teal-700 border-teal-200',
+            icon: FiCheckCircle,
+            defaultLabel: 'Submitted'
         },
 
         // Work statuses

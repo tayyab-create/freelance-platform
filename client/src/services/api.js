@@ -58,7 +58,9 @@ export const workerAPI = {
     applyForJob: (jobId, data) => api.post(`/workers/apply/${jobId}`, data),
     getMyApplications: () => api.get('/workers/applications'),
     getAssignedJobs: () => api.get('/workers/jobs/assigned'),
+    startJob: (jobId) => api.put(`/workers/jobs/${jobId}/start`),
     submitWork: (jobId, data) => api.post(`/workers/submit/${jobId}`, data),
+    getSubmission: (jobId) => api.get(`/workers/submission/${jobId}`),
     getDashboard: () => api.get('/workers/dashboard'),
     getMyReviews: () => api.get('/workers/reviews'),
 };

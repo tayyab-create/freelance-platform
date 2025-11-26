@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { workerAPI, uploadAPI, messageAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
-import { FiDollarSign, FiClock, FiBriefcase, FiUpload, FiFile, FiX, FiCalendar, FiAlertCircle, FiMessageCircle, FiCheckCircle, FiMoreVertical, FiFilter, FiAward, FiTag, FiSearch } from 'react-icons/fi';
+import { FiDollarSign, FiClock, FiBriefcase, FiUpload, FiFile, FiX, FiCalendar, FiAlertCircle, FiMessageCircle, FiCheckCircle, FiMoreVertical, FiFilter, FiAward, FiTag, FiSearch, FiPlay } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { PageHeader, EmptyState, SkeletonLoader, Modal, StatusBadge } from '../../components/shared';
 import { useNavigate } from 'react-router-dom';
@@ -13,10 +13,15 @@ const AssignedJobs = () => {
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // API base URL for file uploads
+  const API_BASE_URL = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000';
+
   // Modals
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
+  const [submissionDetails, setSubmissionDetails] = useState(null);
+  const [loadingSubmission, setLoadingSubmission] = useState(false);
 
   // Submission State
   const [submitting, setSubmitting] = useState(false);
@@ -74,14 +79,30 @@ const AssignedJobs = () => {
     }
   };
 
-  const handleViewDetails = (job) => {
+  const handleViewDetails = async (job) => {
     setSelectedJob(job);
     setShowDetailsModal(true);
+
+    // If job is submitted or completed, fetch submission details
+    if (job.status === 'submitted' || job.status === 'completed') {
+      setLoadingSubmission(true);
+      try {
+        const response = await workerAPI.getSubmission(job._id);
+        setSubmissionDetails(response.data.data);
+      } catch (error) {
+        toast.error('Failed to load submission details');
+      } finally {
+        setLoadingSubmission(false);
+      }
+    }
   };
 
   const handleCloseDetailsModal = () => {
     setShowDetailsModal(false);
-    setTimeout(() => setSelectedJob(null), 300);
+    setTimeout(() => {
+      setSelectedJob(null);
+      setSubmissionDetails(null);
+    }, 300);
   };
 
   const handleFileUpload = async (e) => {
@@ -95,7 +116,7 @@ const AssignedJobs = () => {
 
       const newFiles = responses.map(res => ({
         fileName: res.data.data.originalName,
-        fileUrl: `http://localhost:5000${res.data.data.fileUrl}`,
+        fileUrl: `${API_BASE_URL}${res.data.data.fileUrl}`,
         fileType: res.data.data.mimeType,
       }));
 
@@ -176,6 +197,18 @@ const AssignedJobs = () => {
     return daysUntilDeadline <= 3 && daysUntilDeadline > 0;
   };
 
+  const handleStartJob = async (job, e) => {
+    if (e) e.stopPropagation();
+
+    try {
+      await workerAPI.startJob(job._id);
+      toast.success('Job started! Status updated to In Progress.');
+      fetchAssignedJobs();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to start job');
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-8 pb-8">
@@ -216,6 +249,8 @@ const AssignedJobs = () => {
                 { key: 'all', label: 'All Jobs' },
                 { key: 'assigned', label: 'Assigned' },
                 { key: 'in-progress', label: 'In Progress' },
+                { key: 'submitted', label: 'Submitted' },
+                { key: 'completed', label: 'Completed' },
               ].map((tab) => (
                 <button
                   key={tab.key}
@@ -321,7 +356,17 @@ const AssignedJobs = () => {
                         Message Company
                       </button>
 
-                      {job.status === 'assigned' || job.status === 'in-progress' ? (
+                      {job.status === 'assigned' && (
+                        <button
+                          onClick={(e) => handleStartJob(job, e)}
+                          className="flex items-center gap-2 px-5 py-2 rounded-lg bg-purple-600 text-white text-sm font-bold hover:bg-purple-700 shadow-md shadow-purple-500/20 transition-all"
+                        >
+                          <FiPlay className="h-4 w-4" />
+                          Start Working
+                        </button>
+                      )}
+
+                      {job.status === 'in-progress' && (
                         <button
                           onClick={(e) => handleOpenSubmitModal(job, e)}
                           className="flex items-center gap-2 px-5 py-2 rounded-lg bg-primary-600 text-white text-sm font-bold hover:bg-primary-700 shadow-md shadow-primary-500/20 transition-all"
@@ -329,7 +374,21 @@ const AssignedJobs = () => {
                           <FiUpload className="h-4 w-4" />
                           Submit Work
                         </button>
-                      ) : null}
+                      )}
+
+                      {job.status === 'submitted' && (
+                        <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-teal-50 border border-teal-200 text-teal-700 text-sm font-bold">
+                          <FiCheckCircle className="h-4 w-4" />
+                          Submitted - Under Review
+                        </div>
+                      )}
+
+                      {job.status === 'completed' && (
+                        <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-100 border border-green-200 text-green-800 text-sm font-bold">
+                          <FiCheckCircle className="h-4 w-4" />
+                          Completed
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -361,7 +420,16 @@ const AssignedJobs = () => {
                   >
                     Close
                   </button>
-                  {(selectedJob.status === 'assigned' || selectedJob.status === 'in-progress') && (
+                  {selectedJob.status === 'assigned' && (
+                    <button
+                      onClick={() => handleStartJob(selectedJob)}
+                      className="px-6 py-2.5 rounded-xl bg-purple-600 text-white font-bold hover:bg-purple-700 transition-colors shadow-lg shadow-purple-500/30 flex items-center gap-2"
+                    >
+                      <FiPlay className="h-5 w-5" />
+                      Start Working
+                    </button>
+                  )}
+                  {selectedJob.status === 'in-progress' && (
                     <button
                       onClick={() => handleOpenSubmitModal(selectedJob)}
                       className="px-6 py-2.5 rounded-xl bg-primary-600 text-white font-bold hover:bg-primary-700 transition-colors shadow-lg shadow-primary-500/30 flex items-center gap-2"
@@ -473,6 +541,248 @@ const AssignedJobs = () => {
                       </span>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* Submission Details - For Submitted Jobs */}
+              {selectedJob.status === 'submitted' && (
+                <div className="border-t border-gray-200 pt-6 mt-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <FiCheckCircle className="h-5 w-5 text-teal-500" />
+                    Your Submission
+                  </h3>
+                  {loadingSubmission ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="h-8 w-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
+                    </div>
+                  ) : submissionDetails ? (
+                    <div className="space-y-4 bg-green-50/50 p-6 rounded-2xl border border-green-100">
+                      <div className="flex items-center gap-2 text-green-700 text-sm font-bold">
+                        <FiCheckCircle className="h-5 w-5" />
+                        Submitted on {new Date(submissionDetails.createdAt).toLocaleDateString()} at {new Date(submissionDetails.createdAt).toLocaleTimeString()}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">Description</label>
+                        <p className="text-gray-600 text-sm whitespace-pre-line bg-white p-4 rounded-xl border border-gray-200">
+                          {submissionDetails.description}
+                        </p>
+                      </div>
+
+                      {submissionDetails.links && submissionDetails.links.length > 0 && (
+                        <div>
+                          <label className="block text-sm font-bold text-gray-700 mb-2">Links</label>
+                          <div className="space-y-2">
+                            {submissionDetails.links.map((link, index) => (
+                              <a
+                                key={index}
+                                href={link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 text-primary-600 hover:text-primary-700 text-sm font-medium break-all bg-white p-3 rounded-xl border border-gray-200 hover:border-primary-300 transition-colors"
+                              >
+                                <FiUpload className="h-4 w-4 flex-shrink-0" />
+                                {link}
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {submissionDetails.files && submissionDetails.files.length > 0 && (
+                        <div>
+                          <label className="block text-sm font-bold text-gray-700 mb-2">Attachments ({submissionDetails.files.length})</label>
+                          <div className="space-y-2">
+                            {submissionDetails.files.map((file, index) => (
+                              <a
+                                key={index}
+                                href={file.fileUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center justify-between bg-white p-3 rounded-xl border border-gray-200 hover:border-primary-300 transition-colors group"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-100 transition-colors">
+                                    <FiFile className="h-4 w-4" />
+                                  </div>
+                                  <span className="text-sm font-semibold text-gray-700 group-hover:text-primary-600 transition-colors">
+                                    {file.fileName}
+                                  </span>
+                                </div>
+                                <FiUpload className="h-4 w-4 text-gray-400 group-hover:text-primary-600 transition-colors" />
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="pt-3 border-t border-green-200">
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className={`px-3 py-1.5 rounded-lg font-bold ${
+                            submissionDetails.status === 'approved' ? 'bg-green-100 text-green-700' :
+                            submissionDetails.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                            'bg-yellow-100 text-yellow-700'
+                          }`}>
+                            {submissionDetails.status === 'pending' ? 'Under Review' : submissionDetails.status.charAt(0).toUpperCase() + submissionDetails.status.slice(1)}
+                          </span>
+                          {submissionDetails.reviewedAt && (
+                            <span className="text-gray-500">
+                              Reviewed on {new Date(submissionDetails.reviewedAt).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-6 text-gray-500">
+                      <FiAlertCircle className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                      <p className="text-sm">Unable to load submission details</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Completion Details - For Completed Jobs */}
+              {selectedJob.status === 'completed' && (
+                <div className="border-t border-gray-200 pt-6 mt-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <FiCheckCircle className="h-5 w-5 text-green-600" />
+                    Job Completed
+                  </h3>
+                  {loadingSubmission ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="h-8 w-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
+                    </div>
+                  ) : submissionDetails ? (
+                    <div className="space-y-6">
+                      {/* Completion Success Banner */}
+                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-2xl border-2 border-green-200">
+                        <div className="flex items-start gap-4">
+                          <div className="p-3 bg-green-100 rounded-full">
+                            <FiCheckCircle className="h-6 w-6 text-green-600" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-lg font-bold text-green-900 mb-2">Successfully Completed!</h4>
+                            <div className="space-y-1 text-sm text-green-700">
+                              <p className="flex items-center gap-2">
+                                <FiCalendar className="h-4 w-4" />
+                                <span className="font-semibold">Submitted on:</span>
+                                {new Date(submissionDetails.createdAt).toLocaleDateString()} at {new Date(submissionDetails.createdAt).toLocaleTimeString()}
+                              </p>
+                              {submissionDetails.reviewedAt && (
+                                <p className="flex items-center gap-2">
+                                  <FiCheckCircle className="h-4 w-4" />
+                                  <span className="font-semibold">Approved on:</span>
+                                  {new Date(submissionDetails.reviewedAt).toLocaleDateString()} at {new Date(submissionDetails.reviewedAt).toLocaleTimeString()}
+                                </p>
+                              )}
+                              {selectedJob.completedDate && (
+                                <p className="flex items-center gap-2">
+                                  <FiCheckCircle className="h-4 w-4" />
+                                  <span className="font-semibold">Completed on:</span>
+                                  {new Date(selectedJob.completedDate).toLocaleDateString()} at {new Date(selectedJob.completedDate).toLocaleTimeString()}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Submission Details */}
+                      <div className="bg-white p-6 rounded-2xl border border-gray-200">
+                        <h4 className="text-md font-bold text-gray-900 mb-4 flex items-center gap-2">
+                          <FiFile className="h-5 w-5 text-gray-400" />
+                          Your Submission
+                        </h4>
+
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">Description</label>
+                            <p className="text-gray-600 text-sm whitespace-pre-line bg-gray-50 p-4 rounded-xl border border-gray-200">
+                              {submissionDetails.description}
+                            </p>
+                          </div>
+
+                          {submissionDetails.links && submissionDetails.links.length > 0 && (
+                            <div>
+                              <label className="block text-sm font-bold text-gray-700 mb-2">Links ({submissionDetails.links.length})</label>
+                              <div className="space-y-2">
+                                {submissionDetails.links.map((link, index) => (
+                                  <a
+                                    key={index}
+                                    href={link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 text-primary-600 hover:text-primary-700 text-sm font-medium break-all bg-gray-50 p-3 rounded-xl border border-gray-200 hover:border-primary-300 transition-colors"
+                                  >
+                                    <FiUpload className="h-4 w-4 flex-shrink-0" />
+                                    {link}
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {submissionDetails.files && submissionDetails.files.length > 0 && (
+                            <div>
+                              <label className="block text-sm font-bold text-gray-700 mb-2">Attachments ({submissionDetails.files.length})</label>
+                              <div className="space-y-2">
+                                {submissionDetails.files.map((file, index) => (
+                                  <a
+                                    key={index}
+                                    href={file.fileUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center justify-between bg-gray-50 p-3 rounded-xl border border-gray-200 hover:border-primary-300 transition-colors group"
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div className="p-2 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-100 transition-colors">
+                                        <FiFile className="h-4 w-4" />
+                                      </div>
+                                      <span className="text-sm font-semibold text-gray-700 group-hover:text-primary-600 transition-colors">
+                                        {file.fileName}
+                                      </span>
+                                    </div>
+                                    <FiUpload className="h-4 w-4 text-gray-400 group-hover:text-primary-600 transition-colors" />
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Payment & Stats */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-green-50 p-4 rounded-2xl border border-green-200">
+                          <div className="flex items-center gap-2 text-green-600 mb-1">
+                            <FiDollarSign className="h-4 w-4" />
+                            <span className="text-xs font-bold uppercase tracking-wider">Payment</span>
+                          </div>
+                          <p className="text-2xl font-black text-green-700">${selectedJob.salary}</p>
+                          <p className="text-xs text-green-600 capitalize">{selectedJob.salaryType}</p>
+                        </div>
+
+                        <div className="bg-blue-50 p-4 rounded-2xl border border-blue-200">
+                          <div className="flex items-center gap-2 text-blue-600 mb-1">
+                            <FiClock className="h-4 w-4" />
+                            <span className="text-xs font-bold uppercase tracking-wider">Duration</span>
+                          </div>
+                          <p className="text-lg font-bold text-blue-700">
+                            {selectedJob.assignedDate && selectedJob.completedDate
+                              ? `${Math.ceil((new Date(selectedJob.completedDate) - new Date(selectedJob.assignedDate)) / (1000 * 60 * 60 * 24))} days`
+                              : 'N/A'}
+                          </p>
+                          <p className="text-xs text-blue-600">From assignment to completion</p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-6 text-gray-500">
+                      <FiAlertCircle className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                      <p className="text-sm">Unable to load completion details</p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
