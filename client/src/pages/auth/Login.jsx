@@ -5,7 +5,7 @@ import { login, clearError } from '../../redux/slices/authSlice';
 import AuthLayout from '../../components/layout/AuthLayout';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
-import { FiMail, FiLock } from 'react-icons/fi';
+import { FiMail, FiLock, FiArrowRight } from 'react-icons/fi';
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -26,7 +26,7 @@ const Login = () => {
         navigate('/pending-approval');
         return;
       }
-      
+
       // Redirect approved users based on role
       if (user.status === 'approved') {
         if (user.role === 'admin') {
@@ -62,46 +62,47 @@ const Login = () => {
       subtitle="Sign in to your account to continue"
     >
       <form onSubmit={handleSubmit} className="space-y-6">
-        <Input
-          label="Email Address"
-          type="email"
-          name="email"
-          value={email}
-          onChange={handleChange}
-          placeholder="Enter your email"
-          required
-          icon={FiMail}
-        />
+        <div className="space-y-4">
+          <Input
+            label="Email Address"
+            type="email"
+            name="email"
+            value={email}
+            onChange={handleChange}
+            placeholder="Enter your email"
+            required
+            icon={FiMail}
+          />
 
-        <Input
-          label="Password"
-          type="password"
-          name="password"
-          value={password}
-          onChange={handleChange}
-          placeholder="Enter your password"
-          required
-          icon={FiLock}
-        />
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <input
-              id="remember-me"
-              name="remember-me"
-              type="checkbox"
-              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+          <div className="space-y-1">
+            <Input
+              label="Password"
+              type="password"
+              name="password"
+              value={password}
+              onChange={handleChange}
+              placeholder="Enter your password"
+              required
+              icon={FiLock}
             />
-            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-              Remember me
-            </label>
+            <div className="flex justify-end">
+              <Link to="/forgot-password" className="text-sm font-medium text-primary-600 hover:text-primary-500">
+                Forgot password?
+              </Link>
+            </div>
           </div>
+        </div>
 
-          <div className="text-sm">
-            <Link to="/forgot-password" className="text-primary-600 hover:text-primary-500">
-              Forgot password?
-            </Link>
-          </div>
+        <div className="flex items-center">
+          <input
+            id="remember-me"
+            name="remember-me"
+            type="checkbox"
+            className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded cursor-pointer"
+          />
+          <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700 cursor-pointer select-none">
+            Keep me signed in
+          </label>
         </div>
 
         <Button
@@ -110,14 +111,27 @@ const Login = () => {
           fullWidth
           loading={loading}
           disabled={loading}
+          className="shadow-xl shadow-primary-500/20 py-3 text-lg"
+          icon={!loading ? FiArrowRight : undefined}
         >
           Sign In
         </Button>
 
-        <div className="text-center text-sm">
-          <span className="text-gray-600">Don't have an account? </span>
-          <Link to="/register" className="text-primary-600 hover:text-primary-500 font-medium">
-            Sign up
+        <div className="relative my-8">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-200"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-4 bg-white text-gray-500">New to the platform?</span>
+          </div>
+        </div>
+
+        <div className="text-center">
+          <Link
+            to="/register"
+            className="inline-flex items-center justify-center w-full px-4 py-3 border-2 border-gray-100 rounded-xl text-sm font-bold text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-200 transition-all duration-200"
+          >
+            Create an account
           </Link>
         </div>
       </form>
