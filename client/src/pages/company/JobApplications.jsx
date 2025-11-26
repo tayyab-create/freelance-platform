@@ -2,11 +2,23 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { companyAPI, jobAPI, messageAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
-import Spinner from '../../components/common/Spinner';
 import Button from '../../components/common/Button';
-import { FiUser, FiMail, FiStar, FiCheckCircle, FiMessageCircle, FiFileText, FiUsers, FiDollarSign, FiAward } from 'react-icons/fi';
+import {
+    FiUser,
+    FiStar,
+    FiCheckCircle,
+    FiMessageCircle,
+    FiFileText,
+    FiArrowLeft,
+    FiCalendar,
+    FiDollarSign,
+    FiClock,
+    FiBriefcase,
+    FiMapPin
+} from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import { PageHeader, SkeletonLoader, EmptyState, StatusBadge, Avatar, ActionDropdown } from '../../components/shared';
+import { SkeletonLoader, StatusBadge } from '../../components/shared';
+import FilterBar from '../../components/shared/FilterBar';
 
 const JobApplications = () => {
     const { id } = useParams();
@@ -16,6 +28,10 @@ const JobApplications = () => {
     const [loading, setLoading] = useState(true);
     const [assigningTo, setAssigningTo] = useState(null);
     const [messagingWorker, setMessagingWorker] = useState(null);
+
+    // Filters
+    const [filter, setFilter] = useState('all');
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         fetchData();
@@ -71,178 +87,244 @@ const JobApplications = () => {
         }
     };
 
+    const filteredApplications = applications.filter(app => {
+        if (filter !== 'all' && app.status !== filter) return false;
+        if (!searchQuery) return true;
+        const query = searchQuery.toLowerCase();
+        return (
+            app.workerInfo?.fullName?.toLowerCase().includes(query) ||
+            app.worker?.email?.toLowerCase().includes(query)
+        );
+    });
+
+    const filterOptions = [
+        {
+            key: 'status', label: 'Status', type: 'select', options: [
+                { value: 'pending', label: 'Pending' },
+                { value: 'accepted', label: 'Accepted' },
+                { value: 'rejected', label: 'Rejected' }
+            ]
+        }
+    ];
+
     if (loading) {
         return (
             <DashboardLayout>
-                <SkeletonLoader type="list" count={5} />
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+                    <SkeletonLoader type="card" count={3} />
+                </div>
             </DashboardLayout>
         );
     }
 
     return (
         <DashboardLayout>
-            <div className="space-y-8 pb-8">
-                {/* Job Header - Premium */}
-                <div className="bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/30 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/60 p-8 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
-                    <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                            <h1 className="text-4xl font-black text-gray-900 mb-3">{job?.title}</h1>
-                            <div className="flex items-center gap-3">
-                                <div className="flex items-center gap-2 px-4 py-2 bg-white/80 rounded-xl shadow-md">
-                                    <FiUsers className="h-5 w-5 text-primary-600" />
-                                    <p className="font-bold text-gray-900">
-                                        {applications.length} Application{applications.length !== 1 ? 's' : ''}
-                                    </p>
-                                </div>
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+                {/* Back Button */}
+                <button
+                    onClick={() => navigate('/company/jobs')}
+                    className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-900 font-medium mb-6 transition-colors group"
+                >
+                    <div className="p-1 rounded-full bg-gray-100 group-hover:bg-gray-200 transition-colors">
+                        <FiArrowLeft className="w-4 h-4" />
+                    </div>
+                    Back to Jobs
+                </button>
+
+                {/* Job Details Card */}
+                <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-8 shadow-sm">
+                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8">
+                        <div>
+                            <div className="flex items-center gap-3 mb-3">
+                                <h1 className="text-3xl font-bold text-gray-900">{job?.title}</h1>
+                                <StatusBadge status={job?.status} />
                             </div>
+                            <p className="text-gray-600 leading-relaxed max-w-3xl">{job?.description}</p>
+                        </div>
+                        <div className="flex flex-col gap-2 min-w-[200px]">
+                            <div className="text-sm text-gray-500 font-medium uppercase tracking-wider">Posted</div>
+                            <div className="flex items-center gap-2 text-gray-900 font-medium">
+                                <FiCalendar className="w-4 h-4 text-gray-400" />
+                                {new Date(job?.createdAt).toLocaleDateString()}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-8 border-t border-gray-100">
+                        <div className="p-4 bg-gray-50 rounded-xl">
+                            <div className="flex items-center gap-2 text-gray-500 text-sm font-medium mb-1">
+                                <FiDollarSign className="w-4 h-4" />
+                                Budget
+                            </div>
+                            <div className="text-lg font-bold text-gray-900">${job?.salary}</div>
+                            <div className="text-xs text-gray-500">{job?.salaryType}</div>
+                        </div>
+                        <div className="p-4 bg-gray-50 rounded-xl">
+                            <div className="flex items-center gap-2 text-gray-500 text-sm font-medium mb-1">
+                                <FiClock className="w-4 h-4" />
+                                Duration
+                            </div>
+                            <div className="text-lg font-bold text-gray-900">{job?.duration}</div>
+                        </div>
+                        <div className="p-4 bg-gray-50 rounded-xl">
+                            <div className="flex items-center gap-2 text-gray-500 text-sm font-medium mb-1">
+                                <FiBriefcase className="w-4 h-4" />
+                                Experience
+                            </div>
+                            <div className="text-lg font-bold text-gray-900 capitalize">{job?.experienceLevel}</div>
+                        </div>
+                        <div className="p-4 bg-gray-50 rounded-xl">
+                            <div className="flex items-center gap-2 text-gray-500 text-sm font-medium mb-1">
+                                <FiUser className="w-4 h-4" />
+                                Applications
+                            </div>
+                            <div className="text-lg font-bold text-gray-900">{applications.length}</div>
                         </div>
                     </div>
                 </div>
 
-                {/* Applications */}
-                {applications.length === 0 ? (
-                    <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/60 p-12 text-center">
-                        <div className="max-w-md mx-auto">
-                            <div className="mb-6">
-                                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full">
-                                    <FiFileText className="h-10 w-10 text-gray-400" />
-                                </div>
-                            </div>
-                            <h3 className="text-2xl font-bold text-gray-900 mb-2">No Applications Yet</h3>
-                            <p className="text-gray-600">No workers have applied to this job yet. Sit tight!</p>
+                {/* Applications Section */}
+                <div className="mb-6">
+                    <h2 className="text-xl font-bold text-gray-900 mb-6">
+                        Applications ({applications.length})
+                    </h2>
+
+                    <FilterBar
+                        onSearch={setSearchQuery}
+                        onFilterChange={(filters) => setFilter(filters.status || 'all')}
+                        filters={filterOptions}
+                        searchPlaceholder="Search applicants..."
+                    />
+                </div>
+
+                {filteredApplications.length === 0 ? (
+                    <div className="text-center py-20 bg-white rounded-2xl border border-gray-200 border-dashed">
+                        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-50 mb-6">
+                            <FiFileText className="w-10 h-10 text-gray-400" />
                         </div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">
+                            {searchQuery ? 'No matching applications' : 'No Applications Yet'}
+                        </h3>
+                        <p className="text-gray-500">
+                            {searchQuery ? 'Try adjusting your search' : 'Applications will appear here when workers apply to this job'}
+                        </p>
                     </div>
                 ) : (
                     <div className="space-y-6">
-                        {applications.map((application) => (
+                        {filteredApplications.map((application) => (
                             <div
                                 key={application._id}
-                                className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-lg border border-white/60 p-8 hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 group"
+                                className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300"
                             >
-                                <div className="flex flex-col lg:flex-row gap-6">
-                                    {/* Worker Avatar & Basic Info */}
-                                    <div className="flex gap-5">
-                                        <div className="relative flex-shrink-0">
+                                {/* Applicant Header */}
+                                <div className="p-6 border-b border-gray-100">
+                                    <div className="flex flex-col md:flex-row md:items-start gap-6">
+                                        {/* Avatar */}
+                                        <div className="flex-shrink-0">
                                             {application.workerInfo?.profilePicture ? (
                                                 <img
                                                     src={application.workerInfo.profilePicture}
                                                     alt={application.workerInfo.fullName}
-                                                    className="h-24 w-24 rounded-2xl object-cover border-4 border-white shadow-xl group-hover:scale-110 transition-transform duration-300"
+                                                    className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md"
                                                 />
                                             ) : (
-                                                <div className="h-24 w-24 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center border-4 border-white shadow-xl group-hover:scale-110 transition-transform duration-300">
-                                                    <FiUser className="h-12 w-12 text-white" />
+                                                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center text-primary-600 shadow-inner">
+                                                    <FiUser className="w-8 h-8" />
                                                 </div>
                                             )}
                                         </div>
 
-                                        {/* Worker Info */}
-                                        <div className="flex-1">
-                                            <div className="flex items-start justify-between mb-3">
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
                                                 <div>
-                                                    <h3 className="text-2xl font-black text-gray-900 mb-1">
+                                                    <h3 className="text-xl font-bold text-gray-900">
                                                         {application.workerInfo?.fullName || 'Worker'}
                                                     </h3>
-                                                    <p className="text-gray-600 flex items-center gap-2 mb-2">
-                                                        <FiMail className="h-4 w-4" />
-                                                        {application.worker?.email}
-                                                    </p>
-                                                    {application.workerInfo && (
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-xl border border-yellow-300">
-                                                                <FiStar className="h-4 w-4 text-yellow-600 fill-current" />
-                                                                <span className="font-bold text-yellow-800">
-                                                                    {application.workerInfo.averageRating?.toFixed(1) || '0.0'}
-                                                                </span>
-                                                                <span className="text-xs text-gray-600">
-                                                                    ({application.workerInfo.totalReviews || 0} reviews)
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    )}
+                                                    <p className="text-gray-500">{application.worker?.email}</p>
+                                                </div>
+                                                <StatusBadge status={application.status} />
+                                            </div>
+
+                                            {application.workerInfo && (
+                                                <div className="flex items-center gap-4 text-sm mt-2">
+                                                    <div className="flex items-center gap-1 bg-yellow-50 text-yellow-700 px-2 py-1 rounded-lg">
+                                                        <FiStar className="w-4 h-4 fill-current" />
+                                                        <span className="font-bold">
+                                                            {application.workerInfo.averageRating?.toFixed(1) || '0.0'}
+                                                        </span>
+                                                        <span className="text-yellow-600/70">
+                                                            ({application.workerInfo.totalReviews || 0} reviews)
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Content Grid */}
+                                <div className="grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100">
+                                    {/* Proposal */}
+                                    <div className="p-6 md:col-span-2">
+                                        <div className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                            <FiFileText className="w-4 h-4" />
+                                            Cover Letter
+                                        </div>
+                                        <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                                            {application.proposal}
+                                        </p>
+
+                                        {/* Skills */}
+                                        {application.workerInfo?.skills && application.workerInfo.skills.length > 0 && (
+                                            <div className="mt-6 pt-6 border-t border-gray-100">
+                                                <div className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">Skills</div>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {application.workerInfo.skills.slice(0, 10).map((skill, index) => (
+                                                        <span
+                                                            key={index}
+                                                            className="px-3 py-1 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 font-medium"
+                                                        >
+                                                            {skill}
+                                                        </span>
+                                                    ))}
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Status Badge */}
-                                    <div className="flex-shrink-0">
-                                        <span className={`px-5 py-2.5 text-sm font-bold rounded-xl border-2 shadow-sm uppercase ${application.status === 'pending' ? 'bg-gradient-to-r from-yellow-100 to-orange-100 text-yellow-800 border-yellow-300' :
-                                                application.status === 'accepted' ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border-green-300' :
-                                                    'bg-gradient-to-r from-red-100 to-pink-100 text-red-800 border-red-300'
-                                            }`}>
-                                            {application.status}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                {/* Skills */}
-                                {application.workerInfo?.skills && application.workerInfo.skills.length > 0 && (
-                                    <div className="mt-5">
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <FiAward className="h-5 w-5 text-primary-600" />
-                                            <h4 className="font-bold text-gray-900">Skills:</h4>
-                                        </div>
-                                        <div className="flex flex-wrap gap-2">
-                                            {application.workerInfo.skills.slice(0, 6).map((skill, index) => (
-                                                <span
-                                                    key={index}
-                                                    className="px-4 py-2 text-sm font-bold rounded-xl bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 text-blue-700 border border-blue-200/50 shadow-sm"
-                                                >
-                                                    {skill}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Proposal */}
-                                <div className="mt-5 bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl p-6 border-2 border-purple-200">
-                                    <div className="flex items-center gap-2 mb-3">
-                                        <FiFileText className="h-5 w-5 text-purple-600" />
-                                        <h4 className="font-bold text-gray-900 text-lg">Proposal:</h4>
-                                    </div>
-                                    <p className="text-gray-700 leading-relaxed">{application.proposal}</p>
-                                </div>
-
-                                {/* Proposed Rate & Actions */}
-                                <div className="mt-6 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-                                    <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl border-2 border-green-300">
-                                        <div className="p-2 bg-green-500 rounded-lg">
-                                            <FiDollarSign className="h-6 w-6 text-white" />
-                                        </div>
-                                        <div>
-                                            <span className="text-sm text-gray-600 font-semibold uppercase block">Proposed Rate</span>
-                                            <span className="text-2xl font-black text-green-800">${application.proposedRate}</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Action Buttons */}
-                                    <div className="flex gap-3">
-                                        <Button
-                                            variant="secondary"
-                                            icon={FiMessageCircle}
-                                            onClick={() => handleMessageWorker(application.worker._id)}
-                                            loading={messagingWorker === application.worker._id}
-                                            disabled={messagingWorker !== null}
-                                            className="px-6 py-3 text-lg"
-                                        >
-                                            Message
-                                        </Button>
-
-                                        {application.status === 'pending' && job?.status === 'posted' && (
-                                            <Button
-                                                variant="success"
-                                                icon={FiCheckCircle}
-                                                onClick={() => handleAssignJob(application.worker._id, application._id)}
-                                                loading={assigningTo === application._id}
-                                                disabled={assigningTo !== null}
-                                                className="px-6 py-3 text-lg shadow-lg"
-                                            >
-                                                Assign Job
-                                            </Button>
                                         )}
+                                    </div>
+
+                                    {/* Rate & Actions */}
+                                    <div className="p-6 bg-gray-50/50 flex flex-col justify-between">
+                                        <div className="mb-6">
+                                            <div className="text-sm text-gray-500 font-medium mb-1">Proposed Rate</div>
+                                            <div className="text-3xl font-bold text-gray-900">${application.proposedRate}</div>
+                                            <div className="text-sm text-gray-500">Total amount</div>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <Button
+                                                variant="secondary"
+                                                icon={FiMessageCircle}
+                                                onClick={() => handleMessageWorker(application.worker._id)}
+                                                loading={messagingWorker === application.worker._id}
+                                                disabled={messagingWorker !== null}
+                                                className="w-full justify-center"
+                                            >
+                                                Message
+                                            </Button>
+
+                                            {application.status === 'pending' && job?.status === 'posted' && (
+                                                <Button
+                                                    variant="primary"
+                                                    icon={FiCheckCircle}
+                                                    onClick={() => handleAssignJob(application.worker._id, application._id)}
+                                                    loading={assigningTo === application._id}
+                                                    disabled={assigningTo !== null}
+                                                    className="w-full justify-center"
+                                                >
+                                                    Assign Job
+                                                </Button>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
