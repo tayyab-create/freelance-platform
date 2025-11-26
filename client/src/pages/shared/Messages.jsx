@@ -174,8 +174,11 @@ const Messages = () => {
 
         // Update conversation list
         fetchConversations();
+      } else {
+        toast.error(data.message || 'Failed to send message');
       }
     } catch (error) {
+      console.error('Send message error:', error);
       toast.error('Failed to send message');
     } finally {
       setSendingMessage(false);

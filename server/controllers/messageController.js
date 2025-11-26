@@ -215,6 +215,25 @@ exports.sendMessage = async (req, res) => {
 
     if (!conversation) {
       return res.status(404).json({
+        success: false,
+        message: 'Conversation not found'
+      });
+    }
+
+    let attachments = [];
+    if (files && files.length > 0) {
+      attachments = files.map(file => ({
+        filename: file.originalname,
+        path: file.path.replace(/\\/g, '/'),
+        mimetype: file.mimetype,
+        size: file.size
+      }));
+    }
+
+    if (!content && attachments.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Message content or attachment is required'
       });
     }
 
