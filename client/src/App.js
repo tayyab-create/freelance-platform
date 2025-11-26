@@ -24,6 +24,7 @@ import PendingApproval from "./pages/auth/PendingApproval";
 // Worker Pages
 import WorkerDashboard from "./pages/worker/WorkerDashboard";
 import BrowseJobs from "./pages/worker/BrowseJobs";
+import SavedSearches from "./pages/worker/SavedSearches";
 import JobDetails from "./pages/worker/JobDetails";
 
 // Company Pages
@@ -491,6 +492,22 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={["worker"]}>
               <JobDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/worker/saved-searches"
+          element={
+            <ProtectedRoute allowedRoles={["worker"]}>
+              <SavedSearches />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/worker/browse-jobs"
+          element={
+            <ProtectedRoute allowedRoles={["worker"]}>
+              <BrowseJobs />
             </ProtectedRoute>
           }
         />

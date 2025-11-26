@@ -7,6 +7,7 @@ const applicationController = require('../controllers/worker/applicationControll
 const jobController = require('../controllers/worker/jobController');
 const dashboardController = require('../controllers/worker/dashboardController');
 const reviewController = require('../controllers/worker/reviewController');
+const savedSearchController = require('../controllers/worker/savedSearchController');
 
 const { protect, authorize, checkApproval } = require('../middleware/auth');
 
@@ -39,5 +40,12 @@ router.get('/reviews', reviewController.getMyReviews);
 
 // Dashboard
 router.get('/dashboard', dashboardController.getDashboard);
+
+// Saved Search routes
+router.get('/saved-searches', savedSearchController.getSavedSearches);
+router.post('/saved-searches', checkApproval, savedSearchController.createSavedSearch);
+router.put('/saved-searches/:id', checkApproval, savedSearchController.updateSavedSearch);
+router.delete('/saved-searches/:id', checkApproval, savedSearchController.deleteSavedSearch);
+router.get('/saved-searches/:id/jobs', savedSearchController.getJobsForSavedSearch);
 
 module.exports = router;

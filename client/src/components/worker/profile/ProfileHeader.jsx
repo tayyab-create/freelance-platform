@@ -3,6 +3,8 @@ import { FiEdit2, FiSave, FiX, FiUser, FiTrash2, FiPhone } from 'react-icons/fi'
 import FileUpload from '../../common/FileUpload';
 import Spinner from '../../common/Spinner';
 
+import Textarea from '../../common/Textarea';
+
 const ProfileHeader = ({
     profile,
     editing,
@@ -121,7 +123,7 @@ const ProfileHeader = ({
                             {/* Availability Indicator */}
                             {profile?.availability && (
                                 <div className={`absolute bottom-1 right-1 h-5 w-5 rounded-full border-2 border-white shadow-sm z-30 ${profile.availability === 'available' ? 'bg-emerald-500' :
-                                        profile.availability === 'busy' ? 'bg-yellow-500' : 'bg-gray-400'
+                                    profile.availability === 'busy' ? 'bg-yellow-500' : 'bg-gray-400'
                                     }`}></div>
                             )}
                         </div>
@@ -153,14 +155,15 @@ const ProfileHeader = ({
                                     />
                                 </div>
                                 <div className="md:col-span-2">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
-                                    <textarea
+                                    <Textarea
+                                        label="Bio"
                                         name="bio"
                                         value={basicInfo.bio}
                                         onChange={handleBasicInfoChange}
-                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
-                                        rows="3"
                                         placeholder="My BIO is the perfect and I need it alwayss!!"
+                                        rows={3}
+                                        maxLength={500}
+                                        showCharacterCount
                                     />
                                 </div>
                             </div>

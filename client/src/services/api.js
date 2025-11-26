@@ -63,6 +63,12 @@ export const workerAPI = {
     getSubmission: (jobId) => api.get(`/workers/submission/${jobId}`),
     getDashboard: () => api.get('/workers/dashboard'),
     getMyReviews: () => api.get('/workers/reviews'),
+    // Saved Searches
+    getSavedSearches: () => api.get('/workers/saved-searches'),
+    createSavedSearch: (data) => api.post('/workers/saved-searches', data),
+    updateSavedSearch: (id, data) => api.put(`/workers/saved-searches/${id}`, data),
+    deleteSavedSearch: (id) => api.delete(`/workers/saved-searches/${id}`),
+    getJobsForSavedSearch: (id) => api.get(`/workers/saved-searches/${id}/jobs`),
 };
 
 // Add Review API

@@ -98,7 +98,35 @@ const workerProfileSchema = new mongoose.Schema({
   totalReviews: {
     type: Number,
     default: 0
-  }
+  },
+  savedSearches: [{
+    name: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    filters: {
+      search: { type: String, default: '' },
+      category: { type: String, default: '' },
+      experienceLevel: { type: String, default: '' },
+      salaryMin: { type: String, default: '' },
+      salaryMax: { type: String, default: '' },
+      location: { type: String, default: '' },
+      remoteOnly: { type: Boolean, default: false },
+      sortBy: { type: String, default: 'newest' }
+    },
+    notifyOnNewMatches: {
+      type: Boolean,
+      default: true
+    },
+    lastNotified: {
+      type: Date
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
 }, {
   timestamps: true
 });
