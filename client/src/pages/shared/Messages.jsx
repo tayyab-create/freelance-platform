@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import {
   FiSend,
@@ -25,6 +26,16 @@ const Messages = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const messagesEndRef = useRef(null);
   const messageInputRef = useRef(null);
+  const { id } = useParams();
+
+  useEffect(() => {
+    if (id && conversations.length > 0) {
+      const conversation = conversations.find(c => c._id === id);
+      if (conversation) {
+        setSelectedConversation(conversation);
+      }
+    }
+  }, [id, conversations]);
 
   useEffect(() => {
     fetchConversations();
@@ -216,9 +227,8 @@ const Messages = () => {
                   <button
                     key={conversation._id}
                     onClick={() => setSelectedConversation(conversation)}
-                    className={`w-full p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors text-left ${
-                      selectedConversation?._id === conversation._id ? 'bg-blue-50' : ''
-                    }`}
+                    className={`w-full p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors text-left ${selectedConversation?._id === conversation._id ? 'bg-blue-50' : ''
+                      }`}
                   >
                     <div className="flex items-start gap-3">
                       <div className="flex-shrink-0 relative">
@@ -318,7 +328,7 @@ const Messages = () => {
                   const showDate =
                     index === 0 ||
                     new Date(message.createdAt).toDateString() !==
-                      new Date(messages[index - 1].createdAt).toDateString();
+                    new Date(messages[index - 1].createdAt).toDateString();
 
                   return (
                     <React.Fragment key={message._id}>
@@ -358,11 +368,10 @@ const Messages = () => {
                           </span>
 
                           <div
-                            className={`rounded-2xl px-4 py-2.5 ${
-                              isOwn
+                            className={`rounded-2xl px-4 py-2.5 ${isOwn
                                 ? 'bg-blue-500 text-white rounded-tr-sm shadow-sm'
                                 : 'bg-gray-100 text-gray-900 rounded-tl-sm'
-                            }`}
+                              }`}
                           >
                             <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
                               {message.content}
@@ -370,9 +379,8 @@ const Messages = () => {
                           </div>
 
                           <p
-                            className={`text-xs text-gray-500 mt-1 px-1 ${
-                              isOwn ? 'text-right' : 'text-left'
-                            }`}
+                            className={`text-xs text-gray-500 mt-1 px-1 ${isOwn ? 'text-right' : 'text-left'
+                              }`}
                           >
                             {getMessageTime(message.createdAt)}
                             {isOwn && <span className="ml-1">✓</span>}

@@ -70,16 +70,16 @@ function App() {
             <div className="min-h-screen flex flex-col">
               {/* Navbar */}
               <nav className={`fixed w-full z-50 transition-all duration-300 ${isScrolled
-                  ? 'bg-white/90 backdrop-blur-xl border-b border-gray-200/50 py-3 shadow-sm'
-                  : 'bg-transparent border-transparent py-6'
+                ? 'bg-white/90 backdrop-blur-xl border-b border-gray-200/50 py-3 shadow-sm'
+                : 'bg-transparent border-transparent py-6'
                 }`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                   <div className="flex justify-between items-center">
                     {/* Logo */}
                     <Link to="/" className="flex items-center gap-3 group">
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg transition-all duration-300 group-hover:scale-110 ${isScrolled
-                          ? 'bg-primary-600 text-white shadow-primary-500/20'
-                          : 'bg-white/10 backdrop-blur-md text-white border border-white/20'
+                        ? 'bg-primary-600 text-white shadow-primary-500/20'
+                        : 'bg-white/10 backdrop-blur-md text-white border border-white/20'
                         }`}>
                         <span className="font-bold text-xl">F</span>
                       </div>
@@ -101,8 +101,8 @@ function App() {
                       <Link
                         to="/login"
                         className={`px-4 py-2 rounded-lg font-medium transition-all ${isScrolled
-                            ? 'text-gray-700 hover:bg-gray-100'
-                            : 'text-white hover:bg-white/10'
+                          ? 'text-gray-700 hover:bg-gray-100'
+                          : 'text-white hover:bg-white/10'
                           }`}
                       >
                         Log In
@@ -110,8 +110,8 @@ function App() {
                       <Link
                         to="/register"
                         className={`px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg transition-all hover:scale-105 active:scale-95 ${isScrolled
-                            ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-primary-500/20'
-                            : 'bg-white text-primary-600 hover:bg-gray-50'
+                          ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-primary-500/20'
+                          : 'bg-white text-primary-600 hover:bg-gray-50'
                           }`}
                       >
                         Get Started
@@ -604,6 +604,14 @@ function App() {
         {/* Message Routes */}
         <Route
           path="/messages"
+          element={
+            <ProtectedRoute allowedRoles={["worker", "company"]}>
+              <Messages />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/messages/:id"
           element={
             <ProtectedRoute allowedRoles={["worker", "company"]}>
               <Messages />
