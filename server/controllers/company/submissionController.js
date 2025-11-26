@@ -30,12 +30,15 @@ exports.getSubmissions = async (req, res) => {
                     }
                 }
 
-                // Check if review exists
-                const reviewExists = await Review.findOne({
-                    job: submission.job._id,
-                    worker: submission.worker._id,
-                    company: req.user._id,
-                });
+                // Check if review exists (only if both job and worker exist)
+                let reviewExists = null;
+                if (submission.job && submission.worker) {
+                    reviewExists = await Review.findOne({
+                        job: submission.job._id,
+                        worker: submission.worker._id,
+                        company: req.user._id,
+                    });
+                }
 
                 submissionObj.hasReview = !!reviewExists;
 

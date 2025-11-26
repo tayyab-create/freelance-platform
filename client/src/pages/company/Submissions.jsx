@@ -149,8 +149,8 @@ const Submissions = () => {
                 key={key}
                 onClick={() => setFilter(key)}
                 className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${filter === key
-                    ? 'bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg shadow-primary-500/30 scale-105'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
+                  ? 'bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg shadow-primary-500/30 scale-105'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
                   }`}
               >
                 <Icon className="h-5 w-5" />
