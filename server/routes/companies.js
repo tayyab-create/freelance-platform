@@ -1,17 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const {
-  getProfile,
-  updateProfile,
-  postJob,
-  getMyJobs,
-  getJobApplications,
-  assignJob,
-  getSubmissions,
-  completeJob,
-  reviewWorker,
-  getDashboard
-} = require('../controllers/companyController');
+
+// Import controllers from their new locations
+const profileController = require('../controllers/company/profileController');
+const jobController = require('../controllers/company/jobController');
+const applicationController = require('../controllers/company/applicationController');
+const submissionController = require('../controllers/company/submissionController');
+const reviewController = require('../controllers/company/reviewController');
+const dashboardController = require('../controllers/company/dashboardController');
+
 const { protect, authorize, checkApproval } = require('../middleware/auth');
 
 // All routes are protected and only accessible by companies
@@ -19,23 +16,23 @@ router.use(protect);
 router.use(authorize('company'));
 
 // Profile routes
-router.get('/profile', getProfile);
-router.put('/profile', updateProfile);
+router.get('/profile', profileController.getProfile);
+router.put('/profile', profileController.updateProfile);
 
 // Job routes
-router.post('/jobs', checkApproval, postJob);
-router.get('/jobs', getMyJobs);
-router.get('/jobs/:jobId/applications', checkApproval, getJobApplications);
-router.put('/jobs/:jobId/assign', checkApproval, assignJob);
-router.put('/jobs/:jobId/complete', checkApproval, completeJob);
+router.post('/jobs', checkApproval, jobController.postJob);
+router.get('/jobs', jobController.getMyJobs);
+router.get('/jobs/:jobId/applications', checkApproval, applicationController.getJobApplications);
+router.put('/jobs/:jobId/assign', checkApproval, applicationController.assignJob);
+router.put('/jobs/:jobId/complete', checkApproval, submissionController.completeJob);
 
 // Submission routes
-router.get('/submissions', checkApproval, getSubmissions);
+router.get('/submissions', checkApproval, submissionController.getSubmissions);
 
 // Review routes
-router.post('/review/:workerId', checkApproval, reviewWorker);
+router.post('/review/:workerId', checkApproval, reviewController.reviewWorker);
 
 // Dashboard
-router.get('/dashboard', getDashboard);
+router.get('/dashboard', dashboardController.getDashboard);
 
 module.exports = router;
