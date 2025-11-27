@@ -6,11 +6,21 @@ import { toast } from 'react-toastify';
 import { PageHeader, EmptyState, SkeletonLoader, Modal, StatusBadge } from '../../components/shared';
 import ApplicationCard from '../../components/shared/ApplicationCard';
 import { useNavigate } from 'react-router-dom';
+import AdvancedFilterBar from '../../components/shared/AdvancedFilterBar';
 
 const MyApplications = () => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all');
+  const [filters, setFilters] = useState({
+    search: '',
+    status: [],
+    company: '',
+    level: '',
+    budgetMin: '',
+    budgetMax: '',
+    deadlineStart: null,
+    deadlineEnd: null
+  });
   const [deletedCount, setDeletedCount] = useState(0);
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -81,9 +91,34 @@ const MyApplications = () => {
     }
   };
 
-  const filteredApplications = filter === 'all'
-    ? applications
-    : applications.filter(app => app.status === filter);
+  const filteredApplications = applications.filter(app => {
+    // Search
+    const matchesSearch = !filters.search ||
+      app.job?.title?.toLowerCase().includes(filters.search.toLowerCase()) ||
+      app.job?.companyInfo?.companyName?.toLowerCase().includes(filters.search.toLowerCase());
+
+    // Status (Multi-select)
+    const matchesStatus = filters.status.length === 0 || filters.status.includes(app.status);
+
+    // Company
+    const matchesCompany = !filters.company ||
+      app.job?.companyInfo?.companyName?.toLowerCase().includes(filters.company.toLowerCase());
+
+    // Level
+    const matchesLevel = !filters.level ||
+      app.job?.experienceLevel?.toLowerCase() === filters.level.toLowerCase();
+
+    // Budget
+    const matchesBudgetMin = !filters.budgetMin || app.job?.salary >= Number(filters.budgetMin);
+    const matchesBudgetMax = !filters.budgetMax || app.job?.salary <= Number(filters.budgetMax);
+
+    // Deadline
+    const jobDeadline = app.job?.deadline ? new Date(app.job.deadline) : null;
+    const matchesDeadlineStart = !filters.deadlineStart || (jobDeadline && jobDeadline >= new Date(filters.deadlineStart));
+    const matchesDeadlineEnd = !filters.deadlineEnd || (jobDeadline && jobDeadline <= new Date(filters.deadlineEnd));
+
+    return matchesSearch && matchesStatus && matchesCompany && matchesLevel && matchesBudgetMin && matchesBudgetMax && matchesDeadlineStart && matchesDeadlineEnd;
+  });
 
   const counts = {
     all: applications.length,
@@ -91,6 +126,12 @@ const MyApplications = () => {
     accepted: applications.filter(a => a.status === 'accepted').length,
     rejected: applications.filter(a => a.status === 'rejected').length,
   };
+
+  const statusOptions = [
+    { value: 'pending', label: 'Pending', count: counts.pending },
+    { value: 'accepted', label: 'Accepted', count: counts.accepted },
+    { value: 'rejected', label: 'Rejected', count: counts.rejected },
+  ];
 
   return (
     <DashboardLayout>
@@ -171,32 +212,12 @@ const MyApplications = () => {
           </div>
         </div>
 
-        {/* Filter Tabs */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-sm border border-gray-200 p-1.5 overflow-x-auto">
-          <div className="flex gap-1 min-w-max">
-            {[
-              { key: 'all', label: 'All Applications' },
-              { key: 'pending', label: 'Pending' },
-              { key: 'accepted', label: 'Accepted' },
-              { key: 'rejected', label: 'Rejected' }
-            ].map(({ key, label }) => (
-              <button
-                key={key}
-                onClick={() => setFilter(key)}
-                className={`px-4 py-2 rounded-xl font-bold text-sm transition-all duration-200 flex items-center gap-2 ${filter === key
-                  ? 'bg-white text-primary-600 shadow-sm border border-gray-100'
-                  : 'bg-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-700'
-                  }`}
-              >
-                {label}
-                <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-extrabold ${filter === key ? 'bg-primary-50 text-primary-600' : 'bg-gray-100 text-gray-500'
-                  }`}>
-                  {counts[key] || 0}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
+        {/* Advanced Filters */}
+        <AdvancedFilterBar
+          onFilterChange={setFilters}
+          statusOptions={statusOptions}
+          searchPlaceholder="Search applications by job or company..."
+        />
 
         {/* Applications List */}
         {loading ? (
@@ -204,15 +225,19 @@ const MyApplications = () => {
         ) : filteredApplications.length === 0 ? (
           <EmptyState
             icon={FiBriefcase}
-            title={filter === 'all' ? "No applications yet" : `No ${filter} applications`}
-            description={filter === 'all'
-              ? "You haven't applied to any jobs yet. Start browsing available jobs!"
-              : `You don't have any ${filter} applications.`
-            }
-            actionLabel="Browse Jobs"
-            onAction={() => window.location.href = '/worker/jobs'}
-            secondaryActionLabel={filter !== 'all' ? "Show All" : undefined}
-            onSecondaryAction={filter !== 'all' ? () => setFilter('all') : undefined}
+            title={filters.search ? "No matching applications" : "No applications found"}
+            description={filters.search ? "Try adjusting your search terms or filters." : "You don't have any applications matching the current filters."}
+            actionLabel={!filters.search ? "Browse Jobs" : "Clear Filters"}
+            onAction={() => !filters.search ? window.location.href = '/worker/jobs' : setFilters({
+              search: '',
+              status: [],
+              company: '',
+              level: '',
+              budgetMin: '',
+              budgetMax: '',
+              deadlineStart: null,
+              deadlineEnd: null
+            })}
           />
         ) : (
           <div className="space-y-6">

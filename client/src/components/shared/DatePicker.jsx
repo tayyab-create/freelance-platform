@@ -135,15 +135,14 @@ const DatePicker = ({
                 type="button"
                 onClick={() => !disabled && setIsOpen(!isOpen)}
                 disabled={disabled}
-                className={`w-full px-4 py-3 rounded-xl border-2 transition-all text-left flex items-center justify-between ${
-                    error
+                className={`w-full px-4 py-3 rounded-xl border-2 transition-all text-left flex items-center justify-between ${error
                         ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-2 focus:ring-red-200'
                         : isOpen
-                        ? 'border-primary-500 bg-white ring-2 ring-primary-200'
-                        : 'border-gray-200 bg-white hover:border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200'
-                } ${disabled ? 'opacity-50 cursor-not-allowed bg-gray-50' : 'cursor-pointer'}`}
+                            ? 'border-primary-500 bg-white ring-2 ring-primary-200'
+                            : 'border-gray-200 bg-white hover:border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200'
+                    } ${disabled ? 'opacity-50 cursor-not-allowed bg-gray-50' : 'cursor-pointer'}`}
             >
-                <span className={value ? 'text-gray-900 font-medium' : 'text-gray-400'}>
+                <span className={`${value ? 'text-gray-900 font-medium' : 'text-gray-400'} whitespace-nowrap`}>
                     {value ? formatDisplayDate(value) : placeholder}
                 </span>
                 <FiCalendar className={`h-5 w-5 ${error ? 'text-red-500' : 'text-gray-400'}`} />
@@ -208,8 +207,8 @@ const DatePicker = ({
                                         ${isSelectedDate
                                             ? 'bg-primary-600 text-white font-bold shadow-md scale-105'
                                             : isTodayDate
-                                            ? 'bg-primary-50 text-primary-700 font-bold border-2 border-primary-300'
-                                            : 'hover:bg-gray-100'
+                                                ? 'bg-primary-50 text-primary-700 font-bold border-2 border-primary-300'
+                                                : 'hover:bg-gray-100'
                                         }
                                         ${isDisabled
                                             ? 'opacity-30 cursor-not-allowed hover:bg-transparent'

@@ -34,7 +34,8 @@ router.get('/', async (req, res) => {
       minSalary,
       maxSalary,
       page = 1,
-      limit = 10
+      limit = 10,
+      sortBy
     } = req.query;
 
     let query = { status: 'posted', isActive: true };
@@ -97,13 +98,35 @@ router.get('/', async (req, res) => {
 
     const skip = (page - 1) * limit;
 
+    // Determine sort order
+    let sort = '-createdAt';
+    if (sortBy) {
+      switch (sortBy) {
+        case 'oldest':
+          sort = 'createdAt';
+          break;
+        case 'salary-high':
+          sort = '-salary';
+          break;
+        case 'salary-low':
+          sort = 'salary';
+          break;
+        case 'deadline':
+          sort = 'deadline';
+          break;
+        case 'newest':
+        default:
+          sort = '-createdAt';
+      }
+    }
+
     // Populate company information correctly
     const jobs = await Job.find(query)
       .populate({
         path: 'company',
         select: 'email role'
       })
-      .sort('-createdAt')
+      .sort(sort)
       .limit(Number(limit))
       .skip(skip);
 

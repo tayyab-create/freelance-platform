@@ -7,7 +7,7 @@ const JobCard = ({ job, linkTo }) => {
     return (
         <Link
             to={linkTo || `/worker/jobs/${job._id}`}
-            className="group block bg-white rounded-2xl border border-gray-200 hover:border-primary-300 hover:shadow-xl transition-all duration-300 overflow-hidden"
+            className="group flex flex-col h-full bg-white rounded-2xl border border-gray-200 hover:border-primary-300 hover:shadow-xl transition-all duration-300 overflow-hidden"
         >
             {/* Card Header */}
             <div className="p-6 border-b border-gray-100">
@@ -68,7 +68,7 @@ const JobCard = ({ job, linkTo }) => {
             </div>
 
             {/* Card Body */}
-            <div className="p-6">
+            <div className="p-6 flex flex-col flex-1">
                 {/* Tags */}
                 {job.tags && job.tags.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-5">
@@ -102,14 +102,29 @@ const JobCard = ({ job, linkTo }) => {
                     <div className="bg-blue-50 rounded-xl p-3 border border-blue-100">
                         <div className="flex items-center gap-2 text-blue-700 mb-1">
                             <FiClock className="w-4 h-4" />
-                            <span className="text-xs font-semibold uppercase tracking-wide">Duration</span>
+                            <span className="text-xs font-semibold uppercase tracking-wide">Deadline</span>
                         </div>
-                        <p className="text-sm font-bold text-gray-900">{job.duration}</p>
+                        <p className="text-lg font-bold text-gray-900">
+                            {job.deadline ? new Date(job.deadline).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                            }) : 'No Deadline'}
+                        </p>
+                        {job.deadline && (
+                            <p className="text-xs text-gray-600 mt-0.5">
+                                {new Date(job.deadline).toLocaleTimeString('en-US', {
+                                    hour: 'numeric',
+                                    minute: 'numeric',
+                                    hour12: true
+                                })}
+                            </p>
+                        )}
                     </div>
                 </div>
 
                 {/* Experience Level */}
-                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-auto">
                     <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
                             <FiAward className="w-4 h-4 text-purple-600" />

@@ -17,6 +17,8 @@ export { default as DataTable } from './DataTable';
 export { default as ResponsiveTable } from './ResponsiveTable';
 export { default as FilterBar } from './FilterBar';
 export { default as EnhancedFilterBar } from './EnhancedFilterBar';
+export { default as AdvancedFilterBar } from './AdvancedFilterBar';
+export { default as DatePicker } from './DatePicker';
 export { default as ActionDropdown } from './ActionDropdown';
 export { default as RevisionTimeline } from './RevisionTimeline';
 

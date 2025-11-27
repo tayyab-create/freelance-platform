@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { workerAPI, uploadAPI, messageAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
-import { FiBriefcase } from 'react-icons/fi';
+import { FiBriefcase, FiClock, FiCheckCircle } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { PageHeader, EmptyState, SkeletonLoader } from '../../components/shared';
 import { useNavigate } from 'react-router-dom';
 
-// Import new modular components
-import JobFilters from '../../components/worker/assigned-jobs/JobFilters';
+import AdvancedFilterBar from '../../components/shared/AdvancedFilterBar';
 import JobCard from '../../components/worker/assigned-jobs/JobCard';
 import JobDetailsModal from '../../components/worker/assigned-jobs/JobDetailsModal';
 import SubmitWorkModal from '../../components/worker/assigned-jobs/SubmitWorkModal';
@@ -16,8 +15,16 @@ const AssignedJobs = () => {
   const navigate = useNavigate();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState({
+    search: '',
+    status: [],
+    company: '',
+    level: '',
+    budgetMin: '',
+    budgetMax: '',
+    deadlineStart: null,
+    deadlineEnd: null
+  });
 
   // API base URL for file uploads
   const API_BASE_URL = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000';
@@ -56,11 +63,32 @@ const AssignedJobs = () => {
 
   // Filter Logic
   const filteredJobs = jobs.filter(job => {
-    const matchesStatus = filter === 'all' || job.status === filter;
-    const matchesSearch =
-      job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.companyInfo?.companyName?.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesStatus && matchesSearch;
+    // Search
+    const matchesSearch = !filters.search ||
+      job.title.toLowerCase().includes(filters.search.toLowerCase()) ||
+      job.companyInfo?.companyName?.toLowerCase().includes(filters.search.toLowerCase());
+
+    // Status (Multi-select)
+    const matchesStatus = filters.status.length === 0 || filters.status.includes(job.status);
+
+    // Company
+    const matchesCompany = !filters.company ||
+      job.companyInfo?.companyName?.toLowerCase().includes(filters.company.toLowerCase());
+
+    // Level
+    const matchesLevel = !filters.level ||
+      job.experienceLevel?.toLowerCase() === filters.level.toLowerCase();
+
+    // Budget
+    const matchesBudgetMin = !filters.budgetMin || job.salary >= Number(filters.budgetMin);
+    const matchesBudgetMax = !filters.budgetMax || job.salary <= Number(filters.budgetMax);
+
+    // Deadline
+    const jobDeadline = job.deadline ? new Date(job.deadline) : null;
+    const matchesDeadlineStart = !filters.deadlineStart || (jobDeadline && jobDeadline >= new Date(filters.deadlineStart));
+    const matchesDeadlineEnd = !filters.deadlineEnd || (jobDeadline && jobDeadline <= new Date(filters.deadlineEnd));
+
+    return matchesSearch && matchesStatus && matchesCompany && matchesLevel && matchesBudgetMin && matchesBudgetMax && matchesDeadlineStart && matchesDeadlineEnd;
   });
 
   const counts = {
@@ -71,6 +99,14 @@ const AssignedJobs = () => {
     submitted: jobs.filter(j => j.status === 'submitted').length,
     completed: jobs.filter(j => j.status === 'completed').length
   };
+
+  const statusOptions = [
+    { value: 'assigned', label: 'Assigned', count: counts.assigned },
+    { value: 'in-progress', label: 'In Progress', count: counts['in-progress'] },
+    { value: 'revision-requested', label: 'Revisions', count: counts['revision-requested'] },
+    { value: 'submitted', label: 'Submitted', count: counts.submitted },
+    { value: 'completed', label: 'Completed', count: counts.completed },
+  ];
 
   // Handlers
   const handleOpenSubmitModal = (job, e) => {
@@ -262,22 +298,68 @@ const AssignedJobs = () => {
             { label: 'Assigned Jobs' }
           ]}
           actions={
-            <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-100 flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
-              <p className="text-gray-700 font-bold">
-                {jobs.filter(j => j.status !== 'completed' && j.status !== 'cancelled').length} Active
-              </p>
+            <div className="flex items-center gap-3">
+              <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-100 flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+                <p className="text-gray-700 font-bold">
+                  {jobs.filter(j => j.status !== 'completed' && j.status !== 'cancelled').length} Active
+                </p>
+              </div>
+              <div className="bg-gradient-to-r from-primary-600 to-primary-500 px-5 py-2 rounded-xl shadow-lg shadow-primary-500/30">
+                <p className="text-white font-bold">
+                  {jobs.length} Total
+                </p>
+              </div>
             </div>
           }
         />
 
-        {/* Search & Filter Bar */}
-        <JobFilters
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          filter={filter}
-          setFilter={setFilter}
-          counts={counts}
+        {/* Stats Row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
+                <FiBriefcase className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Total Jobs</p>
+                <p className="text-2xl font-black text-gray-900">{counts.all}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-yellow-50 text-yellow-600 rounded-xl">
+                <FiClock className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Active</p>
+                <p className="text-2xl font-black text-gray-900">
+                  {counts.assigned + counts['in-progress'] + counts['revision-requested'] + counts.submitted}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-green-50 text-green-600 rounded-xl">
+                <FiCheckCircle className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Completed</p>
+                <p className="text-2xl font-black text-gray-900">{counts.completed}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Advanced Filters */}
+        <AdvancedFilterBar
+          onFilterChange={setFilters}
+          statusOptions={statusOptions}
+          searchPlaceholder="Search jobs by title or company..."
         />
 
         {loading ? (
@@ -285,10 +367,19 @@ const AssignedJobs = () => {
         ) : filteredJobs.length === 0 ? (
           <EmptyState
             icon={FiBriefcase}
-            title={searchQuery ? "No matching jobs found" : (filter === 'all' ? "No assigned jobs" : `No ${filter} jobs`)}
-            description={searchQuery ? "Try adjusting your search terms." : "You don't have any jobs in this category at the moment."}
-            actionLabel={!searchQuery ? "View Applications" : "Clear Search"}
-            onAction={() => !searchQuery ? navigate('/worker/applications') : setSearchQuery('')}
+            title={filters.search ? "No matching jobs found" : "No jobs found"}
+            description={filters.search ? "Try adjusting your search terms or filters." : "You don't have any jobs matching the current filters."}
+            actionLabel={!filters.search ? "View Applications" : "Clear Filters"}
+            onAction={() => !filters.search ? navigate('/worker/applications') : setFilters({
+              search: '',
+              status: [],
+              company: '',
+              level: '',
+              budgetMin: '',
+              budgetMax: '',
+              deadlineStart: null,
+              deadlineEnd: null
+            })}
           />
         ) : (
           <div className="grid grid-cols-1 gap-6">
@@ -337,4 +428,4 @@ const AssignedJobs = () => {
   );
 };
 
-export default AssignedJobs;  
+export default AssignedJobs;
