@@ -176,6 +176,7 @@ exports.getMessages = async (req, res) => {
 
     const messages = await Message.find({ conversation: conversationId })
       .populate('sender', 'email role')
+      .populate('replyTo', 'content sender')  // <-- ADD THIS LINE
       .sort('-createdAt')
       .limit(Number(limit))
       .skip(skip);
@@ -246,7 +247,7 @@ exports.getMessages = async (req, res) => {
 exports.sendMessage = async (req, res) => {
   try {
     const { conversationId } = req.params;
-    const { content } = req.body;
+    const { content, replyTo } = req.body;
     const files = req.files;
 
     // Verify user is part of conversation
@@ -284,7 +285,8 @@ exports.sendMessage = async (req, res) => {
       conversation: conversationId,
       sender: req.user._id,
       content,
-      attachments
+      attachments,
+      replyTo: replyTo || undefined  // <-- ADD THIS LINE
     });
 
     // Update conversation
@@ -294,7 +296,8 @@ exports.sendMessage = async (req, res) => {
 
     // Populate message
     const populatedMessage = await Message.findById(message._id)
-      .populate('sender', 'email role');
+      .populate('sender', 'email role')
+      .populate('replyTo', 'content sender');
 
     // Add sender profile information
     const msgObj = populatedMessage.toObject();

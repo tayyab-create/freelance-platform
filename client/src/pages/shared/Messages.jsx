@@ -1241,12 +1241,13 @@ const MessagesEnhanced = () => {
                           </div>
 
                           {/* Message reactions */}
-                          {messageReactions[message._id] && messageReactions[message._id].length > 0 && (
+                          {message.reactions && message.reactions.length > 0 && (
                             <div className="flex gap-1 mt-1">
-                              {messageReactions[message._id].map((reaction, idx) => (
+                              {message.reactions.map((reaction, idx) => (
                                 <span
                                   key={idx}
                                   className="px-2 py-0.5 bg-white border border-gray-200 rounded-full text-xs shadow-sm"
+                                  title={`Reacted by ${reaction.userId}`}
                                 >
                                   {reaction.emoji}
                                 </span>
