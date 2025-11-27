@@ -1,6 +1,7 @@
 import React from 'react';
 import Input from '../../common/Input';
 import Button from '../../common/Button';
+import DatePicker from '../../shared/DatePicker';
 
 const CertificationModal = ({
     showCertModal,
@@ -19,7 +20,7 @@ const CertificationModal = ({
                 <form onSubmit={handleSaveCertification} className="space-y-4">
                     <Input label="Certification Title" value={certificationForm.title} onChange={e => setCertificationForm({ ...certificationForm, title: e.target.value })} required />
                     <Input label="Issued By" value={certificationForm.issuedBy} onChange={e => setCertificationForm({ ...certificationForm, issuedBy: e.target.value })} required />
-                    <Input type="date" label="Issued Date" value={certificationForm.issuedDate} onChange={e => setCertificationForm({ ...certificationForm, issuedDate: e.target.value })} required />
+                    <DatePicker label="Issued Date" value={certificationForm.issuedDate} onChange={date => setCertificationForm({ ...certificationForm, issuedDate: date })} required />
                     <Input label="Credential URL" value={certificationForm.certificateUrl} onChange={e => setCertificationForm({ ...certificationForm, certificateUrl: e.target.value })} placeholder="https://" />
                     <div className="flex gap-3 pt-2">
                         <Button type="button" variant="secondary" onClick={() => setShowCertModal(false)} className="flex-1">Cancel</Button>

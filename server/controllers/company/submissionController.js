@@ -113,6 +113,7 @@ exports.requestRevision = async (req, res) => {
 
         // Update job status
         job.status = 'revision-requested';
+        job.deadline = newDeadline;
         await job.save();
 
         res.status(200).json({

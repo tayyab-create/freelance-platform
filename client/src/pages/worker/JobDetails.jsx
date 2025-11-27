@@ -330,12 +330,14 @@ const JobDetails = () => {
                                                 <FiCalendar className="w-4 h-4" />
                                                 <span className="text-xs font-semibold uppercase tracking-wide">Deadline</span>
                                             </div>
-                                            <p className="text-sm font-bold text-gray-900">
-                                                {new Date(job.deadline).toLocaleDateString('en-US', {
-                                                    month: 'short',
-                                                    day: 'numeric'
-                                                })}
-                                            </p>
+                                            <div className="flex flex-col">
+                                                <p className="text-sm font-bold text-gray-900">
+                                                    {new Date(job.deadline).toLocaleDateString()}
+                                                </p>
+                                                <p className="text-xs text-gray-600">
+                                                    {new Date(job.deadline).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </p>
+                                            </div>
                                         </div>
                                     )}
                                 </div>

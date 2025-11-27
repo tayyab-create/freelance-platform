@@ -110,7 +110,7 @@ exports.getDashboard = async (req, res) => {
         // Upcoming Deadlines
         const upcomingDeadlines = await Job.find({
             assignedWorker: req.user._id,
-            status: { $in: ['assigned', 'in-progress'] },
+            status: { $in: ['assigned', 'in-progress', 'revision-requested'] },
             deadline: { $exists: true, $gte: new Date() }
         }).sort('deadline').limit(5).select('title deadline');
 
@@ -121,7 +121,7 @@ exports.getDashboard = async (req, res) => {
             else if (daysUntil <= 5) { deadlineText = `${daysUntil} days`; priority = 'medium'; }
             else if (daysUntil <= 7) { deadlineText = '1 week'; priority = 'low'; }
             else { deadlineText = `${Math.ceil(daysUntil / 7)} weeks`; priority = 'low'; }
-            return { id: job._id, project: job.title, deadline: deadlineText, priority };
+            return { id: job._id, project: job.title, deadline: deadlineText, fullDate: job.deadline, priority };
         });
 
         // Achievements

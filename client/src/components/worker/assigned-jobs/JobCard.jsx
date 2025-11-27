@@ -92,13 +92,13 @@ const JobCard = ({
                             </button>
                         )}
 
-                        {job.status === 'in-progress' && (
+                        {(job.status === 'in-progress' || job.status === 'revision-requested') && (
                             <button
                                 onClick={(e) => handleOpenSubmitModal(job, e)}
                                 className="flex items-center gap-2 px-5 py-2 rounded-lg bg-primary-600 text-white text-sm font-bold hover:bg-primary-700 shadow-md shadow-primary-500/20 transition-all"
                             >
                                 <FiUpload className="h-4 w-4" />
-                                Submit Work
+                                {job.status === 'revision-requested' ? 'Submit Revision' : 'Submit Work'}
                             </button>
                         )}
 

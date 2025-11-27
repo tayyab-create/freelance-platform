@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Modal from '../shared/Modal';
 import Button from '../common/Button';
 import { FiRefreshCw, FiCalendar, FiPaperclip, FiX, FiUpload } from 'react-icons/fi';
+import DateTimePicker from '../shared/DateTimePicker';
 import { uploadAPI } from '../../services/api';
 import { toast } from '../../utils/toast';
 
@@ -117,14 +118,14 @@ const RequestRevisionModal = ({ isOpen, onClose, submission, onSubmit, loading }
                         New Deadline <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
-                        <FiCalendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                        <input
-                            type="datetime-local"
+                        <DateTimePicker
                             value={newDeadline}
-                            onChange={(e) => setNewDeadline(e.target.value)}
+                            onChange={(date) => setNewDeadline(date)}
+                            minDate={new Date()}
                             required
-                            min={new Date().toISOString().slice(0, 16)}
-                            className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            className="w-full"
+                            datePlaceholder="Select deadline date"
+                            timePlaceholder="Select deadline time"
                         />
                     </div>
                     <p className="text-xs text-gray-500 mt-1">

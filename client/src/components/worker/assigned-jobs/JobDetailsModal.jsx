@@ -129,26 +129,33 @@ const JobDetailsModal = ({
                         </div>
                         <p className="text-lg font-bold text-gray-900 capitalize">{selectedJob.experienceLevel}</p>
                     </div>
-                    <div className={`p-4 rounded-2xl border ${
-                        isDeadlineApproaching(selectedJob.deadline) && (selectedJob.status === 'assigned' || selectedJob.status === 'in-progress')
+                    <div className={`p-4 rounded-2xl border ${isDeadlineApproaching(selectedJob.deadline) && (selectedJob.status === 'assigned' || selectedJob.status === 'in-progress')
                             ? 'bg-red-50 border-red-100'
                             : 'bg-gray-50 border-gray-100'
-                    }`}>
-                        <div className={`flex items-center gap-2 mb-1 ${
-                            isDeadlineApproaching(selectedJob.deadline) && (selectedJob.status === 'assigned' || selectedJob.status === 'in-progress')
+                        }`}>
+                        <div className={`flex items-center gap-2 mb-1 ${isDeadlineApproaching(selectedJob.deadline) && (selectedJob.status === 'assigned' || selectedJob.status === 'in-progress')
                                 ? 'text-red-600'
                                 : 'text-gray-500'
-                        }`}>
+                            }`}>
                             <FiCalendar className="h-4 w-4" />
                             <span className="text-xs font-bold uppercase tracking-wider">Deadline</span>
                         </div>
-                        <p className={`text-lg font-bold ${
-                            isDeadlineApproaching(selectedJob.deadline) && (selectedJob.status === 'assigned' || selectedJob.status === 'in-progress')
-                                ? 'text-red-700'
-                                : 'text-gray-900'
-                        }`}>
-                            {selectedJob.deadline ? new Date(selectedJob.deadline).toLocaleDateString() : 'None'}
-                        </p>
+                        <div className="flex flex-col">
+                            <p className={`text-lg font-bold ${isDeadlineApproaching(selectedJob.deadline) && (selectedJob.status === 'assigned' || selectedJob.status === 'in-progress')
+                                    ? 'text-red-700'
+                                    : 'text-gray-900'
+                                }`}>
+                                {selectedJob.deadline ? new Date(selectedJob.deadline).toLocaleDateString() : 'None'}
+                            </p>
+                            {selectedJob.deadline && (
+                                <p className={`text-xs ${isDeadlineApproaching(selectedJob.deadline) && (selectedJob.status === 'assigned' || selectedJob.status === 'in-progress')
+                                        ? 'text-red-600'
+                                        : 'text-gray-500'
+                                    }`}>
+                                    {new Date(selectedJob.deadline).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -389,8 +396,8 @@ const JobDetailsModal = ({
                                 <div className="pt-3 border-t border-green-200">
                                     <div className="flex items-center gap-2 text-sm">
                                         <span className={`px-3 py-1.5 rounded-lg font-bold ${submissionDetails.status === 'approved' ? 'bg-green-100 text-green-700' :
-                                                submissionDetails.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                                    'bg-yellow-100 text-yellow-700'
+                                            submissionDetails.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                                'bg-yellow-100 text-yellow-700'
                                             }`}>
                                             {submissionDetails.status === 'pending' ? 'Under Review' : submissionDetails.status.charAt(0).toUpperCase() + submissionDetails.status.slice(1)}
                                         </span>

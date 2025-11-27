@@ -201,7 +201,7 @@ const JobApplications = () => {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-8 border-t border-gray-100">
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-6 pt-8 border-t border-gray-100">
                         <div className="p-4 bg-gray-50 rounded-xl">
                             <div className="flex items-center gap-2 text-gray-500 text-sm font-medium mb-1">
                                 <FiDollarSign className="w-4 h-4" />
@@ -223,6 +223,22 @@ const JobApplications = () => {
                                 Experience
                             </div>
                             <div className="text-lg font-bold text-gray-900 capitalize">{job?.experienceLevel}</div>
+                        </div>
+                        <div className="p-4 bg-gray-50 rounded-xl">
+                            <div className="flex items-center gap-2 text-gray-500 text-sm font-medium mb-1">
+                                <FiCalendar className="w-4 h-4" />
+                                Deadline
+                            </div>
+                            <div className="text-lg font-bold text-gray-900">
+                                {job?.deadline ? (
+                                    <div className="flex flex-col">
+                                        <span>{new Date(job.deadline).toLocaleDateString()}</span>
+                                        <span className="text-xs text-gray-500 font-normal">
+                                            {new Date(job.deadline).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </span>
+                                    </div>
+                                ) : 'No Deadline'}
+                            </div>
                         </div>
                         <div className="p-4 bg-gray-50 rounded-xl">
                             <div className="flex items-center gap-2 text-gray-500 text-sm font-medium mb-1">

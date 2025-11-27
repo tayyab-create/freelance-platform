@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FiSearch, FiFilter, FiX } from 'react-icons/fi';
 import Select from './CustomSelect';
+import DatePicker from './DatePicker';
 
 const FilterBar = ({
     onSearch,
@@ -205,11 +206,10 @@ const FilterBar = ({
                                 )}
 
                                 {filter.type === 'date' && (
-                                    <input
-                                        type="date"
+                                    <DatePicker
                                         value={activeFilters[filter.key] || ''}
-                                        onChange={(e) => handleFilterChange(filter.key, e.target.value)}
-                                        className="input-field"
+                                        onChange={(date) => handleFilterChange(filter.key, date ? date.toISOString().split('T')[0] : null)}
+                                        className="w-full"
                                     />
                                 )}
                             </div>

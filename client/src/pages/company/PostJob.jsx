@@ -18,6 +18,7 @@ import {
 } from 'react-icons/fi';
 import { toast } from '../../utils/toast';
 import { Select, PageHeader, ConfirmationModal, SuccessAnimation } from '../../components/shared';
+import DatePicker from '../../components/shared/DatePicker';
 import Input from '../../components/common/Input';
 import Textarea from '../../components/common/Textarea';
 import FileUpload from '../../components/common/FileUpload';
@@ -447,15 +448,16 @@ const PostJob = () => {
                                     </div>
                                     <h2 className="text-lg font-bold text-gray-900">Deadline</h2>
                                 </div>
-                                <Input
-                                    type="date"
-                                    name="deadline"
+                                <DatePicker
+                                    label="Deadline"
                                     value={formData.deadline}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    helperText="Application deadline (optional)"
+                                    onChange={(date) => setFieldValue('deadline', date)}
+                                    minDate={new Date()}
+                                    error={touched.deadline ? errors.deadline : ''}
+                                    placeholder="Select application deadline"
                                     className="mb-0"
                                 />
+                                <p className="mt-1 text-sm text-gray-500">Application deadline (optional)</p>
                             </div>
                         </div>
 
