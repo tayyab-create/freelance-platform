@@ -297,14 +297,19 @@ const MyReviews = () => {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredReviews.map((review) => (
-                    <ReviewCard
+                    <div
                       key={review._id}
-                      review={review}
-                      reviewerType="worker"
-                      reviewerName={review.workerInfo?.fullName || 'Freelancer'}
-                      reviewerLogo={review.workerInfo?.profilePicture}
-                      projectTitle={review.job?.title}
-                    />
+                      onClick={() => navigate(`/company/jobs/${review.job?._id}`)}
+                      className="cursor-pointer transition-transform hover:scale-[1.02]"
+                    >
+                      <ReviewCard
+                        review={review}
+                        reviewerType="worker"
+                        reviewerName={review.workerInfo?.fullName || 'Freelancer'}
+                        reviewerLogo={review.workerInfo?.profilePicture}
+                        projectTitle={review.job?.title}
+                      />
+                    </div>
                   ))}
                 </div>
               </div>

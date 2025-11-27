@@ -38,7 +38,8 @@ exports.getMyReviews = async (req, res) => {
                 tags: review.tags,
                 createdAt: review.createdAt,
                 job: {
-                    title: review.job?.title
+                    title: review.job?.title,
+                    _id: review.job?._id
                 },
                 workerInfo: {
                     fullName: workerProfile?.fullName || 'Freelancer',
