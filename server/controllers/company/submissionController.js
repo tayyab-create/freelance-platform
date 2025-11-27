@@ -61,6 +61,75 @@ exports.getSubmissions = async (req, res) => {
     }
 };
 
+// @desc    Request revision for a job submission
+// @route   PUT /api/companies/jobs/:jobId/revision
+// @access  Private/Company
+exports.requestRevision = async (req, res) => {
+    try {
+        const { feedback, newDeadline, attachments } = req.body;
+
+        if (!feedback || !newDeadline) {
+            return res.status(400).json({
+                success: false,
+                message: 'Feedback and new deadline are required'
+            });
+        }
+
+        const job = await Job.findOne({
+            _id: req.params.jobId,
+            company: req.user._id,
+        });
+
+        if (!job) {
+            return res.status(404).json({
+                success: false,
+                message: "Job not found",
+            });
+        }
+
+        if (job.status !== "submitted") {
+            return res.status(400).json({
+                success: false,
+                message: "Can only request revision for submitted jobs",
+            });
+        }
+
+        // Update submission
+        const submission = await Submission.findOne({ job: req.params.jobId });
+
+        if (!submission) {
+            return res.status(404).json({
+                success: false,
+                message: "Submission not found",
+            });
+        }
+
+        submission.status = 'revision-requested';
+        submission.revisionFeedback = feedback;
+        submission.revisionDeadline = newDeadline;
+        submission.revisionAttachments = attachments || [];
+        submission.reviewedAt = Date.now();
+        await submission.save();
+
+        // Update job status
+        job.status = 'revision-requested';
+        await job.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Revision requested successfully",
+            data: submission,
+        });
+    } catch (error) {
+        console.error("Request Revision Error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message,
+        });
+    }
+};
+
 // @desc    Review and complete a job
 // @route   PUT /api/companies/jobs/:jobId/complete
 // @access  Private/Company

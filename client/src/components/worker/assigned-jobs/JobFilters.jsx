@@ -29,6 +29,7 @@ const JobFilters = ({
                         { key: 'all', label: 'All Jobs' },
                         { key: 'assigned', label: 'Assigned' },
                         { key: 'in-progress', label: 'In Progress' },
+                        { key: 'revision-requested', label: 'Revisions' },
                         { key: 'submitted', label: 'Submitted' },
                         { key: 'completed', label: 'Completed' },
                     ].map((tab) => (

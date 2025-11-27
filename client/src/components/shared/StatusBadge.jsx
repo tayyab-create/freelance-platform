@@ -6,7 +6,8 @@ import {
     FiAlertCircle,
     FiLoader,
     FiPause,
-    FiPlay
+    FiPlay,
+    FiAlertTriangle
 } from 'react-icons/fi';
 
 const StatusBadge = ({
@@ -63,6 +64,11 @@ const StatusBadge = ({
             color: 'bg-teal-100 text-teal-700 border-teal-200',
             icon: FiCheckCircle,
             defaultLabel: 'Submitted'
+        },
+        'revision-requested': {
+            color: 'bg-orange-100 text-orange-700 border-orange-200',
+            icon: FiAlertTriangle,
+            defaultLabel: 'Revision Requested'
         },
 
         // Work statuses

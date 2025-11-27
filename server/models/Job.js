@@ -45,7 +45,7 @@ const jobSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['posted', 'assigned', 'in-progress', 'submitted', 'completed', 'cancelled'],
+    enum: ['posted', 'assigned', 'in-progress', 'submitted', 'revision-requested', 'completed', 'cancelled'],
     default: 'posted'
   },
   assignedWorker: {

@@ -1,6 +1,6 @@
 import React from 'react';
-import { FiMessageCircle, FiPlay, FiUpload, FiBriefcase, FiClock, FiDollarSign, FiCalendar, FiFile, FiAward, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
-import { Modal } from '../../shared';
+import { FiMessageCircle, FiPlay, FiUpload, FiBriefcase, FiClock, FiDollarSign, FiCalendar, FiFile, FiAward, FiCheckCircle, FiAlertCircle, FiPaperclip, FiDownload, FiAlertTriangle } from 'react-icons/fi';
+import { Modal, RevisionTimeline } from '../../shared';
 
 const JobDetailsModal = ({
     isOpen,
@@ -14,6 +14,16 @@ const JobDetailsModal = ({
     isDeadlineApproaching
 }) => {
     if (!selectedJob) return null;
+
+    const API_BASE_URL = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000';
+
+    const getFullFileUrl = (fileUrl) => {
+        if (!fileUrl) return '';
+        if (fileUrl.startsWith('http')) {
+            return fileUrl.replace('http://localhost:5000', API_BASE_URL);
+        }
+        return `${API_BASE_URL}${fileUrl}`;
+    };
 
     return (
         <Modal
@@ -47,13 +57,13 @@ const JobDetailsModal = ({
                                     Start Working
                                 </button>
                             )}
-                            {selectedJob.status === 'in-progress' && (
+                            {(selectedJob.status === 'in-progress' || selectedJob.status === 'revision-requested') && (
                                 <button
                                     onClick={() => handleOpenSubmitModal(selectedJob)}
                                     className="px-6 py-2.5 rounded-xl bg-primary-600 text-white font-bold hover:bg-primary-700 transition-colors shadow-lg shadow-primary-500/30 flex items-center gap-2"
                                 >
                                     <FiUpload className="h-5 w-5" />
-                                    Submit Work
+                                    {selectedJob.status === 'revision-requested' ? 'Submit Revision' : 'Submit Work'}
                                 </button>
                             )}
                         </div>
@@ -142,6 +152,88 @@ const JobDetailsModal = ({
                     </div>
                 </div>
 
+                {/* Revision Alert - For Revision Requested Jobs */}
+                {selectedJob.status === 'revision-requested' && submissionDetails && (
+                    <div className="bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-200 rounded-2xl p-6">
+                        <div className="flex items-start gap-4">
+                            <div className="p-3 bg-orange-100 rounded-full flex-shrink-0">
+                                <FiAlertTriangle className="h-6 w-6 text-orange-600" />
+                            </div>
+                            <div className="flex-1 min-w-0 space-y-4">
+                                <div>
+                                    <h3 className="text-lg font-bold text-orange-900 mb-2">Revision Requested</h3>
+                                    <p className="text-sm text-orange-700">
+                                        The client has requested changes to your submission. Please review the feedback and submit a revised version.
+                                    </p>
+                                </div>
+
+                                {/* Client Feedback */}
+                                <div>
+                                    <label className="block text-sm font-bold text-orange-900 mb-2">Client's Feedback:</label>
+                                    <div className="bg-white p-4 rounded-xl border border-orange-200">
+                                        <p className="text-gray-700 whitespace-pre-line break-words">{submissionDetails.revisionFeedback}</p>
+                                    </div>
+                                </div>
+
+                                {/* New Deadline */}
+                                {submissionDetails.revisionDeadline && (
+                                    <div className="flex items-center gap-3 bg-orange-100 p-3 rounded-xl">
+                                        <FiCalendar className="h-5 w-5 text-orange-600 flex-shrink-0" />
+                                        <div className="min-w-0">
+                                            <span className="text-sm font-bold text-orange-900">New Deadline: </span>
+                                            <span className="text-sm text-orange-700">
+                                                {new Date(submissionDetails.revisionDeadline).toLocaleDateString()} at {new Date(submissionDetails.revisionDeadline).toLocaleTimeString()}
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Reference Attachments */}
+                                {submissionDetails.revisionAttachments && submissionDetails.revisionAttachments.length > 0 && (
+                                    <div>
+                                        <label className="block text-sm font-bold text-orange-900 mb-2">
+                                            Reference Documents ({submissionDetails.revisionAttachments.length})
+                                        </label>
+                                        <div className="space-y-2">
+                                            {submissionDetails.revisionAttachments.map((file, index) => (
+                                                <a
+                                                    key={index}
+                                                    href={getFullFileUrl(file.fileUrl)}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    download
+                                                    className="flex items-center justify-between bg-white p-3 rounded-xl border border-orange-200 hover:border-orange-300 hover:shadow-md transition-all group min-w-0"
+                                                >
+                                                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                        <div className="p-2 bg-orange-50 text-orange-600 rounded-lg group-hover:bg-orange-100 transition-colors flex-shrink-0">
+                                                            <FiFile className="h-5 w-5" />
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-semibold text-gray-700 group-hover:text-orange-600 transition-colors truncate" title={file.fileName}>
+                                                                {file.fileName}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <FiDownload className="h-5 w-5 text-gray-400 group-hover:text-orange-600 transition-colors flex-shrink-0 ml-2" />
+                                                </a>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Revision Count */}
+                                {submissionDetails.revisionCount > 0 && (
+                                    <div className="pt-3 border-t border-orange-200">
+                                        <p className="text-sm text-orange-700">
+                                            <span className="font-bold">Revision #{submissionDetails.revisionCount + 1}</span>
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Description */}
                 <div>
                     <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
@@ -170,6 +262,55 @@ const JobDetailsModal = ({
                                 </span>
                             ))}
                         </div>
+                    </div>
+                )}
+
+                {/* Job Attachments */}
+                {selectedJob.attachments && selectedJob.attachments.length > 0 && (
+                    <div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                            <FiPaperclip className="h-5 w-5 text-gray-400" />
+                            Job Attachments
+                        </h3>
+                        <div className="space-y-2">
+                            {selectedJob.attachments.map((file, index) => (
+                                <a
+                                    key={index}
+                                    href={file.fileUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center justify-between bg-white p-4 rounded-xl border border-gray-200 hover:border-primary-300 hover:shadow-md transition-all group"
+                                >
+                                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                                        <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-lg group-hover:bg-indigo-100 transition-colors flex-shrink-0">
+                                            <FiFile className="h-5 w-5" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-semibold text-gray-700 group-hover:text-primary-600 transition-colors truncate">
+                                                {file.fileName}
+                                            </p>
+                                            {file.fileSize && (
+                                                <p className="text-xs text-gray-500 mt-0.5">
+                                                    {(file.fileSize / 1024 / 1024).toFixed(2)} MB
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <FiDownload className="h-5 w-5 text-gray-400 group-hover:text-primary-600 transition-colors flex-shrink-0 ml-2" />
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Revision History */}
+                {submissionDetails && submissionDetails.revisionHistory && submissionDetails.revisionHistory.length > 0 && (
+                    <div>
+                        <RevisionTimeline
+                            revisionHistory={submissionDetails.revisionHistory}
+                            currentSubmission={submissionDetails}
+                            userRole="worker"
+                        />
                     </div>
                 )}
 

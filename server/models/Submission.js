@@ -47,7 +47,38 @@ const submissionSchema = new mongoose.Schema({
   revisionCount: {
     type: Number,
     default: 0
-  }
+  },
+  revisionDeadline: {
+    type: Date
+  },
+  revisionFeedback: {
+    type: String
+  },
+  revisionAttachments: [{
+    fileName: String,
+    fileUrl: String,
+    fileType: String,
+    uploadedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  revisionHistory: [{
+    files: [{
+      fileName: String,
+      fileUrl: String,
+      fileType: String
+    }],
+    description: String,
+    submittedAt: Date,
+    feedback: String,
+    revisionDeadline: Date,
+    attachments: [{
+      fileName: String,
+      fileUrl: String,
+      fileType: String
+    }]
+  }]
 }, {
   timestamps: true
 });

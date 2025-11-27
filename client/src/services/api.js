@@ -9,25 +9,6 @@ const api = axios.create({
     },
 });
 
-// Request interceptor - Add token to requests
-// api.interceptors.request.use(
-//     (config) => {
-//         const token = localStorage.getItem('token');
-//         if (token) {
-//             config.headers.Authorization = `Bearer ${token}`;
-//         }
-
-//         // If sending FormData, delete Content-Type to let browser set it with boundary
-//         // if (config.data instanceof FormData) {
-//         //     delete config.headers['Content-Type'];
-//         // }
-
-//         return config;
-//     },
-//     (error) => {
-//         return Promise.reject(error);
-//     }
-// );
 
 // Request interceptor - Add token to requests
 api.interceptors.request.use(
@@ -114,6 +95,7 @@ export const companyAPI = {
     assignJob: (jobId, data) => api.put(`/companies/jobs/${jobId}/assign`, data),
     getSubmissions: () => api.get('/companies/submissions'),
     completeJob: (jobId) => api.put(`/companies/jobs/${jobId}/complete`),
+    requestRevision: (jobId, data) => api.put(`/companies/jobs/${jobId}/revision`, data),
     reviewWorker: (workerId, data) => api.post(`/companies/review/${workerId}`, data),
     getDashboard: () => api.get('/companies/dashboard'),
 };
@@ -138,27 +120,6 @@ export const adminAPI = {
     deleteJob: (id) => api.delete(`/admin/jobs/${id}`),
 };
 
-// Upload APIs
-// export const uploadAPI = {
-//     uploadSingle: (file, type = 'general') => {
-//         const formData = new FormData();
-//         formData.append('file', file);
-
-//         // Send type as QUERY PARAMETER - this is more reliable
-//         // DO NOT set Content-Type manually - let browser set it with boundary
-//         return api.post(`/upload/single?type=${type}`, formData);
-//     },
-//     uploadMultiple: (files, type = 'general') => {
-//         const formData = new FormData();
-//         files.forEach(file => {
-//             formData.append('files', file);
-//         });
-
-//         // Send type as QUERY PARAMETER
-//         // DO NOT set Content-Type manually - let browser set it with boundary
-//         return api.post(`/upload/multiple?type=${type}`, formData);
-//     },
-// };
 
 // Upload APIs
 export const uploadAPI = {

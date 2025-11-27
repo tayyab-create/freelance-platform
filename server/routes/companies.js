@@ -25,6 +25,7 @@ router.get('/jobs', jobController.getMyJobs);
 router.get('/jobs/:jobId/applications', checkApproval, applicationController.getJobApplications);
 router.put('/jobs/:jobId/assign', checkApproval, applicationController.assignJob);
 router.put('/jobs/:jobId/complete', checkApproval, submissionController.completeJob);
+router.put('/jobs/:jobId/revision', checkApproval, submissionController.requestRevision);
 
 // Submission routes
 router.get('/submissions', checkApproval, submissionController.getSubmissions);

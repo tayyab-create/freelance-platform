@@ -18,6 +18,7 @@ import {
 import { toast } from '../../utils/toast';
 import ReviewModal from '../../components/company/ReviewModal';
 import SubmissionDetailsModal from '../../components/company/SubmissionDetailsModal';
+import RequestRevisionModal from '../../components/company/RequestRevisionModal';
 import { SkeletonLoader, StatusBadge, Avatar, PageHeader, ConfirmationModal, SuccessAnimation } from '../../components/shared';
 
 const Submissions = () => {
@@ -30,11 +31,11 @@ const Submissions = () => {
     // Modals
     const [selectedSubmission, setSelectedSubmission] = useState(null);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
-    const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-    const [feedback, setFeedback] = useState('');
+    const [showRevisionModal, setShowRevisionModal] = useState(false);
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [reviewingSubmission, setReviewingSubmission] = useState(null);
     const [submittingReview, setSubmittingReview] = useState(false);
+    const [requestingRevision, setRequestingRevision] = useState(false);
 
     // Confirmation & Success
     const [submissionToApprove, setSubmissionToApprove] = useState(null);
@@ -102,14 +103,24 @@ const Submissions = () => {
     const handleRequestRevision = (submission) => {
         setShowDetailsModal(false);
         setSelectedSubmission(submission);
-        setShowFeedbackModal(true);
-        setFeedback('');
+        setShowRevisionModal(true);
     };
 
-    const submitRevisionRequest = async (e) => {
-        e.preventDefault();
-        toast.info('Revision request feature coming soon!');
-        setShowFeedbackModal(false);
+    const submitRevisionRequest = async (revisionData) => {
+        if (!selectedSubmission) return;
+
+        setRequestingRevision(true);
+        try {
+            await companyAPI.requestRevision(selectedSubmission.job._id, revisionData);
+            toast.success('Revision requested successfully!');
+            setShowRevisionModal(false);
+            setSelectedSubmission(null);
+            fetchSubmissions();
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to request revision');
+        } finally {
+            setRequestingRevision(false);
+        }
     };
 
     const handleViewDetails = (submission) => {
@@ -167,6 +178,7 @@ const Submissions = () => {
                             {[
                                 { key: 'all', label: 'All Submissions' },
                                 { key: 'submitted', label: 'New' },
+                                { key: 'revision-requested', label: 'Revisions' },
                                 { key: 'approved', label: 'Approved' },
                             ].map((tab) => (
                                 <button
@@ -318,42 +330,17 @@ const Submissions = () => {
                 processing={processing}
             />
 
-            {/* Feedback Modal */}
-            {showFeedbackModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-                    <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl animate-scale-in">
-                        <h2 className="text-xl font-bold text-gray-900 mb-4">Request Changes</h2>
-                        <form onSubmit={submitRevisionRequest} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    What needs to be changed?
-                                </label>
-                                <textarea
-                                    value={feedback}
-                                    onChange={(e) => setFeedback(e.target.value)}
-                                    placeholder="Describe what needs to be revised..."
-                                    rows="6"
-                                    required
-                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
-                                />
-                            </div>
-                            <div className="flex gap-3">
-                                <Button type="submit" variant="primary" className="flex-1">
-                                    Send Request
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant="secondary"
-                                    onClick={() => setShowFeedbackModal(false)}
-                                    className="flex-1"
-                                >
-                                    Cancel
-                                </Button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+            {/* Request Revision Modal */}
+            <RequestRevisionModal
+                isOpen={showRevisionModal}
+                onClose={() => {
+                    setShowRevisionModal(false);
+                    setSelectedSubmission(null);
+                }}
+                submission={selectedSubmission}
+                onSubmit={submitRevisionRequest}
+                loading={requestingRevision}
+            />
 
             {/* Review Modal */}
             {showReviewModal && reviewingSubmission && (

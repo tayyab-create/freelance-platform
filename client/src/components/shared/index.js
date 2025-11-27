@@ -18,6 +18,7 @@ export { default as ResponsiveTable } from './ResponsiveTable';
 export { default as FilterBar } from './FilterBar';
 export { default as EnhancedFilterBar } from './EnhancedFilterBar';
 export { default as ActionDropdown } from './ActionDropdown';
+export { default as RevisionTimeline } from './RevisionTimeline';
 
 // Card Components
 export { default as JobCard } from './JobCard';

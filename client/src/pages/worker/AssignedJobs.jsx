@@ -67,6 +67,7 @@ const AssignedJobs = () => {
     all: jobs.length,
     assigned: jobs.filter(j => j.status === 'assigned').length,
     'in-progress': jobs.filter(j => j.status === 'in-progress').length,
+    'revision-requested': jobs.filter(j => j.status === 'revision-requested').length,
     submitted: jobs.filter(j => j.status === 'submitted').length,
     completed: jobs.filter(j => j.status === 'completed').length
   };
@@ -90,8 +91,8 @@ const AssignedJobs = () => {
     setSelectedJob(job);
     setShowDetailsModal(true);
 
-    // If job is submitted or completed, fetch submission details
-    if (job.status === 'submitted' || job.status === 'completed') {
+    // If job is submitted, revision-requested, or completed, fetch submission details
+    if (job.status === 'submitted' || job.status === 'revision-requested' || job.status === 'completed') {
       setLoadingSubmission(true);
       try {
         const response = await workerAPI.getSubmission(job._id);
@@ -263,7 +264,9 @@ const AssignedJobs = () => {
           actions={
             <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-100 flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
-              <p className="text-gray-700 font-bold">{jobs.length} Active</p>
+              <p className="text-gray-700 font-bold">
+                {jobs.filter(j => j.status !== 'completed' && j.status !== 'cancelled').length} Active
+              </p>
             </div>
           }
         />

@@ -18,7 +18,7 @@ import {
     FiBriefcase,
     FiArrowRight
 } from 'react-icons/fi';
-import { StatusBadge, Avatar } from '../shared';
+import { StatusBadge, Avatar, RevisionTimeline } from '../shared';
 
 const SubmissionDetailsModal = ({
     isOpen,
@@ -317,6 +317,17 @@ const SubmissionDetailsModal = ({
                             </div>
                         </div>
                     </div>
+
+                    {/* Revision History */}
+                    {submission.revisionHistory && submission.revisionHistory.length > 0 && (
+                        <div className="col-span-1 lg:col-span-3">
+                            <RevisionTimeline
+                                revisionHistory={submission.revisionHistory}
+                                currentSubmission={submission}
+                                userRole="company"
+                            />
+                        </div>
+                    )}
                 </div>
             </Modal>
         </>

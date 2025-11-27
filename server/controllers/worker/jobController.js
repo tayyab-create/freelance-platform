@@ -8,7 +8,7 @@ exports.getAssignedJobs = async (req, res) => {
     try {
         const jobs = await Job.find({
             assignedWorker: req.user._id,
-            status: { $in: ['assigned', 'in-progress', 'submitted', 'completed'] }
+            status: { $in: ['assigned', 'in-progress', 'submitted', 'revision-requested', 'completed'] }
         })
             .populate('company', 'email')
             .sort('-assignedDate');
@@ -66,16 +66,57 @@ exports.submitWork = async (req, res) => {
             });
         }
 
-        // Check if already submitted
+        // Check if submission already exists
         const existingSubmission = await Submission.findOne({ job: jobId });
+
         if (existingSubmission) {
-            return res.status(400).json({
-                success: false,
-                message: 'Work already submitted for this job'
-            });
+            // Handle resubmission (revision case)
+            if (existingSubmission.status === 'revision-requested') {
+                // Move current submission data to revision history
+                existingSubmission.revisionHistory.push({
+                    files: existingSubmission.files,
+                    description: existingSubmission.description,
+                    submittedAt: existingSubmission.createdAt,
+                    feedback: existingSubmission.revisionFeedback,
+                    revisionDeadline: existingSubmission.revisionDeadline,
+                    attachments: existingSubmission.revisionAttachments
+                });
+
+                // Increment revision count
+                existingSubmission.revisionCount += 1;
+
+                // Update with new submission data
+                existingSubmission.description = description;
+                existingSubmission.links = links || [];
+                existingSubmission.files = files || [];
+                existingSubmission.status = 'submitted';
+
+                // Clear revision-specific fields
+                existingSubmission.revisionFeedback = undefined;
+                existingSubmission.revisionDeadline = undefined;
+                existingSubmission.revisionAttachments = [];
+
+                await existingSubmission.save();
+
+                // Update job status back to submitted
+                job.status = 'submitted';
+                await job.save();
+
+                return res.status(200).json({
+                    success: true,
+                    message: 'Revision submitted successfully',
+                    data: existingSubmission
+                });
+            } else {
+                // Already submitted and not in revision state
+                return res.status(400).json({
+                    success: false,
+                    message: 'Work already submitted for this job'
+                });
+            }
         }
 
-        // Create submission
+        // Create new submission (first submission)
         const submission = await Submission.create({
             job: jobId,
             worker: req.user._id,
