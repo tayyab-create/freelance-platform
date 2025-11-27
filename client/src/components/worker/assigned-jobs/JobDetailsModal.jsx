@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiMessageCircle, FiPlay, FiUpload, FiBriefcase, FiClock, FiDollarSign, FiCalendar, FiFile, FiAward, FiCheckCircle, FiAlertCircle, FiPaperclip, FiDownload, FiAlertTriangle } from 'react-icons/fi';
+import { FiMessageCircle, FiPlay, FiUpload, FiBriefcase, FiClock, FiDollarSign, FiCalendar, FiFile, FiAward, FiCheckCircle, FiAlertCircle, FiPaperclip, FiDownload, FiAlertTriangle, FiStar } from 'react-icons/fi';
 import { Modal, RevisionTimeline, StatusBadge, ExpandableText } from '../../shared';
 
 const JobDetailsModal = ({
@@ -9,6 +9,7 @@ const JobDetailsModal = ({
     handleStartConversation,
     handleStartJob,
     handleOpenSubmitModal,
+    handleOpenReviewModal,
     loadingSubmission,
     submissionDetails,
     isDeadlineApproaching
@@ -64,6 +65,15 @@ const JobDetailsModal = ({
                                 >
                                     <FiUpload className="h-5 w-5" />
                                     {selectedJob.status === 'revision-requested' ? 'Submit Revision' : 'Submit Work'}
+                                </button>
+                            )}
+                            {selectedJob.status === 'completed' && (
+                                <button
+                                    onClick={() => handleOpenReviewModal(selectedJob)}
+                                    className="px-6 py-2.5 rounded-xl bg-yellow-500 text-white font-bold hover:bg-yellow-600 transition-colors shadow-lg shadow-yellow-500/30 flex items-center gap-2"
+                                >
+                                    <FiStar className="h-5 w-5" />
+                                    Review Company
                                 </button>
                             )}
                         </div>

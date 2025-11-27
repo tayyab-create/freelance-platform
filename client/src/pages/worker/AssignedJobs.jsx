@@ -10,6 +10,7 @@ import AdvancedFilterBar from '../../components/shared/AdvancedFilterBar';
 import JobCard from '../../components/worker/assigned-jobs/JobCard';
 import JobDetailsModal from '../../components/worker/assigned-jobs/JobDetailsModal';
 import SubmitWorkModal from '../../components/worker/assigned-jobs/SubmitWorkModal';
+import ReviewCompanyModal from '../../components/worker/assigned-jobs/ReviewCompanyModal';
 
 const AssignedJobs = () => {
   const navigate = useNavigate();
@@ -32,6 +33,7 @@ const AssignedJobs = () => {
   // Modals
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
   const [submissionDetails, setSubmissionDetails] = useState(null);
   const [loadingSubmission, setLoadingSubmission] = useState(false);
@@ -121,6 +123,15 @@ const AssignedJobs = () => {
     if (!showDetailsModal) {
       setTimeout(() => setSelectedJob(null), 300);
     }
+  };
+
+  const handleOpenReviewModal = (job) => {
+    setSelectedJob(job);
+    setShowReviewModal(true);
+  };
+
+  const handleCloseReviewModal = () => {
+    setShowReviewModal(false);
   };
 
   const handleViewDetails = async (job) => {
@@ -405,6 +416,7 @@ const AssignedJobs = () => {
           handleStartConversation={handleStartConversation}
           handleStartJob={handleStartJob}
           handleOpenSubmitModal={handleOpenSubmitModal}
+          handleOpenReviewModal={handleOpenReviewModal}
           loadingSubmission={loadingSubmission}
           submissionDetails={submissionDetails}
           isDeadlineApproaching={isDeadlineApproaching}
@@ -422,6 +434,16 @@ const AssignedJobs = () => {
           submitting={submitting}
           uploadingFiles={uploadingFiles}
           uploadProgress={uploadProgress}
+        />
+
+        {/* Review Company Modal */}
+        <ReviewCompanyModal
+          isOpen={showReviewModal}
+          onClose={handleCloseReviewModal}
+          job={selectedJob}
+          onReviewSubmit={() => {
+            // Optionally refresh jobs or show success
+          }}
         />
       </div>
     </DashboardLayout>

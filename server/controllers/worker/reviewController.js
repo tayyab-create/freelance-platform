@@ -1,4 +1,4 @@
-const { Review } = require('../../models');
+const { Review, Job, CompanyProfile } = require('../../models');
 const { getCompanyProfile } = require('../../utils/companyInfoHelper');
 
 // @desc    Get worker's reviews
@@ -87,6 +87,88 @@ exports.getWorkerReviews = async (req, res) => {
             success: false,
             message: 'Server error',
             error: error.message
+        });
+    }
+};
+
+// @desc    Review a company
+// @route   POST /api/workers/review/:companyId
+// @access  Private/Worker
+exports.reviewCompany = async (req, res) => {
+    try {
+        const { jobId, rating, reviewText } = req.body;
+
+        // Validate rating
+        if (!rating || rating < 1 || rating > 5) {
+            return res.status(400).json({
+                success: false,
+                message: "Rating must be between 1 and 5",
+            });
+        }
+
+        // Check if job exists and is completed
+        const job = await Job.findOne({
+            _id: jobId,
+            company: req.params.companyId,
+            assignedWorker: req.user._id,
+            status: "completed",
+        });
+
+        if (!job) {
+            return res.status(404).json({
+                success: false,
+                message: "Job not found, not assigned to you, or not completed",
+            });
+        }
+
+        // Check if review already exists
+        const existingReview = await Review.findOne({
+            job: jobId,
+            worker: req.user._id,
+            reviewedBy: 'worker'
+        });
+
+        if (existingReview) {
+            return res.status(400).json({
+                success: false,
+                message: "You have already reviewed the company for this job",
+            });
+        }
+
+        // Create review
+        const review = await Review.create({
+            job: jobId,
+            worker: req.user._id,
+            company: req.params.companyId,
+            rating,
+            reviewText,
+            reviewedBy: 'worker'
+        });
+
+        // Update company's average rating
+        const allReviews = await Review.find({ company: req.params.companyId, reviewedBy: 'worker' });
+        const avgRating =
+            allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
+
+        await CompanyProfile.findOneAndUpdate(
+            { user: req.params.companyId },
+            {
+                averageRating: parseFloat(avgRating.toFixed(2)),
+                totalReviews: allReviews.length,
+            }
+        );
+
+        res.status(201).json({
+            success: true,
+            message: "Review submitted successfully",
+            data: review,
+        });
+    } catch (error) {
+        console.error("Review Company Error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message,
         });
     }
 };

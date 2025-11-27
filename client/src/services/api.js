@@ -78,6 +78,7 @@ export const workerAPI = {
     updateSavedSearch: (id, data) => api.put(`/workers/saved-searches/${id}`, data),
     deleteSavedSearch: (id) => api.delete(`/workers/saved-searches/${id}`),
     getJobsForSavedSearch: (id) => api.get(`/workers/saved-searches/${id}/jobs`),
+    reviewCompany: (companyId, data) => api.post(`/workers/review/${companyId}`, data),
 };
 
 // Add Review API

@@ -28,6 +28,11 @@ const reviewSchema = new mongoose.Schema({
     minlength: 10,
     maxlength: 500
   },
+  reviewedBy: {
+    type: String,
+    enum: ['company', 'worker'],
+    required: true
+  },
   skills: [{
     type: String
   }],
@@ -36,14 +41,13 @@ const reviewSchema = new mongoose.Schema({
     default: true
   },
   tags: [{
-    type: String,
-    enum: ['professional', 'quality-work', 'on-time', 'great-communication', 'creative', 'reliable']
+    type: String
   }]
 }, {
   timestamps: true
 });
 
-// One review per job-worker combination
-reviewSchema.index({ job: 1, worker: 1 }, { unique: true });
+// One review per job-worker-reviewer combination
+reviewSchema.index({ job: 1, worker: 1, reviewedBy: 1 }, { unique: true });
 
 module.exports = mongoose.model('Review', reviewSchema);

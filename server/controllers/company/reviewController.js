@@ -50,6 +50,7 @@ exports.reviewWorker = async (req, res) => {
             company: req.user._id,
             rating,
             reviewText,
+            reviewedBy: 'company',
             skills: skills || [],
             wouldHireAgain: wouldHireAgain !== undefined ? wouldHireAgain : true,
             tags: tags || [],

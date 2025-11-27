@@ -37,6 +37,7 @@ router.get('/submission/:jobId', checkApproval, jobController.getSubmission);
 
 // Review routes
 router.get('/reviews', reviewController.getMyReviews);
+router.post('/review/:companyId', checkApproval, reviewController.reviewCompany);
 
 // Dashboard
 router.get('/dashboard', dashboardController.getDashboard);
