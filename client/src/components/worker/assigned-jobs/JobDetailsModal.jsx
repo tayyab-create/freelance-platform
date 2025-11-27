@@ -13,10 +13,12 @@ const JobDetailsModal = ({
     handleOpenReviewModal,
     loadingSubmission,
     submissionDetails,
-    isDeadlineApproaching
+    isDeadlineApproaching,
+    onReviewRefresh
 }) => {
     const [reviewsData, setReviewsData] = useState(null);
     const [loadingReviews, setLoadingReviews] = useState(false);
+    const [reviewRefreshTrigger, setReviewRefreshTrigger] = useState(0);
 
     useEffect(() => {
         // Fetch reviews when modal opens and job is completed
@@ -26,7 +28,7 @@ const JobDetailsModal = ({
             // Clear reviews when modal closes or job changes
             setReviewsData(null);
         }
-    }, [isOpen, selectedJob?._id, selectedJob?.status]);
+    }, [isOpen, selectedJob?._id, selectedJob?.status, reviewRefreshTrigger]);
 
     const fetchJobReviews = async () => {
         if (!selectedJob?._id) return;
@@ -42,6 +44,15 @@ const JobDetailsModal = ({
             setLoadingReviews(false);
         }
     };
+
+    // Expose refresh function to parent via callback
+    useEffect(() => {
+        if (onReviewRefresh && isOpen) {
+            onReviewRefresh(() => {
+                setReviewRefreshTrigger(prev => prev + 1);
+            });
+        }
+    }, [onReviewRefresh, isOpen]);
 
     if (!selectedJob) return null;
 
@@ -667,7 +678,7 @@ const JobDetailsModal = ({
                                 </div>
 
                                 {/* Display Reviews */}
-                                <div className="grid gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {/* Worker's Review */}
                                     {reviewsData.workerReview ? (
                                         <ReviewCard

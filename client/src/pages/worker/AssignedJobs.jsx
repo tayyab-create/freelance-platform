@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { workerAPI, uploadAPI, messageAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { FiBriefcase, FiClock, FiCheckCircle } from 'react-icons/fi';
@@ -16,6 +16,7 @@ const AssignedJobs = () => {
   const navigate = useNavigate();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const reviewRefreshRef = useRef(null);
   const [filters, setFilters] = useState({
     search: '',
     status: [],
@@ -135,9 +136,9 @@ const AssignedJobs = () => {
   };
 
   const handleReviewSubmitted = () => {
-    // Refresh job details modal if open
-    if (showDetailsModal && selectedJob) {
-      handleViewDetails(selectedJob);
+    // Refresh reviews in the modal if it's open
+    if (reviewRefreshRef.current) {
+      reviewRefreshRef.current();
     }
   };
 
@@ -427,6 +428,7 @@ const AssignedJobs = () => {
           loadingSubmission={loadingSubmission}
           submissionDetails={submissionDetails}
           isDeadlineApproaching={isDeadlineApproaching}
+          onReviewRefresh={(refreshFn) => { reviewRefreshRef.current = refreshFn; }}
         />
 
         {/* Submit Work Modal */}
