@@ -353,6 +353,18 @@ const MessagesEnhanced = () => {
       const data = await response.json();
       if (data.success) {
         setMessages(data.data);
+
+        // Emit read receipts for unread messages
+        if (socket) {
+          data.data.forEach(message => {
+            if (message.sender._id !== currentUser?.id && !message.isRead) {
+              socket.emit('message_read', {
+                messageId: message._id,
+                conversationId: conversationId,
+              });
+            }
+          });
+        }
       }
     } catch (error) {
       toast.error('Failed to load messages');
@@ -609,14 +621,32 @@ const MessagesEnhanced = () => {
     messageInputRef.current?.focus();
   };
 
-  const handleReaction = (messageId, emoji) => {
-    setMessageReactions(prev => ({
-      ...prev,
-      [messageId]: [...(prev[messageId] || []), { emoji, userId: currentUser?.id }]
-    }));
+  const handleReaction = async (messageId, emoji) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(
+        `${API_URL}/messages/${selectedConversation._id}/message/${messageId}/reaction`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ emoji }),
+        }
+      );
 
-    // TODO: Send to backend
-    toast.success('Reaction added!');
+      const data = await response.json();
+      if (data.success) {
+        // Update the message with the new reactions from backend
+        setMessages(prev => prev.map(msg =>
+          msg._id === messageId ? { ...msg, reactions: data.data.reactions } : msg
+        ));
+        toast.success('Reaction updated!');
+      }
+    } catch (error) {
+      toast.error('Failed to add reaction');
+    }
   };
 
   // ============= CONVERSATION ACTIONS =============
