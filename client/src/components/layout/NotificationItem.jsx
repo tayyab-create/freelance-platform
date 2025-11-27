@@ -16,21 +16,52 @@ const NotificationItem = ({ notification, onClose }) => {
   const dispatch = useDispatch();
 
   const getIcon = (type) => {
+    const iconClasses = "h-5 w-5";
+    const wrapperClasses = "w-10 h-10 rounded-2xl flex items-center justify-center shadow-sm";
+
     switch (type) {
       case 'application':
-        return <BriefcaseIcon className="h-5 w-5 text-blue-500" />;
+        return (
+          <div className={`${wrapperClasses} bg-blue-50`}>
+            <BriefcaseIcon className={`${iconClasses} text-blue-600`} />
+          </div>
+        );
       case 'job':
-        return <BriefcaseIcon className="h-5 w-5 text-green-500" />;
+        return (
+          <div className={`${wrapperClasses} bg-green-50`}>
+            <BriefcaseIcon className={`${iconClasses} text-green-600`} />
+          </div>
+        );
       case 'submission':
-        return <DocumentTextIcon className="h-5 w-5 text-purple-500" />;
+        return (
+          <div className={`${wrapperClasses} bg-purple-50`}>
+            <DocumentTextIcon className={`${iconClasses} text-purple-600`} />
+          </div>
+        );
       case 'review':
-        return <StarIcon className="h-5 w-5 text-yellow-500" />;
+        return (
+          <div className={`${wrapperClasses} bg-yellow-50`}>
+            <StarIcon className={`${iconClasses} text-yellow-600`} />
+          </div>
+        );
       case 'message':
-        return <ChatBubbleLeftIcon className="h-5 w-5 text-indigo-500" />;
+        return (
+          <div className={`${wrapperClasses} bg-indigo-50`}>
+            <ChatBubbleLeftIcon className={`${iconClasses} text-indigo-600`} />
+          </div>
+        );
       case 'system':
-        return <BellIcon className="h-5 w-5 text-gray-500" />;
+        return (
+          <div className={`${wrapperClasses} bg-gray-50`}>
+            <BellIcon className={`${iconClasses} text-gray-600`} />
+          </div>
+        );
       default:
-        return <BellIcon className="h-5 w-5 text-gray-500" />;
+        return (
+          <div className={`${wrapperClasses} bg-gray-50`}>
+            <BellIcon className={`${iconClasses} text-gray-600`} />
+          </div>
+        );
     }
   };
 
@@ -70,36 +101,38 @@ const NotificationItem = ({ notification, onClose }) => {
   return (
     <div
       onClick={handleClick}
-      className={`flex items-start gap-3 p-3 hover:bg-gray-50 transition-colors cursor-pointer border-b border-gray-100 ${
-        !notification.read ? 'bg-blue-50' : ''
+      className={`group flex items-start gap-4 p-4 hover:bg-white/80 transition-all duration-300 cursor-pointer relative ${
+        !notification.read ? 'bg-primary-50/30' : 'bg-transparent'
       }`}
     >
+      {/* Unread indicator bar */}
+      {!notification.read && (
+        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary-500 to-primary-600 rounded-r-full"></div>
+      )}
+
       {/* Icon */}
-      <div className="flex-shrink-0 mt-1">
+      <div className="flex-shrink-0">
         {getIcon(notification.type)}
       </div>
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <p className={`text-sm font-medium text-gray-900 ${!notification.read ? 'font-semibold' : ''}`}>
+        <p className={`text-sm font-bold text-gray-900 ${!notification.read ? 'text-gray-900' : 'text-gray-700'}`}>
           {notification.title}
         </p>
-        <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+        <p className="text-sm text-gray-600 mt-1 line-clamp-2 leading-relaxed">
           {notification.message}
         </p>
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-xs text-gray-500 mt-2 font-medium">
           {getTimeAgo(notification.createdAt)}
         </p>
       </div>
 
-      {/* Unread indicator and delete button */}
-      <div className="flex items-start gap-2">
-        {!notification.read && (
-          <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-        )}
+      {/* Delete button */}
+      <div className="flex items-start">
         <button
           onClick={handleDelete}
-          className="text-gray-400 hover:text-red-500 transition-colors"
+          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-300 opacity-0 group-hover:opacity-100 active:scale-95"
           title="Delete notification"
         >
           <XMarkIcon className="h-4 w-4" />

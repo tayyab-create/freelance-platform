@@ -64,14 +64,16 @@ const GlobalSearch = ({ isOpen, onClose }) => {
       // Search jobs based on role
       if (user?.role === 'worker') {
         try {
-          const jobsResponse = await jobAPI.searchJobs({ search: searchQuery, limit: 5 });
-          searchResults.jobs = jobsResponse.data?.data?.jobs || [];
+          // Use getAllJobs with search param instead of non-existent searchJobs
+          const jobsResponse = await jobAPI.getAllJobs({ search: searchQuery, limit: 5 });
+          searchResults.jobs = jobsResponse.data?.data || [];
         } catch (error) {
           console.error('Job search error:', error);
         }
       } else if (user?.role === 'company') {
         try {
-          const jobsResponse = await companyAPI.getJobs();
+          // Use getMyJobs instead of non-existent getJobs
+          const jobsResponse = await companyAPI.getMyJobs();
           const filteredJobs = (jobsResponse.data?.data || [])
             .filter(job =>
               job.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -206,11 +208,10 @@ const GlobalSearch = ({ isOpen, onClose }) => {
                 <button
                   key={category.key}
                   onClick={() => setActiveCategory(category.key)}
-                  className={`px-4 py-2 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
-                    activeCategory === category.key
+                  className={`px-4 py-2 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${activeCategory === category.key
                       ? 'bg-primary-600 text-white shadow-md'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                    }`}
                 >
                   {category.label}
                   {category.count > 0 && (
@@ -238,11 +239,10 @@ const GlobalSearch = ({ isOpen, onClose }) => {
                       onClick={() => handleResultClick(result.type, result.data)}
                       className="w-full px-6 py-4 hover:bg-gray-50 transition-colors flex items-start gap-4 text-left group"
                     >
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                        result.type === 'job'
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${result.type === 'job'
                           ? 'bg-blue-100 text-blue-600 group-hover:bg-blue-200'
                           : 'bg-purple-100 text-purple-600 group-hover:bg-purple-200'
-                      }`}>
+                        }`}>
                         {result.type === 'job' ? <FiBriefcase className="w-5 h-5" /> : <FiUser className="w-5 h-5" />}
                       </div>
                       <div className="flex-1 min-w-0">

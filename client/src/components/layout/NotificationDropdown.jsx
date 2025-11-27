@@ -34,43 +34,43 @@ const NotificationDropdown = ({ isOpen, onClose, isCollapsed = false }) => {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-[60] bg-black/5 backdrop-blur-[1px]"
+        className="fixed inset-0 z-[60] bg-black/10 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      {/* Side Panel - Positioned next to sidebar */}
+      {/* Side Panel - Positioned next to sidebar with glassmorphic design */}
       <div
-        className={`fixed top-0 bottom-0 w-96 bg-white shadow-2xl border-r border-gray-200 z-[70] flex flex-col transition-all duration-300 ${isCollapsed ? 'left-20' : 'left-64'}`}
+        className={`fixed top-0 bottom-0 w-96 bg-white/90 backdrop-blur-2xl shadow-2xl border-r border-gray-100 z-[70] flex flex-col transition-all duration-300 ${isCollapsed ? 'left-24' : 'left-72'}`}
         style={{ height: '100vh' }}
       >
         {/* Header */}
-        <div className="p-5 border-b border-gray-100 bg-white">
+        <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-white/50 to-transparent">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-xl font-bold text-gray-900">Notifications</h3>
-              <p className="text-sm text-gray-500">Stay updated with your activities</p>
+              <h3 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Notifications</h3>
+              <p className="text-xs text-gray-500 mt-0.5 font-medium">Stay updated with your activities</p>
             </div>
             <button
               onClick={onClose}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+              className="p-2.5 text-gray-400 hover:text-gray-700 hover:bg-white/80 rounded-2xl transition-all duration-300 active:scale-95"
             >
-              <XMarkIcon className="w-6 h-6" />
+              <XMarkIcon className="w-5 h-5" />
             </button>
           </div>
 
           {/* Action buttons */}
           {notifications.length > 0 && (
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
                 onClick={handleMarkAllAsRead}
-                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 text-xs font-bold text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-2xl transition-all duration-300 hover:shadow-md hover:shadow-primary-500/10 active:scale-95"
               >
                 <CheckIcon className="h-4 w-4" />
                 Mark all read
               </button>
               <button
                 onClick={handleDeleteAllRead}
-                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 text-xs font-bold text-red-700 bg-red-50 hover:bg-red-100 rounded-2xl transition-all duration-300 hover:shadow-md hover:shadow-red-500/10 active:scale-95"
               >
                 <TrashIcon className="h-4 w-4" />
                 Clear read
@@ -80,14 +80,14 @@ const NotificationDropdown = ({ isOpen, onClose, isCollapsed = false }) => {
         </div>
 
         {/* Notifications list */}
-        <div className="overflow-y-auto flex-1 bg-gray-50/50">
+        <div className="overflow-y-auto flex-1 bg-transparent scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
             </div>
           ) : notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              <div className="w-20 h-20 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl flex items-center justify-center mb-4 shadow-sm">
                 <svg
                   className="w-10 h-10 text-gray-400"
                   fill="none"
@@ -106,7 +106,7 @@ const NotificationDropdown = ({ isOpen, onClose, isCollapsed = false }) => {
               <p className="text-gray-500 text-sm">You're all caught up! Check back later for updates.</p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-gray-100/50">
               {notifications.map((notification) => (
                 <NotificationItem
                   key={notification._id}
@@ -120,13 +120,13 @@ const NotificationDropdown = ({ isOpen, onClose, isCollapsed = false }) => {
 
         {/* Footer */}
         {notifications.length > 0 && (
-          <div className="p-4 border-t border-gray-200 bg-white">
+          <div className="p-4 border-t border-gray-100 bg-gradient-to-r from-white/50 to-transparent">
             <button
               onClick={() => {
                 // You can navigate to a full notifications page here if needed
                 onClose();
               }}
-              className="w-full py-2.5 text-sm text-gray-700 hover:text-gray-900 font-semibold hover:bg-gray-50 rounded-xl transition-colors border border-gray-200"
+              className="w-full py-3 text-sm text-gray-600 hover:text-gray-900 font-bold hover:bg-white/80 rounded-2xl transition-all duration-300 border border-gray-200 hover:shadow-md active:scale-95"
             >
               Close Notifications
             </button>
