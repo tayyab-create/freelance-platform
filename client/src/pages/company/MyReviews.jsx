@@ -68,9 +68,8 @@ const MyReviews = () => {
         {[1, 2, 3, 4, 5].map((star) => (
           <FiStar
             key={star}
-            className={`h-5 w-5 ${
-              star <= rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'
-            }`}
+            className={`h-5 w-5 ${star <= rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'
+              }`}
           />
         ))}
       </div>
@@ -227,11 +226,10 @@ const MyReviews = () => {
                   </div>
                   <button
                     onClick={() => setSelectedRating('all')}
-                    className={`px-4 py-2 rounded-xl font-semibold transition-all ${
-                      selectedRating === 'all'
+                    className={`px-4 py-2 rounded-xl font-semibold transition-all ${selectedRating === 'all'
                         ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                      }`}
                   >
                     All ({reviews.length})
                   </button>
@@ -239,11 +237,10 @@ const MyReviews = () => {
                     <button
                       key={rating}
                       onClick={() => setSelectedRating(rating.toString())}
-                      className={`px-4 py-2 rounded-xl font-semibold transition-all flex items-center gap-1.5 ${
-                        selectedRating === rating.toString()
+                      className={`px-4 py-2 rounded-xl font-semibold transition-all flex items-center gap-1.5 ${selectedRating === rating.toString()
                           ? 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/30'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
+                        }`}
                     >
                       {rating}
                       <FiStar className={`h-4 w-4 ${selectedRating === rating.toString() ? 'fill-white' : ''}`} />
@@ -372,12 +369,12 @@ const MyReviews = () => {
                           ))}
                         </>
                       )}
-                      {review.wouldHireAgain && (
+                      {/* {review.wouldHireAgain && (
                         <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-xl border border-emerald-200">
                           <FiAward className="h-3.5 w-3.5" />
                           Would hire again
                         </span>
-                      )}
+                      )} */}
                     </div>
                   </div>
                 ))}
