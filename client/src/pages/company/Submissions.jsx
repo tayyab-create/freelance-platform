@@ -19,7 +19,7 @@ import { toast } from '../../utils/toast';
 import ReviewModal from '../../components/company/ReviewModal';
 import SubmissionDetailsModal from '../../components/company/SubmissionDetailsModal';
 import RequestRevisionModal from '../../components/company/RequestRevisionModal';
-import { SkeletonLoader, StatusBadge, Avatar, PageHeader, ConfirmationModal, SuccessAnimation } from '../../components/shared';
+import { SkeletonLoader, StatusBadge, Avatar, PageHeader, ConfirmationModal, SuccessAnimation, ExpandableText } from '../../components/shared';
 
 const Submissions = () => {
     const [submissions, setSubmissions] = useState([]);
@@ -274,9 +274,11 @@ const Submissions = () => {
                                     {/* Content Snippet */}
                                     <div className="px-5 pb-4 flex-1">
                                         <div className="bg-gray-50 rounded-xl p-3 mb-3 border border-gray-100 group-hover:border-primary-100 transition-colors">
-                                            <p className="text-sm text-gray-600 line-clamp-3 italic">
-                                                "{submission.description || 'No description provided.'}"
-                                            </p>
+                                            <ExpandableText
+                                                text={submission.description || 'No description provided.'}
+                                                limit={150}
+                                                textClassName="text-sm text-gray-600 italic"
+                                            />
                                         </div>
 
                                         {submission.files?.length > 0 && (

@@ -9,7 +9,7 @@ import {
     FiCheckCircle
 } from 'react-icons/fi';
 import Button from '../../../components/common/Button';
-import { StatusBadge } from '../../../components/shared';
+import { StatusBadge, ExpandableText } from '../../../components/shared';
 
 const ApplicationList = ({
     applications,
@@ -97,9 +97,11 @@ const ApplicationList = ({
                                 <FiFileText className="w-4 h-4" />
                                 Cover Letter
                             </div>
-                            <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                                {application.proposal}
-                            </p>
+                            <ExpandableText
+                                text={application.proposal}
+                                limit={300}
+                                textClassName="text-gray-700 leading-relaxed"
+                            />
 
                             {/* Skills */}
                             {application.workerInfo?.skills && application.workerInfo.skills.length > 0 && (

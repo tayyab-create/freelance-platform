@@ -2,6 +2,7 @@ import React from 'react';
 import { FiEdit2, FiSave, FiX, FiUser, FiTrash2, FiPhone } from 'react-icons/fi';
 import FileUpload from '../../common/FileUpload';
 import Spinner from '../../common/Spinner';
+import { ExpandableText } from '../../shared';
 
 import Textarea from '../../common/Textarea';
 
@@ -188,7 +189,11 @@ const ProfileHeader = ({
                                     </p>
                                 )}
                                 {profile?.bio && (
-                                    <p className="text-gray-700 leading-relaxed">{profile.bio}</p>
+                                    <ExpandableText
+                                        text={profile.bio}
+                                        limit={200}
+                                        textClassName="text-gray-700 leading-relaxed"
+                                    />
                                 )}
                             </div>
                         )}

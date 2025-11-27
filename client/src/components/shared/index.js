@@ -7,6 +7,7 @@ export { default as PageHeader } from './PageHeader';
 export { default as Avatar } from './Avatar';
 export { default as StatusBadge } from './StatusBadge';
 export { default as ProgressBar, SegmentedProgressBar } from './ProgressBar';
+export { default as ExpandableText } from './ExpandableText';
 
 // Modal & Dialog Components
 export { default as Modal, ConfirmModal } from './Modal';

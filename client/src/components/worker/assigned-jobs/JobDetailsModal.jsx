@@ -1,6 +1,6 @@
 import React from 'react';
 import { FiMessageCircle, FiPlay, FiUpload, FiBriefcase, FiClock, FiDollarSign, FiCalendar, FiFile, FiAward, FiCheckCircle, FiAlertCircle, FiPaperclip, FiDownload, FiAlertTriangle } from 'react-icons/fi';
-import { Modal, RevisionTimeline, StatusBadge } from '../../shared';
+import { Modal, RevisionTimeline, StatusBadge, ExpandableText } from '../../shared';
 
 const JobDetailsModal = ({
     isOpen,
@@ -250,8 +250,12 @@ const JobDetailsModal = ({
                         <FiFile className="h-5 w-5 text-gray-400" />
                         Job Description
                     </h3>
-                    <div className="prose prose-sm max-w-none text-gray-600 bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
-                        <p className="whitespace-pre-line leading-relaxed">{selectedJob.description}</p>
+                    <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
+                        <ExpandableText
+                            text={selectedJob.description}
+                            limit={500}
+                            textClassName="text-gray-600 text-sm leading-relaxed"
+                        />
                     </div>
                 </div>
 
@@ -344,9 +348,13 @@ const JobDetailsModal = ({
 
                                 <div>
                                     <label className="block text-sm font-bold text-gray-700 mb-2">Description</label>
-                                    <p className="text-gray-600 text-sm whitespace-pre-line bg-white p-4 rounded-xl border border-gray-200">
-                                        {submissionDetails.description}
-                                    </p>
+                                    <div className="bg-white p-4 rounded-xl border border-gray-200">
+                                        <ExpandableText
+                                            text={submissionDetails.description}
+                                            limit={300}
+                                            textClassName="text-gray-600 text-sm leading-relaxed"
+                                        />
+                                    </div>
                                 </div>
 
                                 {submissionDetails.links && submissionDetails.links.length > 0 && (
@@ -477,9 +485,13 @@ const JobDetailsModal = ({
                                     <div className="space-y-4">
                                         <div>
                                             <label className="block text-sm font-bold text-gray-700 mb-2">Description</label>
-                                            <p className="text-gray-600 text-sm whitespace-pre-line bg-gray-50 p-4 rounded-xl border border-gray-200">
-                                                {submissionDetails.description}
-                                            </p>
+                                            <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                                                <ExpandableText
+                                                    text={submissionDetails.description}
+                                                    limit={300}
+                                                    textClassName="text-gray-600 text-sm leading-relaxed"
+                                                />
+                                            </div>
                                         </div>
 
                                         {submissionDetails.links && submissionDetails.links.length > 0 && (

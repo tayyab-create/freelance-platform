@@ -9,6 +9,7 @@ import {
     FiChevronUp,
     FiDownload
 } from 'react-icons/fi';
+import ExpandableText from './ExpandableText';
 
 const RevisionTimeline = ({ revisionHistory, currentSubmission, userRole = 'worker' }) => {
     const [expandedItems, setExpandedItems] = useState({});
@@ -101,9 +102,11 @@ const RevisionTimeline = ({ revisionHistory, currentSubmission, userRole = 'work
                                                         {userRole === 'worker' ? 'Client Feedback' : 'Your Feedback'}
                                                     </label>
                                                     <div className="bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-lg p-4">
-                                                        <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
-                                                            {revision.feedback}
-                                                        </p>
+                                                        <ExpandableText
+                                                            text={revision.feedback}
+                                                            limit={200}
+                                                            textClassName="text-sm text-gray-700 leading-relaxed"
+                                                        />
                                                     </div>
                                                 </div>
                                             )}
@@ -132,9 +135,11 @@ const RevisionTimeline = ({ revisionHistory, currentSubmission, userRole = 'work
                                                         {userRole === 'worker' ? 'Your Submission' : 'Worker Submission'}
                                                     </label>
                                                     <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                                                        <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
-                                                            {revision.description}
-                                                        </p>
+                                                        <ExpandableText
+                                                            text={revision.description}
+                                                            limit={200}
+                                                            textClassName="text-sm text-gray-700 leading-relaxed"
+                                                        />
                                                     </div>
                                                 </div>
                                             )}
@@ -219,8 +224,8 @@ const RevisionTimeline = ({ revisionHistory, currentSubmission, userRole = 'work
                                         {currentSubmission?.status === 'revision-requested'
                                             ? 'Awaiting revision'
                                             : currentSubmission?.status === 'submitted'
-                                            ? 'Under review'
-                                            : 'Latest version'}
+                                                ? 'Under review'
+                                                : 'Latest version'}
                                     </p>
                                 </div>
                             </div>

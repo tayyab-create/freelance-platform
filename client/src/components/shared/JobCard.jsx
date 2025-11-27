@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { FiBriefcase, FiDollarSign, FiClock, FiAward, FiCalendar, FiArrowRight } from 'react-icons/fi';
 import StatusBadge from './StatusBadge';
+import ExpandableText from './ExpandableText';
 
 const JobCard = ({ job, linkTo }) => {
     return (
@@ -62,9 +63,13 @@ const JobCard = ({ job, linkTo }) => {
                 </h3>
 
                 {/* Description */}
-                <p className="text-gray-600 text-sm line-clamp-2 leading-relaxed">
-                    {job.description}
-                </p>
+                <div className="mb-2">
+                    <ExpandableText
+                        text={job.description}
+                        limit={150}
+                        textClassName="text-gray-600 text-sm leading-relaxed"
+                    />
+                </div>
             </div>
 
             {/* Card Body */}

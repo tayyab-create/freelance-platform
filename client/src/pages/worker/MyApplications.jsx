@@ -3,7 +3,7 @@ import { workerAPI, messageAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { FiBriefcase, FiClock, FiCheckCircle, FiX, FiAlertCircle, FiFileText, FiAward, FiDollarSign, FiMessageCircle, FiPaperclip, FiFile } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import { PageHeader, EmptyState, SkeletonLoader, Modal, StatusBadge } from '../../components/shared';
+import { PageHeader, EmptyState, SkeletonLoader, Modal, StatusBadge, ExpandableText } from '../../components/shared';
 import ApplicationCard from '../../components/shared/ApplicationCard';
 import { useNavigate } from 'react-router-dom';
 import AdvancedFilterBar from '../../components/shared/AdvancedFilterBar';
@@ -439,7 +439,11 @@ const MyApplications = () => {
                   <FiFileText className="h-5 w-5" />
                   Your Proposal
                 </h3>
-                <p className="text-blue-800 whitespace-pre-wrap leading-relaxed">{selectedApplication.proposal}</p>
+                <ExpandableText
+                  text={selectedApplication.proposal}
+                  limit={300}
+                  textClassName="text-blue-800 leading-relaxed"
+                />
 
                 {/* Proposal Attachments */}
                 {selectedApplication.attachments && selectedApplication.attachments.length > 0 && (

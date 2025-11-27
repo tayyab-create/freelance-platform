@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     FiCalendar,
     FiDollarSign,
@@ -6,11 +6,14 @@ import {
     FiBriefcase,
     FiUser,
     FiPaperclip,
-    FiDownload
+    FiDownload,
+    FiChevronDown,
+    FiChevronUp
 } from 'react-icons/fi';
 import { StatusBadge } from '../../../components/shared';
 
 const JobDetailsCard = ({ job, applicationCount }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
     if (!job) return null;
 
     return (
@@ -21,7 +24,31 @@ const JobDetailsCard = ({ job, applicationCount }) => {
                         <h1 className="text-3xl font-bold text-gray-900">{job.title}</h1>
                         <StatusBadge status={job.status} />
                     </div>
-                    <p className="text-gray-600 leading-relaxed max-w-3xl">{job.description}</p>
+                    <div className="prose prose-gray max-w-none">
+                        <div className={`text-gray-600 leading-relaxed whitespace-pre-line transition-all duration-300 ${!isExpanded && job.description.length > 500 ? 'max-h-32 overflow-hidden relative' : ''}`}>
+                            <p>
+                                {isExpanded || job.description.length <= 500
+                                    ? job.description
+                                    : `${job.description.slice(0, 500)}...`}
+                            </p>
+                            {!isExpanded && job.description.length > 500 && (
+                                <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+                            )}
+                        </div>
+                        {job.description.length > 500 && (
+                            <button
+                                onClick={() => setIsExpanded(!isExpanded)}
+                                className="mt-2 inline-flex items-center gap-2 text-primary-600 font-medium hover:text-primary-700 transition-colors group"
+                            >
+                                <span>{isExpanded ? 'See Less' : 'See More'}</span>
+                                {isExpanded ? (
+                                    <FiChevronUp className="w-4 h-4 transition-transform duration-200 group-hover:-translate-y-0.5" />
+                                ) : (
+                                    <FiChevronDown className="w-4 h-4 transition-transform duration-200 group-hover:translate-y-0.5" />
+                                )}
+                            </button>
+                        )}
+                    </div>
                 </div>
                 <div className="flex flex-col gap-2 min-w-[200px]">
                     <div className="text-sm text-gray-500 font-medium uppercase tracking-wider">Posted</div>

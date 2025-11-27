@@ -16,7 +16,9 @@ import {
     FiPaperclip,
     FiDollarSign,
     FiBriefcase,
-    FiArrowRight
+    FiArrowRight,
+    FiChevronDown,
+    FiChevronUp
 } from 'react-icons/fi';
 import { StatusBadge, Avatar, RevisionTimeline } from '../shared';
 
@@ -29,6 +31,7 @@ const SubmissionDetailsModal = ({
     processing
 }) => {
     const [previewImage, setPreviewImage] = useState(null);
+    const [isExpanded, setIsExpanded] = useState(false);
 
     if (!submission) return null;
 
@@ -114,9 +117,27 @@ const SubmissionDetailsModal = ({
                                     <FiFileText className="w-4 h-4 text-gray-400" />
                                     Submission Notes
                                 </h3>
-                                <div className="bg-gray-50 rounded-2xl p-6 text-gray-700 leading-relaxed whitespace-pre-wrap border border-gray-100">
-                                    {submission.description || (
-                                        <span className="text-gray-400 italic">No description provided.</span>
+                                <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                                    <div className={`text-gray-700 leading-relaxed whitespace-pre-wrap transition-all duration-300 ${!isExpanded && (submission.description || '').length > 500 ? 'max-h-60 overflow-hidden relative' : ''}`}>
+                                        {submission.description || (
+                                            <span className="text-gray-400 italic">No description provided.</span>
+                                        )}
+                                        {!isExpanded && (submission.description || '').length > 500 && (
+                                            <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-gray-50 to-transparent pointer-events-none"></div>
+                                        )}
+                                    </div>
+                                    {(submission.description || '').length > 500 && (
+                                        <button
+                                            onClick={() => setIsExpanded(!isExpanded)}
+                                            className="mt-4 inline-flex items-center gap-2 text-primary-600 font-medium hover:text-primary-700 transition-colors group"
+                                        >
+                                            <span>{isExpanded ? 'See Less' : 'See More'}</span>
+                                            {isExpanded ? (
+                                                <FiChevronUp className="w-4 h-4 transition-transform duration-200 group-hover:-translate-y-0.5" />
+                                            ) : (
+                                                <FiChevronDown className="w-4 h-4 transition-transform duration-200 group-hover:translate-y-0.5" />
+                                            )}
+                                        </button>
                                     )}
                                 </div>
                             </div>
