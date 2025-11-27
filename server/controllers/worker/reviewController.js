@@ -91,6 +91,91 @@ exports.getWorkerReviews = async (req, res) => {
     }
 };
 
+// @desc    Get reviews for a specific job
+// @route   GET /api/workers/jobs/:jobId/reviews
+// @access  Private/Worker
+exports.getJobReviews = async (req, res) => {
+    try {
+        const { jobId } = req.params;
+
+        // Check if job exists and worker is assigned
+        const job = await Job.findOne({
+            _id: jobId,
+            assignedWorker: req.user._id
+        });
+
+        if (!job) {
+            return res.status(404).json({
+                success: false,
+                message: 'Job not found or not assigned to you'
+            });
+        }
+
+        // Fetch both reviews for this job
+        const [workerReview, companyReview] = await Promise.all([
+            Review.findOne({
+                job: jobId,
+                worker: req.user._id,
+                reviewedBy: 'worker'
+            }).populate('company', 'email'),
+            Review.findOne({
+                job: jobId,
+                worker: req.user._id,
+                reviewedBy: 'company'
+            }).populate('company', 'email')
+        ]);
+
+        // Get company profile info if reviews exist
+        let workerReviewData = null;
+        let companyReviewData = null;
+
+        if (workerReview) {
+            const reviewObj = workerReview.toObject();
+            if (reviewObj.company) {
+                const companyProfile = await getCompanyProfile(reviewObj.company._id);
+                if (companyProfile) {
+                    reviewObj.companyInfo = {
+                        companyName: companyProfile.companyName,
+                        logo: companyProfile.logo
+                    };
+                }
+            }
+            workerReviewData = reviewObj;
+        }
+
+        if (companyReview) {
+            const reviewObj = companyReview.toObject();
+            if (reviewObj.company) {
+                const companyProfile = await getCompanyProfile(reviewObj.company._id);
+                if (companyProfile) {
+                    reviewObj.companyInfo = {
+                        companyName: companyProfile.companyName,
+                        logo: companyProfile.logo
+                    };
+                }
+            }
+            companyReviewData = reviewObj;
+        }
+
+        res.status(200).json({
+            success: true,
+            data: {
+                workerReview: workerReviewData,
+                companyReview: companyReviewData,
+                hasWorkerReviewed: !!workerReview,
+                hasCompanyReviewed: !!companyReview
+            }
+        });
+    } catch (error) {
+        console.error('Get Job Reviews Error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error',
+            error: error.message
+        });
+    }
+};
+
 // @desc    Review a company
 // @route   POST /api/workers/review/:companyId
 // @access  Private/Worker

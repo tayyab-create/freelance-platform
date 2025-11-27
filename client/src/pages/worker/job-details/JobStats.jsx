@@ -3,7 +3,7 @@ import { FiDollarSign, FiClock, FiAward, FiCalendar } from 'react-icons/fi';
 
 const JobStats = ({ job }) => {
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-8 pt-0">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-8">
             <div className="bg-green-50 rounded-xl p-4 border border-green-100">
                 <div className="flex items-center gap-2 text-green-700 mb-1">
                     <FiDollarSign className="w-4 h-4" />

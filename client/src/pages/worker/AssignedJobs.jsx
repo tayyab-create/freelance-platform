@@ -134,6 +134,13 @@ const AssignedJobs = () => {
     setShowReviewModal(false);
   };
 
+  const handleReviewSubmitted = () => {
+    // Refresh job details modal if open
+    if (showDetailsModal && selectedJob) {
+      handleViewDetails(selectedJob);
+    }
+  };
+
   const handleViewDetails = async (job) => {
     setSelectedJob(job);
     setShowDetailsModal(true);
@@ -393,7 +400,7 @@ const AssignedJobs = () => {
             })}
           />
         ) : (
-          <div className="grid grid-cols-1 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredJobs.map((job) => (
               <JobCard
                 key={job._id}
@@ -441,9 +448,7 @@ const AssignedJobs = () => {
           isOpen={showReviewModal}
           onClose={handleCloseReviewModal}
           job={selectedJob}
-          onReviewSubmit={() => {
-            // Optionally refresh jobs or show success
-          }}
+          onReviewSubmit={handleReviewSubmitted}
         />
       </div>
     </DashboardLayout>

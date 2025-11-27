@@ -30,6 +30,7 @@ export { default as JobCard } from './JobCard';
 export { default as JobMetaItem } from './JobMetaItem';
 export { default as SectionCard } from './SectionCard';
 export { default as ApplicationCard } from './ApplicationCard';
+export { default as ReviewCard } from './ReviewCard';
 
 // Form Components
 export { default as Select } from './CustomSelect';

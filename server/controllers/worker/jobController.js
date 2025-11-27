@@ -1,4 +1,4 @@
-const { Job, Submission } = require('../../models');
+const { Job, Submission, Review } = require('../../models');
 const { getCompanyProfile } = require('../../utils/companyInfoHelper');
 
 // @desc    Get assigned jobs
@@ -13,10 +13,12 @@ exports.getAssignedJobs = async (req, res) => {
             .populate('company', 'email')
             .sort('-assignedDate');
 
-        // Get company profiles
+        // Get company profiles and client ratings
         const jobsWithCompanyInfo = await Promise.all(
             jobs.map(async (job) => {
                 const jobObj = job.toObject();
+
+                // Get company profile
                 if (jobObj.company) {
                     const companyProfile = await getCompanyProfile(jobObj.company._id);
                     if (companyProfile) {
@@ -26,6 +28,19 @@ exports.getAssignedJobs = async (req, res) => {
                         };
                     }
                 }
+
+                // Get client rating if job is completed
+                if (jobObj.status === 'completed') {
+                    const review = await Review.findOne({
+                        job: jobObj._id,
+                        reviewedBy: 'company'
+                    }).select('rating');
+
+                    if (review) {
+                        jobObj.clientRating = review.rating;
+                    }
+                }
+
                 return jobObj;
             })
         );
