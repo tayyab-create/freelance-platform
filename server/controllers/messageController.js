@@ -329,3 +329,384 @@ exports.sendMessage = async (req, res) => {
     });
   }
 };
+
+// @desc    Edit a message
+// @route   PATCH /api/messages/:conversationId/message/:messageId
+// @access  Private
+exports.editMessage = async (req, res) => {
+  try {
+    const { conversationId, messageId } = req.params;
+    const { content } = req.body;
+
+    // Verify user is part of conversation
+    const conversation = await Conversation.findOne({
+      _id: conversationId,
+      participants: req.user._id
+    });
+
+    if (!conversation) {
+      return res.status(404).json({
+        success: false,
+        message: 'Conversation not found'
+      });
+    }
+
+    // Find message and verify sender
+    const message = await Message.findOne({
+      _id: messageId,
+      conversation: conversationId,
+      sender: req.user._id // Only sender can edit
+    });
+
+    if (!message) {
+      return res.status(404).json({
+        success: false,
+        message: 'Message not found or you are not authorized to edit it'
+      });
+    }
+
+    // Update message
+    message.content = content;
+    message.edited = true;
+    message.editedAt = new Date();
+    await message.save();
+
+    res.status(200).json({
+      success: true,
+      data: message
+    });
+  } catch (error) {
+    console.error('Edit Message Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Delete a message
+// @route   DELETE /api/messages/:conversationId/message/:messageId
+// @access  Private
+exports.deleteMessage = async (req, res) => {
+  try {
+    const { conversationId, messageId } = req.params;
+
+    // Verify user is part of conversation
+    const conversation = await Conversation.findOne({
+      _id: conversationId,
+      participants: req.user._id
+    });
+
+    if (!conversation) {
+      return res.status(404).json({
+        success: false,
+        message: 'Conversation not found'
+      });
+    }
+
+    // Find message and verify sender
+    const message = await Message.findOne({
+      _id: messageId,
+      conversation: conversationId,
+      sender: req.user._id // Only sender can delete
+    });
+
+    if (!message) {
+      return res.status(404).json({
+        success: false,
+        message: 'Message not found or you are not authorized to delete it'
+      });
+    }
+
+    // Delete message
+    await Message.deleteOne({ _id: messageId });
+
+    // Update conversation's last message if this was it
+    if (conversation.lastMessage && conversation.lastMessage.toString() === messageId) {
+      const latestMessage = await Message.findOne({ conversation: conversationId })
+        .sort('-createdAt')
+        .limit(1);
+
+      conversation.lastMessage = latestMessage ? latestMessage._id : null;
+      conversation.lastMessageAt = latestMessage ? latestMessage.createdAt : conversation.lastMessageAt;
+      await conversation.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Message deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete Message Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Add reaction to message
+// @route   POST /api/messages/:conversationId/message/:messageId/reaction
+// @access  Private
+exports.addReaction = async (req, res) => {
+  try {
+    const { conversationId, messageId } = req.params;
+    const { emoji } = req.body;
+
+    // Verify user is part of conversation
+    const conversation = await Conversation.findOne({
+      _id: conversationId,
+      participants: req.user._id
+    });
+
+    if (!conversation) {
+      return res.status(404).json({
+        success: false,
+        message: 'Conversation not found'
+      });
+    }
+
+    const message = await Message.findOne({
+      _id: messageId,
+      conversation: conversationId
+    });
+
+    if (!message) {
+      return res.status(404).json({
+        success: false,
+        message: 'Message not found'
+      });
+    }
+
+    // Check if user already reacted with this emoji
+    const existingReaction = message.reactions.find(
+      r => r.userId.toString() === req.user._id.toString() && r.emoji === emoji
+    );
+
+    if (existingReaction) {
+      // Remove reaction
+      message.reactions = message.reactions.filter(
+        r => !(r.userId.toString() === req.user._id.toString() && r.emoji === emoji)
+      );
+    } else {
+      // Add reaction
+      message.reactions.push({
+        emoji,
+        userId: req.user._id
+      });
+    }
+
+    await message.save();
+
+    res.status(200).json({
+      success: true,
+      data: message
+    });
+  } catch (error) {
+    console.error('Add Reaction Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Toggle pin conversation
+// @route   PATCH /api/messages/:conversationId/pin
+// @access  Private
+exports.togglePin = async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+
+    const conversation = await Conversation.findOne({
+      _id: conversationId,
+      participants: req.user._id
+    });
+
+    if (!conversation) {
+      return res.status(404).json({
+        success: false,
+        message: 'Conversation not found'
+      });
+    }
+
+    const isPinned = conversation.pinnedBy.includes(req.user._id);
+
+    if (isPinned) {
+      conversation.pinnedBy = conversation.pinnedBy.filter(
+        id => id.toString() !== req.user._id.toString()
+      );
+    } else {
+      conversation.pinnedBy.push(req.user._id);
+    }
+
+    await conversation.save();
+
+    res.status(200).json({
+      success: true,
+      pinned: !isPinned,
+      data: conversation
+    });
+  } catch (error) {
+    console.error('Toggle Pin Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Toggle archive conversation
+// @route   PATCH /api/messages/:conversationId/archive
+// @access  Private
+exports.toggleArchive = async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+
+    const conversation = await Conversation.findOne({
+      _id: conversationId,
+      participants: req.user._id
+    });
+
+    if (!conversation) {
+      return res.status(404).json({
+        success: false,
+        message: 'Conversation not found'
+      });
+    }
+
+    const isArchived = conversation.archivedBy.includes(req.user._id);
+
+    if (isArchived) {
+      conversation.archivedBy = conversation.archivedBy.filter(
+        id => id.toString() !== req.user._id.toString()
+      );
+    } else {
+      conversation.archivedBy.push(req.user._id);
+    }
+
+    await conversation.save();
+
+    res.status(200).json({
+      success: true,
+      archived: !isArchived,
+      data: conversation
+    });
+  } catch (error) {
+    console.error('Toggle Archive Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Toggle mute conversation
+// @route   PATCH /api/messages/:conversationId/mute
+// @access  Private
+exports.toggleMute = async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+
+    const conversation = await Conversation.findOne({
+      _id: conversationId,
+      participants: req.user._id
+    });
+
+    if (!conversation) {
+      return res.status(404).json({
+        success: false,
+        message: 'Conversation not found'
+      });
+    }
+
+    const isMuted = conversation.mutedBy.includes(req.user._id);
+
+    if (isMuted) {
+      conversation.mutedBy = conversation.mutedBy.filter(
+        id => id.toString() !== req.user._id.toString()
+      );
+    } else {
+      conversation.mutedBy.push(req.user._id);
+    }
+
+    await conversation.save();
+
+    res.status(200).json({
+      success: true,
+      muted: !isMuted,
+      data: conversation
+    });
+  } catch (error) {
+    console.error('Toggle Mute Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Toggle star message
+// @route   PATCH /api/messages/:conversationId/message/:messageId/star
+// @access  Private
+exports.toggleStar = async (req, res) => {
+  try {
+    const { conversationId, messageId } = req.params;
+
+    // Verify user is part of conversation
+    const conversation = await Conversation.findOne({
+      _id: conversationId,
+      participants: req.user._id
+    });
+
+    if (!conversation) {
+      return res.status(404).json({
+        success: false,
+        message: 'Conversation not found'
+      });
+    }
+
+    const message = await Message.findOne({
+      _id: messageId,
+      conversation: conversationId
+    });
+
+    if (!message) {
+      return res.status(404).json({
+        success: false,
+        message: 'Message not found'
+      });
+    }
+
+    const isStarred = message.starredBy.includes(req.user._id);
+
+    if (isStarred) {
+      message.starredBy = message.starredBy.filter(
+        id => id.toString() !== req.user._id.toString()
+      );
+    } else {
+      message.starredBy.push(req.user._id);
+    }
+
+    await message.save();
+
+    res.status(200).json({
+      success: true,
+      starred: !isStarred,
+      data: message
+    });
+  } catch (error) {
+    console.error('Toggle Star Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};

@@ -22,13 +22,55 @@ const messageSchema = new mongoose.Schema({
     mimetype: String,
     size: Number
   }],
+  // Reply to another message
+  replyTo: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Message'
+  },
+  // Emoji reactions
+  reactions: [{
+    emoji: String,
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  // Edit tracking
+  edited: {
+    type: Boolean,
+    default: false
+  },
+  editedAt: {
+    type: Date
+  },
+  // Read receipts (for future multi-user support)
+  readBy: [{
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    readAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  // Legacy read tracking (keep for backward compatibility)
   isRead: {
     type: Boolean,
     default: false
   },
   readAt: {
     type: Date
-  }
+  },
+  // Starred by users
+  starredBy: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }]
 }, {
   timestamps: true
 });

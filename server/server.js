@@ -107,6 +107,9 @@ io.on("connection", (socket) => {
   // Join user's personal room
   socket.join(socket.userId);
 
+  // Broadcast that user is online
+  socket.broadcast.emit("user_online", { userId: socket.userId });
+
   // Join conversation room
   socket.on("join_conversation", (conversationId) => {
     socket.join(conversationId);
@@ -124,6 +127,16 @@ io.on("connection", (socket) => {
     console.log("Message received:", data);
     // Broadcast to ALL users in the conversation room (including sender)
     io.to(data.conversationId).emit("new_message", data.message);
+
+    // Also notify recipients for conversation list updates
+    if (data.recipients && Array.isArray(data.recipients)) {
+      data.recipients.forEach(userId => {
+        io.to(userId).emit("conversation_updated", {
+          conversationId: data.conversationId,
+          lastMessage: data.message
+        });
+      });
+    }
   });
 
   // Handle typing indicator
@@ -141,9 +154,20 @@ io.on("connection", (socket) => {
     });
   });
 
+  // Handle message read receipts
+  socket.on("message_read", (data) => {
+    socket.to(data.conversationId).emit("message_read", {
+      messageId: data.messageId,
+      conversationId: data.conversationId,
+      userId: socket.userId
+    });
+  });
+
   // Handle disconnect
   socket.on("disconnect", () => {
     console.log(`User disconnected: ${socket.userId}`);
+    // Broadcast that user is offline
+    socket.broadcast.emit("user_offline", { userId: socket.userId });
   });
 });
 
