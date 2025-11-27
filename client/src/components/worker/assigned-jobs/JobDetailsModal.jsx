@@ -139,15 +139,15 @@ const JobDetailsModal = ({
                     </div>
                     <div className="flex-1">
                         <div className="flex justify-between items-start gap-4">
-                            <h2 className="text-2xl font-black text-gray-900 mb-2 leading-tight">{selectedJob.title}</h2>
+                            <h2 className="text-2xl font-black text-gray-900 mb-2 leading-tight break-words">{selectedJob.title}</h2>
                             <StatusBadge status={selectedJob.status} />
                         </div>
                         <div className="flex flex-wrap items-center gap-3 text-gray-600">
-                            <span className="font-bold text-gray-900">{selectedJob.companyInfo?.companyName}</span>
+                            <span className="font-bold text-gray-900 truncate max-w-[200px]" title={selectedJob.companyInfo?.companyName}>{selectedJob.companyInfo?.companyName}</span>
                             {selectedJob.companyInfo?.tagline && (
                                 <>
                                     <span className="text-gray-300">•</span>
-                                    <span className="text-sm">{selectedJob.companyInfo.tagline}</span>
+                                    <span className="text-sm truncate max-w-[200px]" title={selectedJob.companyInfo.tagline}>{selectedJob.companyInfo.tagline}</span>
                                 </>
                             )}
                         </div>

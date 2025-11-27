@@ -105,7 +105,7 @@ const AllUsers = () => {
             {row.role === 'worker' ? 'W' : row.role === 'company' ? 'C' : 'A'}
           </div>
           <div>
-            <div className="font-medium text-gray-900">{row.email}</div>
+            <div className="font-medium text-gray-900 truncate max-w-[150px]" title={row.email}>{row.email}</div>
             <div className="text-xs text-gray-500">ID: {row._id.slice(-6)}</div>
           </div>
         </div>
@@ -209,7 +209,11 @@ const AllUsers = () => {
         <Modal
           isOpen={isModalOpen}
           onClose={closeModal}
-          title={loadingDetails ? 'Loading...' : selectedUser ? (selectedUser.profile?.fullName || selectedUser.profile?.companyName || 'User Details') : 'User Details'}
+          title={loadingDetails ? 'Loading...' : selectedUser ? (
+            <span className="truncate block max-w-md">
+              {selectedUser.profile?.fullName || selectedUser.profile?.companyName || 'User Details'}
+            </span>
+          ) : 'User Details'}
           size="lg"
           footer={
             selectedUser && (
@@ -255,11 +259,11 @@ const AllUsers = () => {
                     </div>
                   )}
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900">
+                    <h2 className="text-xl font-bold text-gray-900 truncate max-w-[300px]" title={selectedUser.profile?.fullName || selectedUser.profile?.companyName}>
                       {selectedUser.profile?.fullName || selectedUser.profile?.companyName || 'No Name'}
                     </h2>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-gray-500">{selectedUser.user.email}</span>
+                      <span className="text-gray-500 truncate max-w-[200px]" title={selectedUser.user.email}>{selectedUser.user.email}</span>
                       <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase ${selectedUser.user.role === 'worker' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
                         }`}>
                         {selectedUser.user.role}
@@ -295,7 +299,7 @@ const AllUsers = () => {
                 <div className="space-y-6">
                   <div>
                     <h3 className="font-bold text-gray-900 mb-2">About</h3>
-                    <p className="text-gray-600 leading-relaxed">
+                    <p className="text-gray-600 leading-relaxed break-words">
                       {selectedUser.profile.bio || 'No bio provided.'}
                     </p>
                   </div>
@@ -332,7 +336,7 @@ const AllUsers = () => {
                 <div className="space-y-6">
                   <div>
                     <h3 className="font-bold text-gray-900 mb-2">Description</h3>
-                    <p className="text-gray-600 leading-relaxed">
+                    <p className="text-gray-600 leading-relaxed break-words">
                       {selectedUser.profile.description || 'No description provided.'}
                     </p>
                   </div>
@@ -360,7 +364,7 @@ const AllUsers = () => {
                       <ul className="space-y-2 text-sm text-gray-600">
                         <li className="flex items-center gap-2">
                           <FiGlobe className="text-gray-400" />
-                          <a href={selectedUser.profile.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                          <a href={selectedUser.profile.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline truncate max-w-[200px]" title={selectedUser.profile.website}>
                             {selectedUser.profile.website || 'N/A'}
                           </a>
                         </li>

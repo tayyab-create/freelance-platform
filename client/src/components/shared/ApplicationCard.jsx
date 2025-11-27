@@ -48,18 +48,18 @@ const ApplicationCard = ({ application, onViewJob }) => {
                         {application.job?.title || 'Job Title'}
                     </h3>
 
-                    <p className="text-gray-600 text-sm mb-4">
+                    <p className="text-gray-600 text-sm mb-4 truncate">
                         {application.job?.companyInfo?.companyName || 'Unknown Company'}
                     </p>
 
                     <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-600">
-                        <div className="flex items-center gap-2">
-                            <FiDollarSign className="text-gray-400" />
-                            <span>Bid: <span className="font-bold text-gray-900">${application.proposedRate}</span></span>
+                        <div className="flex items-center gap-2 min-w-0">
+                            <FiDollarSign className="text-gray-400 flex-shrink-0" />
+                            <span className="truncate">Bid: <span className="font-bold text-gray-900">${application.proposedRate}</span></span>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <FiDollarSign className="text-gray-400" />
-                            <span>Budget: <span className="font-medium">${application.job?.salary}</span></span>
+                        <div className="flex items-center gap-2 min-w-0">
+                            <FiDollarSign className="text-gray-400 flex-shrink-0" />
+                            <span className="truncate">Budget: <span className="font-medium">${application.job?.salary}</span></span>
                         </div>
                     </div>
                 </div>

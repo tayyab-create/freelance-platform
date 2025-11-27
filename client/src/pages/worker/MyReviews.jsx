@@ -226,11 +226,10 @@ const MyReviews = () => {
                   </div>
                   <button
                     onClick={() => setSelectedRating('all')}
-                    className={`px-4 py-2 rounded-xl font-semibold transition-all ${
-                      selectedRating === 'all'
+                    className={`px-4 py-2 rounded-xl font-semibold transition-all ${selectedRating === 'all'
                         ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                      }`}
                   >
                     All ({reviews.length})
                   </button>
@@ -238,11 +237,10 @@ const MyReviews = () => {
                     <button
                       key={rating}
                       onClick={() => setSelectedRating(rating.toString())}
-                      className={`px-4 py-2 rounded-xl font-semibold transition-all flex items-center gap-1.5 ${
-                        selectedRating === rating.toString()
+                      className={`px-4 py-2 rounded-xl font-semibold transition-all flex items-center gap-1.5 ${selectedRating === rating.toString()
                           ? 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/30'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
+                        }`}
                     >
                       {rating}
                       <FiStar className={`h-4 w-4 ${selectedRating === rating.toString() ? 'fill-white' : ''}`} />
@@ -317,7 +315,7 @@ const MyReviews = () => {
                           </div>
                         )}
                         <div>
-                          <h4 className="font-bold text-gray-900">
+                          <h4 className="font-bold text-gray-900 truncate max-w-[200px]" title={review.companyInfo?.companyName}>
                             {review.companyInfo?.companyName || 'Company'}
                           </h4>
                           <p className="text-sm text-gray-500">
@@ -345,7 +343,7 @@ const MyReviews = () => {
                     {/* Project Info */}
                     <div className="mb-4 pb-4 border-b border-gray-100">
                       <p className="text-xs text-gray-500 uppercase tracking-wide font-bold mb-1">Project</p>
-                      <p className="font-bold text-gray-900">{review.job?.title}</p>
+                      <p className="font-bold text-gray-900 truncate" title={review.job?.title}>{review.job?.title}</p>
                     </div>
 
                     {/* Review Text */}

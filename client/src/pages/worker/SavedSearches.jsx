@@ -157,7 +157,7 @@ const SavedSearches = () => {
                                 {/* Header */}
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="flex-1">
-                                        <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-primary-600 transition-colors">
+                                        <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-primary-600 transition-colors truncate" title={search.name}>
                                             {search.name}
                                         </h3>
                                         <p className="text-sm text-gray-500">
@@ -185,7 +185,7 @@ const SavedSearches = () => {
                                 {/* Filters */}
                                 <div className="flex flex-wrap gap-2 mb-4">
                                     {search.filters.search && (
-                                        <span className="px-2 py-1 bg-primary-50 text-primary-700 rounded-lg text-xs font-medium">
+                                        <span className="px-2 py-1 bg-primary-50 text-primary-700 rounded-lg text-xs font-medium truncate max-w-[150px]" title={search.filters.search}>
                                             "{search.filters.search}"
                                         </span>
                                     )}
@@ -205,7 +205,7 @@ const SavedSearches = () => {
                                         </span>
                                     )}
                                     {search.filters.location && (
-                                        <span className="px-2 py-1 bg-orange-50 text-orange-700 rounded-lg text-xs font-medium">
+                                        <span className="px-2 py-1 bg-orange-50 text-orange-700 rounded-lg text-xs font-medium truncate max-w-[150px]" title={search.filters.location}>
                                             📍 {search.filters.location}
                                         </span>
                                     )}
@@ -260,7 +260,7 @@ const SavedSearches = () => {
             >
                 <div className="space-y-4">
                     <p className="text-gray-600">
-                        Are you sure you want to delete "<strong>{deleteModal.search?.name}</strong>"? This action cannot be undone.
+                        Are you sure you want to delete "<strong className="break-words">{deleteModal.search?.name}</strong>"? This action cannot be undone.
                     </p>
                     <div className="flex gap-3">
                         <button

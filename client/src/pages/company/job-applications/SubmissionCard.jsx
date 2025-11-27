@@ -27,7 +27,7 @@ const SubmissionCard = ({ submission, onViewSubmission }) => {
                 </div>
 
                 <div className="bg-gray-50 rounded-xl p-4 mb-6">
-                    <div className={`text-gray-600 italic whitespace-pre-line transition-all duration-300 ${!isExpanded && (submission.description || '').length > 200 ? 'max-h-20 overflow-hidden relative' : ''}`}>
+                    <div className={`text-gray-600 italic whitespace-pre-line break-words transition-all duration-300 ${!isExpanded && (submission.description || '').length > 200 ? 'max-h-20 overflow-hidden relative' : ''}`}>
                         <p>
                             {isExpanded || (submission.description || '').length <= 200
                                 ? (submission.description || 'No description provided.')

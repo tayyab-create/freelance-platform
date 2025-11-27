@@ -117,7 +117,7 @@ const ManageJobs = () => {
             primary: true,
             render: (value, row) => (
                 <div>
-                    <div className="font-medium text-gray-900">{row.title}</div>
+                    <div className="font-medium text-gray-900 truncate max-w-[200px]" title={row.title}>{row.title}</div>
                     <div className="text-xs text-gray-500 mt-0.5">{row.category}</div>
                 </div>
             )
@@ -134,7 +134,7 @@ const ManageJobs = () => {
                             {row.companyInfo?.companyName?.charAt(0) || 'C'}
                         </div>
                     )}
-                    <span className="text-sm text-gray-700">{row.companyInfo?.companyName || 'Unknown Company'}</span>
+                    <span className="text-sm text-gray-700 truncate max-w-[150px]" title={row.companyInfo?.companyName}>{row.companyInfo?.companyName || 'Unknown Company'}</span>
                 </div>
             )
         },
@@ -228,7 +228,7 @@ const ManageJobs = () => {
                 <Modal
                     isOpen={isModalOpen && !!selectedJob}
                     onClose={closeModal}
-                    title={selectedJob?.title}
+                    title={<span className="truncate block max-w-md">{selectedJob?.title}</span>}
                     size="lg"
                     footer={
                         <>
@@ -271,8 +271,8 @@ const ManageJobs = () => {
                                             </div>
                                         )}
                                         <div>
-                                            <div className="font-bold text-gray-900">{selectedJob.companyInfo?.companyName || 'Unknown'}</div>
-                                            <div className="text-xs text-gray-500">{selectedJob.company?.email}</div>
+                                            <div className="font-bold text-gray-900 truncate max-w-[200px]" title={selectedJob.companyInfo?.companyName}>{selectedJob.companyInfo?.companyName || 'Unknown'}</div>
+                                            <div className="text-xs text-gray-500 truncate max-w-[200px]" title={selectedJob.company?.email}>{selectedJob.company?.email}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -290,7 +290,7 @@ const ManageJobs = () => {
 
                             <div>
                                 <h3 className="font-bold text-gray-900 mb-2">Description</h3>
-                                <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">
+                                <p className="text-gray-600 leading-relaxed whitespace-pre-wrap break-words max-h-[300px] overflow-y-auto pr-2">
                                     {selectedJob.description}
                                 </p>
                             </div>

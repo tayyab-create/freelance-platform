@@ -348,7 +348,7 @@ const SubmissionDetails = () => {
                     {/* Header Section */}
                     <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 p-8 border-b border-gray-100">
                         <div>
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2 break-words">
                                 {submission.job?.title}
                             </h2>
                             <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -371,7 +371,7 @@ const SubmissionDetails = () => {
                                     Submission Notes
                                 </h3>
                                 <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
-                                    <div className={`text-gray-700 leading-relaxed whitespace-pre-wrap break-all transition-all duration-300 ${!isExpanded && (submission.description || '').length > 500 ? 'max-h-60 overflow-hidden relative' : ''}`}>
+                                    <div className={`text-gray-700 leading-relaxed whitespace-pre-wrap break-words transition-all duration-300 ${!isExpanded && (submission.description || '').length > 500 ? 'max-h-60 overflow-hidden relative' : ''}`}>
                                         {submission.description || (
                                             <span className="text-gray-400 italic">No description provided.</span>
                                         )}

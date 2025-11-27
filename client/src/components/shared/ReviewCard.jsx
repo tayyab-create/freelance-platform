@@ -52,7 +52,7 @@ const ReviewCard = ({ review, reviewerType, reviewerName, reviewerLogo }) => {
 
                     {/* Reviewer Info */}
                     <div>
-                        <h4 className="text-base font-bold text-gray-900">{reviewerName}</h4>
+                        <h4 className="text-base font-bold text-gray-900 truncate max-w-[150px]" title={reviewerName}>{reviewerName}</h4>
                         <p className="text-sm text-gray-500 capitalize">
                             {reviewerType === 'company' ? 'Company Review' : 'Your Review'}
                         </p>

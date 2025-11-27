@@ -291,7 +291,7 @@ const MyJobs = () => {
                                                 <span>Posted {new Date(job.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                                             )}
                                         </div>
-                                        <span className="text-xs font-bold text-gray-300 uppercase tracking-wider group-hover:text-primary-500 transition-colors">
+                                        <span className="text-xs font-bold text-gray-300 uppercase tracking-wider group-hover:text-primary-500 transition-colors truncate max-w-[100px]" title={job.salaryType}>
                                             {job.salaryType}
                                         </span>
                                     </div>

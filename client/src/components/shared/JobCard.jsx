@@ -74,10 +74,7 @@ const JobCard = ({ job, linkTo }) => {
                 {job.tags && job.tags.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-5">
                         {job.tags.slice(0, 3).map((tag, index) => (
-                            <span
-                                key={index}
-                                className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-lg bg-gray-100 text-gray-700 border border-gray-200"
-                            >
+                            <span className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-lg bg-gray-100 text-gray-700 border border-gray-200 truncate max-w-[150px]">
                                 {tag}
                             </span>
                         ))}
@@ -97,7 +94,7 @@ const JobCard = ({ job, linkTo }) => {
                             <span className="text-xs font-semibold uppercase tracking-wide">Budget</span>
                         </div>
                         <p className="text-lg font-bold text-gray-900">${job.salary}</p>
-                        <p className="text-xs text-gray-600 mt-0.5">{job.salaryType}</p>
+                        <p className="text-xs text-gray-600 mt-0.5 truncate max-w-[120px]" title={job.salaryType}>{job.salaryType}</p>
                     </div>
 
                     <div className="bg-blue-50 rounded-xl p-3 border border-blue-100">
@@ -132,7 +129,7 @@ const JobCard = ({ job, linkTo }) => {
                         </div>
                         <div>
                             <p className="text-xs text-gray-500">Level</p>
-                            <p className="text-sm font-semibold text-gray-900 capitalize">{job.experienceLevel}</p>
+                            <p className="text-sm font-semibold text-gray-900 capitalize truncate max-w-[100px]">{job.experienceLevel}</p>
                         </div>
                     </div>
 
