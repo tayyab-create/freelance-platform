@@ -76,9 +76,10 @@ const RevisionTimeline = ({ revisionHistory, currentSubmission, userRole = 'work
                                                 <h4 className="font-bold text-gray-900">Revision #{revisionNumber}</h4>
                                                 <p className="text-xs text-gray-500 mt-0.5">
                                                     {new Date(revision.submittedAt).toLocaleDateString('en-US', {
-                                                        month: 'short',
-                                                        day: 'numeric',
                                                         year: 'numeric',
+                                                        month: 'short',
+                                                        day: 'numeric'
+                                                    })} at {new Date(revision.submittedAt).toLocaleTimeString('en-US', {
                                                         hour: '2-digit',
                                                         minute: '2-digit'
                                                     })}
@@ -119,9 +120,9 @@ const RevisionTimeline = ({ revisionHistory, currentSubmission, userRole = 'work
                                                         <span className="text-xs font-bold text-blue-900 mr-2">Deadline:</span>
                                                         <span className="text-sm text-blue-700">
                                                             {new Date(revision.revisionDeadline).toLocaleDateString('en-US', {
-                                                                month: 'long',
-                                                                day: 'numeric',
-                                                                year: 'numeric'
+                                                                year: 'numeric',
+                                                                month: 'short',
+                                                                day: 'numeric'
                                                             })}
                                                         </span>
                                                     </div>

@@ -54,7 +54,7 @@ const JobDetailsCard = ({ job, applicationCount }) => {
                     <div className="text-sm text-gray-500 font-medium uppercase tracking-wider">Posted</div>
                     <div className="flex items-center gap-2 text-gray-900 font-medium">
                         <FiCalendar className="w-4 h-4 text-gray-400" />
-                        {new Date(job.createdAt).toLocaleDateString()}
+                        {new Date(job.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </div>
                 </div>
             </div>

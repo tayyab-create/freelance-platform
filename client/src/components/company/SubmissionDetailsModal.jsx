@@ -262,10 +262,9 @@ const SubmissionDetailsModal = ({
                                     <div className="flex items-center gap-2 text-sm text-gray-600">
                                         <FiCalendar className="w-4 h-4 text-gray-400" />
                                         <span>
-                                            {new Date(submission.createdAt).toLocaleDateString(undefined, {
-                                                weekday: 'long',
+                                            {new Date(submission.createdAt).toLocaleDateString('en-US', {
                                                 year: 'numeric',
-                                                month: 'long',
+                                                month: 'short',
                                                 day: 'numeric'
                                             })}
                                         </span>

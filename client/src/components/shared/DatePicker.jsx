@@ -112,7 +112,6 @@ const DatePicker = ({
         if (!date) return '';
         const d = new Date(date);
         return d.toLocaleDateString('en-US', {
-            weekday: 'short',
             year: 'numeric',
             month: 'short',
             day: 'numeric'

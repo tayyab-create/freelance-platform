@@ -334,7 +334,7 @@ const AssignedJobDetails = () => {
                             </div>
                             <div className="flex items-center gap-2 mt-3 text-sm text-gray-500">
                                 <FiClock className="h-4 w-4" />
-                                <span>Assigned on {new Date(selectedJob.assignedDate).toLocaleDateString()}</span>
+                                <span>Assigned on {new Date(selectedJob.assignedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                             </div>
                         </div>
                     </div>
@@ -379,7 +379,7 @@ const AssignedJobDetails = () => {
                                     ? 'text-red-700'
                                     : 'text-gray-900'
                                     }`}>
-                                    {selectedJob.deadline ? new Date(selectedJob.deadline).toLocaleDateString() : 'None'}
+                                    {selectedJob.deadline ? new Date(selectedJob.deadline).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'None'}
                                 </p>
                                 {selectedJob.deadline && (
                                     <p className={`text-xs ${isDeadlineApproaching(selectedJob.deadline) && (selectedJob.status === 'assigned' || selectedJob.status === 'in-progress')
@@ -428,7 +428,7 @@ const AssignedJobDetails = () => {
                                                 <div className="min-w-0">
                                                     <span className="text-sm font-bold text-orange-900">New Deadline: </span>
                                                     <span className="text-sm text-orange-700">
-                                                        {new Date(submissionDetails.revisionDeadline).toLocaleDateString()} at {new Date(submissionDetails.revisionDeadline).toLocaleTimeString()}
+                                                        {new Date(submissionDetails.revisionDeadline).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })} at {new Date(submissionDetails.revisionDeadline).toLocaleTimeString()}
                                                     </span>
                                                 </div>
                                             </div>
@@ -582,7 +582,7 @@ const AssignedJobDetails = () => {
                                     <div className="space-y-4 bg-green-50/50 p-6 rounded-2xl border border-green-100">
                                         <div className="flex items-center gap-2 text-green-700 text-sm font-bold">
                                             <FiCheckCircle className="h-5 w-5" />
-                                            Submitted on {new Date(submissionDetails.createdAt).toLocaleDateString()} at {new Date(submissionDetails.createdAt).toLocaleTimeString()}
+                                            Submitted on {new Date(submissionDetails.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })} at {new Date(submissionDetails.createdAt).toLocaleTimeString()}
                                         </div>
 
                                         <div>
@@ -653,7 +653,7 @@ const AssignedJobDetails = () => {
                                                 </span>
                                                 {submissionDetails.reviewedAt && (
                                                     <span className="text-gray-500">
-                                                        Reviewed on {new Date(submissionDetails.reviewedAt).toLocaleDateString()}
+                                                        Reviewed on {new Date(submissionDetails.reviewedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                                                     </span>
                                                 )}
                                             </div>
@@ -693,20 +693,20 @@ const AssignedJobDetails = () => {
                                                         <p className="flex items-center gap-2">
                                                             <FiCalendar className="h-4 w-4" />
                                                             <span className="font-semibold">Submitted on:</span>
-                                                            {new Date(submissionDetails.createdAt).toLocaleDateString()} at {new Date(submissionDetails.createdAt).toLocaleTimeString()}
+                                                            {new Date(submissionDetails.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })} at {new Date(submissionDetails.createdAt).toLocaleTimeString()}
                                                         </p>
                                                         {submissionDetails.reviewedAt && (
                                                             <p className="flex items-center gap-2">
                                                                 <FiCheckCircle className="h-4 w-4" />
                                                                 <span className="font-semibold">Approved on:</span>
-                                                                {new Date(submissionDetails.reviewedAt).toLocaleDateString()} at {new Date(submissionDetails.reviewedAt).toLocaleTimeString()}
+                                                                {new Date(submissionDetails.reviewedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })} at {new Date(submissionDetails.reviewedAt).toLocaleTimeString()}
                                                             </p>
                                                         )}
                                                         {selectedJob.completedDate && (
                                                             <p className="flex items-center gap-2">
                                                                 <FiCheckCircle className="h-4 w-4" />
                                                                 <span className="font-semibold">Completed on:</span>
-                                                                {new Date(selectedJob.completedDate).toLocaleDateString()} at {new Date(selectedJob.completedDate).toLocaleTimeString()}
+                                                                {new Date(selectedJob.completedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })} at {new Date(selectedJob.completedDate).toLocaleTimeString()}
                                                             </p>
                                                         )}
                                                     </div>

@@ -76,9 +76,9 @@ const MessageList = ({
                             <div className="flex items-center justify-center my-4">
                                 <span className="px-3 py-1 bg-white rounded-full text-xs text-gray-500 border border-gray-200">
                                     {new Date(message.createdAt).toLocaleDateString('en-US', {
-                                        month: 'long',
-                                        day: 'numeric',
                                         year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric',
                                     })}
                                 </span>
                             </div>

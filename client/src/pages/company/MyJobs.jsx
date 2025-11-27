@@ -284,11 +284,11 @@ const MyJobs = () => {
                                             <FiClock className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
                                             {job.deadline ? (
                                                 <div className="flex flex-col">
-                                                    <span className="text-gray-900 font-bold">Due {new Date(job.deadline).toLocaleDateString()}</span>
+                                                    <span className="text-gray-900 font-bold">Due {new Date(job.deadline).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                                                     <span className="text-[10px] text-gray-500">{new Date(job.deadline).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                                 </div>
                                             ) : (
-                                                <span>Posted {new Date(job.createdAt).toLocaleDateString()}</span>
+                                                <span>Posted {new Date(job.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                                             )}
                                         </div>
                                         <span className="text-xs font-bold text-gray-300 uppercase tracking-wider group-hover:text-primary-500 transition-colors">

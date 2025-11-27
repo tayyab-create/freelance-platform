@@ -137,7 +137,7 @@ const ReviewCard = ({ review, reviewerType, reviewerName, reviewerLogo }) => {
                 <p className="text-xs text-gray-400">
                     Reviewed on {new Date(review.createdAt).toLocaleDateString('en-US', {
                         year: 'numeric',
-                        month: 'long',
+                        month: 'short',
                         day: 'numeric'
                     })}
                 </p>

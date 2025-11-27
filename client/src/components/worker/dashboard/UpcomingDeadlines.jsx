@@ -76,7 +76,7 @@ const UpcomingDeadlines = ({ deadlines }) => {
                                                 {dateObj && !isNaN(dateObj.getTime()) && (
                                                     <div className="flex items-center gap-1.5 text-gray-400">
                                                         <span>•</span>
-                                                        <span>{dateObj.toLocaleDateString()}</span>
+                                                        <span>{dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                                                         <span>at</span>
                                                         <span>{dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                                     </div>

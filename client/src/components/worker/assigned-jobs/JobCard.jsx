@@ -49,7 +49,7 @@ const JobCard = ({
                         </div>
                         <p className="text-sm font-bold text-gray-900">
                             {job.completedDate
-                                ? new Date(job.completedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                                ? new Date(job.completedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
                                 : 'Recently'
                             }
                         </p>
@@ -103,7 +103,7 @@ const JobCard = ({
                         </div>
                         <p className={`text-sm font-bold ${hasUrgentDeadline ? 'text-red-700' : 'text-gray-900'}`}>
                             {job.deadline
-                                ? new Date(job.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                                ? new Date(job.deadline).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
                                 : 'No deadline'
                             }
                         </p>
@@ -148,6 +148,7 @@ const JobCard = ({
                             <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
                                 <FiCalendar className="w-3 h-3" />
                                 Assigned {new Date(job.assignedDate).toLocaleDateString('en-US', {
+                                    year: 'numeric',
                                     month: 'short',
                                     day: 'numeric'
                                 })}
@@ -162,7 +163,7 @@ const JobCard = ({
                             <div className="group/tooltip relative">
                                 <FiInfo className="w-4 h-4 text-red-500 cursor-help" />
                                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover/tooltip:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10 shadow-lg">
-                                    Urgent: Due {new Date(job.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                    Urgent: Due {new Date(job.deadline).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                                     <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
                                 </div>
                             </div>

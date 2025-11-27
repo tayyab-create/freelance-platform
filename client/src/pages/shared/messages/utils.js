@@ -13,6 +13,7 @@ export const formatTime = (date) => {
         return 'Yesterday';
     } else {
         return messageDate.toLocaleDateString('en-US', {
+            year: 'numeric',
             month: 'short',
             day: 'numeric',
         });

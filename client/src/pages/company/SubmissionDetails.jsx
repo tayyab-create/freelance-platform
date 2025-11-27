@@ -516,9 +516,8 @@ const SubmissionDetails = () => {
                                         <FiCalendar className="w-4 h-4 text-gray-400" />
                                         <span>
                                             {new Date(submission.createdAt).toLocaleDateString(undefined, {
-                                                weekday: 'long',
                                                 year: 'numeric',
-                                                month: 'long',
+                                                month: 'short',
                                                 day: 'numeric'
                                             })}
                                         </span>

@@ -243,7 +243,7 @@ const SavedSearches = () => {
 
                                 {/* Created Date */}
                                 <p className="text-xs text-gray-400 mt-3">
-                                    Saved {new Date(search.createdAt).toLocaleDateString()}
+                                    Saved {new Date(search.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                                 </p>
                             </div>
                         ))}

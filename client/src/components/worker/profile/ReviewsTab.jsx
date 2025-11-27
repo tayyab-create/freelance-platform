@@ -30,7 +30,7 @@ const ReviewsTab = ({ profile }) => {
                             <div key={i} className="border-b border-gray-100 last:border-0 pb-4 last:pb-0">
                                 <div className="flex justify-between mb-2">
                                     <h4 className="font-bold text-gray-900 text-sm">{review.companyName || 'Client'}</h4>
-                                    <span className="text-xs text-gray-400">{new Date(review.createdAt).toLocaleDateString()}</span>
+                                    <span className="text-xs text-gray-400">{new Date(review.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                                 </div>
                                 <div className="flex text-yellow-400 text-xs mb-2">
                                     {[1, 2, 3, 4, 5].map(s => <FiStar key={s} className={s <= review.rating ? "fill-current" : "text-gray-300"} />)}

@@ -34,6 +34,7 @@ const JobCard = ({ job, linkTo }) => {
                                     <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
                                         <FiCalendar className="w-3 h-3" />
                                         {new Date(job.createdAt).toLocaleDateString('en-US', {
+                                            year: 'numeric',
                                             month: 'short',
                                             day: 'numeric'
                                         })}

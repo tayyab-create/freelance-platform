@@ -89,7 +89,7 @@ const CompanyInfo = ({ companyInfo, companyCreatedAt }) => {
                             <div>
                                 <p className="text-gray-500 text-xs font-medium">Member Since</p>
                                 <p className="text-gray-900 font-semibold">
-                                    {new Date(companyCreatedAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                                    {new Date(companyCreatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                                 </p>
                             </div>
                         </div>

@@ -106,7 +106,7 @@ const PortfolioTab = ({
                                     <div>
                                         <h4 className="font-bold text-gray-900 text-sm">{cert.title}</h4>
                                         <p className="text-xs text-gray-500">{cert.issuedBy}</p>
-                                        <p className="text-xs text-gray-400 mt-1">Issued: {new Date(cert.issuedDate).toLocaleDateString()}</p>
+                                        <p className="text-xs text-gray-400 mt-1">Issued: {new Date(cert.issuedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
                                         {cert.certificateUrl && (
                                             <a href={cert.certificateUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary-600 font-semibold mt-2 inline-block hover:underline">View Certificate</a>
                                         )}

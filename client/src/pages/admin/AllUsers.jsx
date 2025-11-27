@@ -285,7 +285,7 @@ const AllUsers = () => {
                   <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Joined Date</div>
                   <div className="flex items-center gap-2 font-medium text-gray-700">
                     <FiCalendar className="text-gray-400" />
-                    {new Date(selectedUser.user.createdAt).toLocaleDateString()}
+                    {new Date(selectedUser.user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                   </div>
                 </div>
               </div>

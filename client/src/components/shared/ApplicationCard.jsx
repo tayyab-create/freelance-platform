@@ -40,7 +40,7 @@ const ApplicationCard = ({ application, onViewJob }) => {
                         </span>
                         <span className="text-sm text-gray-500">•</span>
                         <span className="text-sm text-gray-500 font-medium">
-                            Applied on {new Date(application.createdAt).toLocaleDateString()}
+                            Applied on {new Date(application.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                         </span>
                     </div>
 

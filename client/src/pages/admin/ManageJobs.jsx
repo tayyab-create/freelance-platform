@@ -156,7 +156,7 @@ const ManageJobs = () => {
         {
             key: 'createdAt',
             label: 'Posted Date',
-            render: (value) => new Date(value).toLocaleDateString()
+            render: (value) => new Date(value).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
         }
     ];
 
@@ -311,7 +311,7 @@ const ManageJobs = () => {
                                     <div className="text-xs text-gray-500 mb-1">Deadline</div>
                                     <div className="flex items-center gap-2 font-medium text-gray-900">
                                         <FiCalendar className="text-gray-400" />
-                                        {new Date(selectedJob.deadline).toLocaleDateString()}
+                                        {new Date(selectedJob.deadline).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                                     </div>
                                 </div>
                                 <div>

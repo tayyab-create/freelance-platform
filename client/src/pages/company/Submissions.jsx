@@ -249,7 +249,7 @@ const Submissions = () => {
                                         </div>
                                         <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
                                             <FiClock className="w-3.5 h-3.5" />
-                                            Submitted {new Date(submission.createdAt).toLocaleDateString()}
+                                            Submitted {new Date(submission.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                                         </div>
                                     </div>
 

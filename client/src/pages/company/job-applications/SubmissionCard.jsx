@@ -19,7 +19,7 @@ const SubmissionCard = ({ submission, onViewSubmission }) => {
                         <div>
                             <h3 className="text-lg font-bold text-gray-900">Work Submitted</h3>
                             <p className="text-sm text-gray-500">
-                                Submitted on {new Date(submission.createdAt).toLocaleDateString()}
+                                Submitted on {new Date(submission.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                             </p>
                         </div>
                     </div>

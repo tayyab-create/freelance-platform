@@ -310,7 +310,7 @@ const MyApplications = () => {
                   </div>
                   <div className="flex items-center gap-2 mt-3 text-sm text-gray-500">
                     <FiClock className="h-4 w-4" />
-                    <span>Posted on {new Date(selectedApplication.job?.createdAt).toLocaleDateString()}</span>
+                    <span>Posted on {new Date(selectedApplication.job?.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                   </div>
                 </div>
               </div>
@@ -353,7 +353,7 @@ const MyApplications = () => {
                   </div>
                   <div className="flex flex-col">
                     <p className="text-lg font-bold text-gray-900">
-                      {selectedApplication.job?.deadline ? new Date(selectedApplication.job.deadline).toLocaleDateString() : 'None'}
+                      {selectedApplication.job?.deadline ? new Date(selectedApplication.job.deadline).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'None'}
                     </p>
                     {selectedApplication.job?.deadline && (
                       <p className="text-xs text-gray-500">
