@@ -136,16 +136,16 @@ const DatePicker = ({
                 onClick={() => !disabled && setIsOpen(!isOpen)}
                 disabled={disabled}
                 className={`w-full px-4 py-3 rounded-xl border-2 transition-all text-left flex items-center justify-between ${error
-                        ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-2 focus:ring-red-200'
-                        : isOpen
-                            ? 'border-primary-500 bg-white ring-2 ring-primary-200'
-                            : 'border-gray-200 bg-white hover:border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200'
+                    ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-2 focus:ring-red-200'
+                    : isOpen
+                        ? 'border-primary-500 bg-white ring-2 ring-primary-200'
+                        : 'border-gray-200 bg-white hover:border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200'
                     } ${disabled ? 'opacity-50 cursor-not-allowed bg-gray-50' : 'cursor-pointer'}`}
             >
                 <span className={`${value ? 'text-gray-900 font-medium' : 'text-gray-400'} whitespace-nowrap`}>
                     {value ? formatDisplayDate(value) : placeholder}
                 </span>
-                <FiCalendar className={`h-5 w-5 ${error ? 'text-red-500' : 'text-gray-400'}`} />
+                <FiCalendar className={`h-5 w-5 flex-shrink-0 ${error ? 'text-red-500' : 'text-gray-400'}`} />
             </button>
 
             {error && (

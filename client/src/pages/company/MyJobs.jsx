@@ -245,7 +245,35 @@ const MyJobs = () => {
                                             <div className="text-[10px] text-gray-500 mb-1 font-medium uppercase tracking-wide">Duration</div>
                                             <div className="flex items-center gap-1.5">
                                                 <FiClock className="w-3.5 h-3.5 text-orange-500" />
-                                                <span className="text-sm font-bold text-gray-900 truncate" title={job.duration}>{job.duration || 'N/A'}</span>
+                                                <span className="text-sm font-bold text-gray-900 truncate" title={job.duration}>
+                                                    {(() => {
+                                                        if (!job.deadline) return job.duration || 'N/A';
+
+                                                        const now = new Date();
+                                                        const deadlineDate = new Date(job.deadline);
+                                                        const diffTime = deadlineDate - now;
+
+                                                        if (diffTime <= 0) return 'Expired';
+
+                                                        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                                                        const months = Math.floor(diffDays / 30);
+                                                        const days = diffDays % 30;
+
+                                                        let durationStr = '';
+                                                        if (months > 0) {
+                                                            durationStr += `${months} month${months > 1 ? 's' : ''}`;
+                                                        }
+                                                        if (days > 0) {
+                                                            if (durationStr) durationStr += ', ';
+                                                            durationStr += `${days} day${days > 1 ? 's' : ''}`;
+                                                        }
+                                                        if (!durationStr) {
+                                                            durationStr = 'Less than a day';
+                                                        }
+
+                                                        return durationStr;
+                                                    })()}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>

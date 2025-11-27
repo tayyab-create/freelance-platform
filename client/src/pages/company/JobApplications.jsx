@@ -215,7 +215,35 @@ const JobApplications = () => {
                                 <FiClock className="w-4 h-4" />
                                 Duration
                             </div>
-                            <div className="text-lg font-bold text-gray-900">{job?.duration}</div>
+                            <div className="text-lg font-bold text-gray-900">
+                                {(() => {
+                                    if (!job?.deadline) return job?.duration || 'N/A';
+
+                                    const now = new Date();
+                                    const deadlineDate = new Date(job.deadline);
+                                    const diffTime = deadlineDate - now;
+
+                                    if (diffTime <= 0) return 'Expired';
+
+                                    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                                    const months = Math.floor(diffDays / 30);
+                                    const days = diffDays % 30;
+
+                                    let durationStr = '';
+                                    if (months > 0) {
+                                        durationStr += `${months} month${months > 1 ? 's' : ''}`;
+                                    }
+                                    if (days > 0) {
+                                        if (durationStr) durationStr += ', ';
+                                        durationStr += `${days} day${days > 1 ? 's' : ''}`;
+                                    }
+                                    if (!durationStr) {
+                                        durationStr = 'Less than a day';
+                                    }
+
+                                    return durationStr;
+                                })()}
+                            </div>
                         </div>
                         <div className="p-4 bg-gray-50 rounded-xl">
                             <div className="flex items-center gap-2 text-gray-500 text-sm font-medium mb-1">
@@ -232,7 +260,7 @@ const JobApplications = () => {
                             <div className="text-lg font-bold text-gray-900">
                                 {job?.deadline ? (
                                     <div className="flex flex-col">
-                                        <span>{new Date(job.deadline).toLocaleDateString()}</span>
+                                        <span>{new Date(job.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                                         <span className="text-xs text-gray-500 font-normal">
                                             {new Date(job.deadline).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                         </span>

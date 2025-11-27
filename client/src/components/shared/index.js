@@ -19,6 +19,8 @@ export { default as FilterBar } from './FilterBar';
 export { default as EnhancedFilterBar } from './EnhancedFilterBar';
 export { default as AdvancedFilterBar } from './AdvancedFilterBar';
 export { default as DatePicker } from './DatePicker';
+export { default as TimePicker } from './TimePicker';
+export { default as DateTimePicker } from './DateTimePicker';
 export { default as ActionDropdown } from './ActionDropdown';
 export { default as RevisionTimeline } from './RevisionTimeline';
 

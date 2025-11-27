@@ -17,7 +17,7 @@ import {
     FiFile
 } from 'react-icons/fi';
 import { toast } from '../../utils/toast';
-import { Select, PageHeader, ConfirmationModal, SuccessAnimation } from '../../components/shared';
+import { Select, PageHeader, ConfirmationModal, SuccessAnimation, DateTimePicker } from '../../components/shared';
 import DatePicker from '../../components/shared/DatePicker';
 import Input from '../../components/common/Input';
 import Textarea from '../../components/common/Textarea';
@@ -434,10 +434,11 @@ const PostJob = () => {
                                     onChange={handleChange}
                                     onBlur={handleBlur}
                                     error={touched.duration ? errors.duration : ''}
-                                    placeholder="e.g., 2 months, 3 weeks"
-                                    required
-                                    helperText="Estimated project duration"
-                                    className="mb-0"
+                                    placeholder="Auto-calculated from deadline"
+                                    readOnly
+                                    disabled
+                                    helperText="Duration is automatically calculated based on the deadline"
+                                    className="mb-0 bg-gray-50"
                                 />
                             </div>
 
@@ -448,10 +449,41 @@ const PostJob = () => {
                                     </div>
                                     <h2 className="text-lg font-bold text-gray-900">Deadline</h2>
                                 </div>
-                                <DatePicker
+                                <DateTimePicker
                                     label="Deadline"
                                     value={formData.deadline}
-                                    onChange={(date) => setFieldValue('deadline', date)}
+                                    onChange={(date) => {
+                                        setFieldValue('deadline', date);
+
+                                        // Auto-calculate duration
+                                        if (date) {
+                                            const now = new Date();
+                                            const deadlineDate = new Date(date);
+                                            const diffTime = deadlineDate - now;
+
+                                            if (diffTime > 0) {
+                                                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                                                const months = Math.floor(diffDays / 30);
+                                                const days = diffDays % 30;
+
+                                                let durationStr = '';
+                                                if (months > 0) {
+                                                    durationStr += `${months} month${months > 1 ? 's' : ''}`;
+                                                }
+                                                if (days > 0) {
+                                                    if (durationStr) durationStr += ', ';
+                                                    durationStr += `${days} day${days > 1 ? 's' : ''}`;
+                                                }
+                                                if (!durationStr) {
+                                                    durationStr = 'Less than a day';
+                                                }
+
+                                                setFieldValue('duration', durationStr);
+                                            } else {
+                                                setFieldValue('duration', 'Expired');
+                                            }
+                                        }
+                                    }}
                                     minDate={new Date()}
                                     error={touched.deadline ? errors.deadline : ''}
                                     placeholder="Select application deadline"
