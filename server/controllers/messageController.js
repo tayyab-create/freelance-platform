@@ -508,6 +508,15 @@ exports.addReaction = async (req, res) => {
 
     await message.save();
 
+    // Emit socket event
+    const io = req.app.get('io');
+    io.to(conversationId).emit('message_reaction', {
+      messageId: message._id,
+      conversationId: conversationId,
+      reactions: message.reactions,
+      userId: req.user._id
+    });
+
     res.status(200).json({
       success: true,
       data: message

@@ -230,12 +230,22 @@ const MessagesEnhanced = () => {
       }
     };
 
+    // Listen for message reactions
+    const handleMessageReaction = ({ messageId, conversationId, reactions }) => {
+      if (conversationId === selectedConversation._id) {
+        setMessages(prev => prev.map(msg =>
+          msg._id === messageId ? { ...msg, reactions: reactions } : msg
+        ));
+      }
+    };
+
     socket.on('new_message', handleNewMessage);
     socket.on('user_typing', handleUserTyping);
     socket.on('user_stop_typing', handleUserStopTyping);
     socket.on('user_online', handleUserOnline);
     socket.on('user_offline', handleUserOffline);
     socket.on('message_read', handleMessageRead);
+    socket.on('message_reaction', handleMessageReaction);
 
     return () => {
       socket.emit('leave_conversation', selectedConversation._id);
@@ -245,6 +255,7 @@ const MessagesEnhanced = () => {
       socket.off('user_online', handleUserOnline);
       socket.off('user_offline', handleUserOffline);
       socket.off('message_read', handleMessageRead);
+      socket.off('message_reaction', handleMessageReaction);
     };
   }, [socket, selectedConversation, currentUser, soundEnabled, notificationsEnabled]);
 

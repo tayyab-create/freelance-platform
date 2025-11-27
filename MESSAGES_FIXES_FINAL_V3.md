@@ -64,6 +64,51 @@ Since the optimistic updates are having trouble matching IDs or state, we will i
     };
 ```
 
+## 3. Fix Real-Time Reactions
+
+**A. Update Backend Controller (`server/controllers/messageController.js`)**
+
+In the `addReaction` function, emit a socket event after saving the message:
+
+```javascript
+    await message.save();
+
+    // Emit socket event
+    const io = req.app.get('io');
+    io.to(conversationId).emit('message_reaction', {
+      messageId: message._id,
+      conversationId: conversationId,
+      reactions: message.reactions,
+      userId: req.user._id
+    });
+
+    res.status(200).json({
+      success: true,
+      data: message
+    });
+```
+
+**B. Update Frontend Listener (`client/src/pages/shared/Messages.jsx`)**
+
+Add a listener for `message_reaction` in the socket `useEffect`:
+
+```javascript
+    // Listen for message reactions
+    const handleMessageReaction = ({ messageId, conversationId, reactions }) => {
+      if (conversationId === selectedConversation._id) {
+        setMessages(prev => prev.map(msg =>
+          msg._id === messageId ? { ...msg, reactions: reactions } : msg
+        ));
+      }
+    };
+
+    socket.on('message_reaction', handleMessageReaction);
+    
+    // Don't forget to remove listener in cleanup
+    // socket.off('message_reaction', handleMessageReaction);
+```
+
 ## 🚀 Verification
 
-This change forces the application to reload the conversation list from the server every time a message event is received. This ensures that even if our local state update fails, the server data will correct it immediately.
+1.  **Conversation List**: Send a message from User A. User B's conversation list should update immediately (check timestamp and last message).
+2.  **Reactions**: React to a message as User A. User B should see the reaction appear instantly without refreshing.
