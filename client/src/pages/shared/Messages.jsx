@@ -365,8 +365,24 @@ const MessagesEnhanced = () => {
             const data = await response.json();
             if (data.success) {
                 setConversations(data.data);
+
+                // Initialize states from backend data
+                const pinned = new Set();
+                const archived = new Set();
+                const muted = new Set();
+
+                data.data.forEach(conv => {
+                    if (conv.pinnedBy?.includes(currentUser?.id)) pinned.add(conv._id);
+                    if (conv.archivedBy?.includes(currentUser?.id)) archived.add(conv._id);
+                    if (conv.mutedBy?.includes(currentUser?.id)) muted.add(conv._id);
+                });
+
+                setPinnedConversations(pinned);
+                setArchivedConversations(archived);
+                setMutedConversations(muted);
             }
         } catch (error) {
+            console.error(error);
             toast.error('Failed to load conversations');
         } finally {
             setLoading(false);
@@ -678,47 +694,84 @@ const MessagesEnhanced = () => {
         }
     };
 
+
     // ============= CONVERSATION ACTIONS =============
-    const togglePin = (conversationId) => {
-        setPinnedConversations(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(conversationId)) {
-                newSet.delete(conversationId);
-                toast.success('Unpinned');
-            } else {
-                newSet.add(conversationId);
-                toast.success('Pinned');
+    const togglePin = async (conversationId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_URL}/messages/${conversationId}/pin`, {
+                method: 'PATCH',
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                setPinnedConversations(prev => {
+                    const newSet = new Set(prev);
+                    if (newSet.has(conversationId)) {
+                        newSet.delete(conversationId);
+                        toast.success('Unpinned');
+                    } else {
+                        newSet.add(conversationId);
+                        toast.success('Pinned');
+                    }
+                    return newSet;
+                });
             }
-            return newSet;
-        });
+        } catch (error) {
+            toast.error('Failed to update pin status');
+        }
     };
 
-    const toggleArchive = (conversationId) => {
-        setArchivedConversations(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(conversationId)) {
-                newSet.delete(conversationId);
-                toast.success('Unarchived');
-            } else {
-                newSet.add(conversationId);
-                toast.success('Archived');
+    const toggleArchive = async (conversationId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_URL}/messages/${conversationId}/archive`, {
+                method: 'PATCH',
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                setArchivedConversations(prev => {
+                    const newSet = new Set(prev);
+                    if (newSet.has(conversationId)) {
+                        newSet.delete(conversationId);
+                        toast.success('Unarchived');
+                    } else {
+                        newSet.add(conversationId);
+                        toast.success('Archived');
+                    }
+                    return newSet;
+                });
             }
-            return newSet;
-        });
+        } catch (error) {
+            toast.error('Failed to update archive status');
+        }
     };
 
-    const toggleMute = (conversationId) => {
-        setMutedConversations(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(conversationId)) {
-                newSet.delete(conversationId);
-                toast.success('Unmuted');
-            } else {
-                newSet.add(conversationId);
-                toast.success('Muted');
+    const toggleMute = async (conversationId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_URL}/messages/${conversationId}/mute`, {
+                method: 'PATCH',
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                setMutedConversations(prev => {
+                    const newSet = new Set(prev);
+                    if (newSet.has(conversationId)) {
+                        newSet.delete(conversationId);
+                        toast.success('Unmuted');
+                    } else {
+                        newSet.add(conversationId);
+                        toast.success('Muted');
+                    }
+                    return newSet;
+                });
             }
-            return newSet;
-        });
+        } catch (error) {
+            toast.error('Failed to update mute status');
+        }
     };
 
     // ============= HELPER FUNCTIONS =============

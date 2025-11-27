@@ -4,8 +4,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../redux/slices/authSlice';
 import {
   FiMenu, FiX, FiLogOut, FiUser, FiBriefcase, FiHome,
-  FiFileText, FiCheckCircle, FiStar, FiMessageCircle,
-  FiChevronLeft, FiChevronRight, FiSearch
+  FiFileText, FiCheckCircle, FiStar, FiMessageSquare,
+  FiChevronLeft, FiChevronRight, FiSearch, FiGrid,
+  FiCompass, FiSend, FiAward, FiPlusSquare, FiLayers, FiInbox, FiSettings
 } from 'react-icons/fi';
 import GlobalSearch from '../shared/GlobalSearch';
 import NotificationBell from './NotificationBell';
@@ -33,25 +34,25 @@ const Navbar = () => {
 
   const navLinks = {
     worker: [
-      { name: 'Dashboard', path: '/worker/dashboard', icon: FiHome },
-      { name: 'Browse Jobs', path: '/worker/jobs', icon: FiBriefcase },
-      { name: 'My Applications', path: '/worker/applications', icon: FiFileText },
-      { name: 'Assigned Jobs', path: '/worker/jobs/assigned', icon: FiCheckCircle },
+      { name: 'Dashboard', path: '/worker/dashboard', icon: FiGrid },
+      { name: 'Browse Jobs', path: '/worker/jobs', icon: FiCompass },
+      { name: 'My Applications', path: '/worker/applications', icon: FiSend },
+      { name: 'Assigned Jobs', path: '/worker/jobs/assigned', icon: FiBriefcase },
+      { name: 'Messages', path: '/messages', icon: FiMessageSquare },
+      { name: 'Reviews', path: '/worker/reviews', icon: FiAward },
       { name: 'Profile', path: '/worker/profile', icon: FiUser },
-      { name: 'Messages', path: '/messages', icon: FiMessageCircle },
-      { name: 'Reviews', path: '/worker/reviews', icon: FiStar },
     ],
     company: [
-      { name: 'Dashboard', path: '/company/dashboard', icon: FiHome },
-      { name: 'Post Job', path: '/company/post-job', icon: FiBriefcase },
-      { name: 'My Jobs', path: '/company/jobs', icon: FiBriefcase },
-      { name: 'Submissions', path: '/company/submissions', icon: FiFileText },
-      { name: 'Profile', path: '/company/profile', icon: FiUser },
-      { name: 'Messages', path: '/company/messages', icon: FiMessageCircle },
-      { name: 'Reviews', path: '/company/reviews', icon: FiStar }
+      { name: 'Dashboard', path: '/company/dashboard', icon: FiGrid },
+      { name: 'Post Job', path: '/company/post-job', icon: FiPlusSquare },
+      { name: 'My Jobs', path: '/company/jobs', icon: FiLayers },
+      { name: 'Submissions', path: '/company/submissions', icon: FiInbox },
+      { name: 'Messages', path: '/company/messages', icon: FiMessageSquare },
+      { name: 'Reviews', path: '/company/reviews', icon: FiAward },
+      { name: 'Profile', path: '/company/profile', icon: FiSettings },
     ],
     admin: [
-      { name: 'Dashboard', path: '/admin/dashboard', icon: FiHome },
+      { name: 'Dashboard', path: '/admin/dashboard', icon: FiGrid },
       { name: 'Pending Approvals', path: '/admin/pending', icon: FiUser },
       { name: 'All Users', path: '/admin/users', icon: FiUser },
       { name: 'Manage Jobs', path: '/admin/jobs', icon: FiBriefcase },
