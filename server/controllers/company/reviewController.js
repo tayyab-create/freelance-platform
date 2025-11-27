@@ -152,7 +152,7 @@ exports.reviewWorker = async (req, res) => {
             'review',
             'New Review Received',
             `You received a ${rating}-star review for "${job.title}"`,
-            `/worker/reviews`,
+            `/worker/jobs/assigned/${jobId}`,
             {
                 jobId: jobId,
                 reviewId: review._id,

@@ -183,7 +183,7 @@ exports.submitWork = async (req, res) => {
                     'submission',
                     'Revision Submitted',
                     `Revised work has been submitted for "${job.title}". Please review the changes.`,
-                    `/company/submissions`,
+                    `/company/submissions/${existingSubmission._id}`,
                     {
                         jobId: job._id,
                         submissionId: existingSubmission._id,
@@ -226,7 +226,7 @@ exports.submitWork = async (req, res) => {
             'submission',
             'Work Submitted',
             `New work has been submitted for "${job.title}". Please review and provide feedback.`,
-            `/company/submissions`,
+            `/company/submissions/${submission._id}`,
             {
                 jobId: job._id,
                 submissionId: submission._id,

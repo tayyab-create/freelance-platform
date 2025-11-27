@@ -98,6 +98,22 @@ exports.getSubmissionById = async (req, res) => {
             }
         }
 
+        // Fetch reviews
+        if (submission.job) {
+            const companyReview = await Review.findOne({
+                job: submission.job._id,
+                reviewedBy: 'company'
+            });
+
+            const workerReview = await Review.findOne({
+                job: submission.job._id,
+                reviewedBy: 'worker'
+            });
+
+            submissionObj.companyReview = companyReview;
+            submissionObj.workerReview = workerReview;
+        }
+
         res.status(200).json({
             success: true,
             data: submissionObj
@@ -173,7 +189,7 @@ exports.requestRevision = async (req, res) => {
             'submission',
             'Revision Requested',
             `Revision has been requested for "${job.title}". Please check the feedback and resubmit by the new deadline.`,
-            `/worker/submission/${job._id}`,
+            `/worker/jobs/assigned/${job._id}`,
             {
                 jobId: job._id,
                 submissionId: submission._id,
@@ -242,7 +258,7 @@ exports.completeJob = async (req, res) => {
             'submission',
             'Work Approved!',
             `Congratulations! Your work for "${job.title}" has been approved and the job is now complete. You can now submit a review.`,
-            `/worker/jobs/${job._id}/reviews`,
+            `/worker/jobs/assigned/${job._id}`,
             {
                 jobId: job._id,
                 status: 'completed'

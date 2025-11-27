@@ -88,7 +88,7 @@ exports.assignJob = async (req, res) => {
             'application',
             'Application Accepted!',
             `Congratulations! Your application for "${job.title}" has been accepted. You can now start working on this project.`,
-            `/worker/jobs/${job._id}`,
+            `/worker/jobs/assigned/${job._id}`,
             {
                 jobId: job._id,
                 applicationId: applicationId,

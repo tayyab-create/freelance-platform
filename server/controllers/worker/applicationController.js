@@ -61,7 +61,7 @@ exports.applyForJob = async (req, res) => {
             'application',
             'New Job Application',
             `You received a new application for "${job.title}"`,
-            `/company/jobs/${job._id}/applications`,
+            `/company/jobs/${job._id}`,
             {
                 jobId: job._id,
                 applicationId: application._id,
