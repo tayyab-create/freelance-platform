@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../redux/slices/authSlice';
 import { FiMenu, FiX, FiLogOut, FiUser, FiBriefcase, FiHome, FiFileText, FiCheckCircle, FiStar, FiMessageCircle, FiChevronLeft, FiChevronRight, FiSearch } from 'react-icons/fi';
 import GlobalSearch from '../shared/GlobalSearch';
+import NotificationBell from './NotificationBell';
 
 const Sidebar = () => {
   const dispatch = useDispatch();
@@ -104,12 +105,27 @@ const Sidebar = () => {
         <div className="flex flex-col h-full">
           {/* Logo Section */}
           <div className="p-6 border-b border-gray-200/50">
-            <Link
-              to={getDashboardLink()}
-              className={`font-display font-bold text-gradient hover:scale-105 transition-all duration-300 block ${isCollapsed ? 'text-center text-xl' : 'text-2xl'}`}
-            >
-              {isCollapsed ? 'FP' : 'Freelance Platform'}
-            </Link>
+            {isCollapsed ? (
+              <div className="flex flex-col items-center gap-3">
+                <Link
+                  to={getDashboardLink()}
+                  className="font-display font-bold text-gradient hover:scale-105 transition-all duration-300 text-xl"
+                >
+                  FP
+                </Link>
+                <NotificationBell isCollapsed={isCollapsed} />
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <Link
+                  to={getDashboardLink()}
+                  className="font-display font-bold text-gradient hover:scale-105 transition-all duration-300 text-2xl"
+                >
+                  Freelance Platform
+                </Link>
+                <NotificationBell isCollapsed={isCollapsed} />
+              </div>
+            )}
           </div>
 
           {/* Global Search */}

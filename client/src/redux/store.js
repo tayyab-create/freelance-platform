@@ -4,6 +4,7 @@ import jobReducer from './slices/jobSlice';
 import workerReducer from './slices/workerSlice';
 import companyReducer from './slices/companySlice';
 import adminReducer from './slices/adminSlice';
+import notificationReducer from './slices/notificationSlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     worker: workerReducer,
     company: companyReducer,
     admin: adminReducer,
+    notifications: notificationReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

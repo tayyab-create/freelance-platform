@@ -178,4 +178,17 @@ export const messageAPI = {
     },
 };
 
+// Notification APIs
+export const notificationAPI = {
+    getNotifications: (params) => api.get('/notifications', { params }),
+    getUnreadCount: () => api.get('/notifications/unread-count'),
+    markAsRead: (id) => api.patch(`/notifications/${id}/read`),
+    markAllAsRead: () => api.patch('/notifications/read-all'),
+    deleteNotification: (id) => api.delete(`/notifications/${id}`),
+    deleteAllRead: () => api.delete('/notifications/read'),
+};
+
+// Add notification API to the default export
+api.notificationAPI = notificationAPI;
+
 export default api;

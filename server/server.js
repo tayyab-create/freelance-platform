@@ -75,6 +75,7 @@ app.use("/api/companies", require("./routes/companies"));
 app.use("/api/jobs", require("./routes/jobs"));
 app.use("/api/upload", require("./routes/upload"));
 app.use("/api/messages", require("./routes/messages"));
+app.use("/api/notifications", require("./routes/notifications"));
 
 // Socket.io Authentication Middleware
 io.use(async (socket, next) => {
@@ -178,6 +179,11 @@ io.on("connection", (socket) => {
     });
   });
 
+  // Handle notification read
+  socket.on("notification_read", (data) => {
+    console.log(`Notification ${data.notificationId} marked as read by ${socket.userId}`);
+  });
+
   // Handle disconnect
   socket.on("disconnect", () => {
     console.log(`User disconnected: ${socket.userId}`);
@@ -188,6 +194,10 @@ io.on("connection", (socket) => {
 
 // Make io accessible to routes
 app.set("io", io);
+
+// Initialize notification service with Socket.io
+const notificationService = require('./services/notificationService');
+notificationService.setSocketIO(io);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
