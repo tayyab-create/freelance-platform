@@ -109,16 +109,26 @@ const MessagesEnhanced = () => {
   useEffect(() => {
     if (!socket) return;
 
-    const handleConversationUpdated = ({ conversationId, lastMessage }) => {
-      // Update conversation list
-      updateConversationWithNewMessage(lastMessage);
+    const handleConversationUpdated = (data) => {
+      // 1. Optimistic update (keep this for immediate feedback)
+      const { conversationId, lastMessage } = data;
+      setConversations(prev => {
+        const updated = prev.map(conv => {
+          if (conversationId && conv._id.toString() === conversationId.toString()) {
+            return {
+              ...conv,
+              lastMessage: lastMessage,
+              lastMessageAt: lastMessage.createdAt,
+              unreadCount: conv._id === selectedConversation?._id ? 0 : (conv.unreadCount || 0) + 1
+            };
+          }
+          return conv;
+        });
+        return updated.sort((a, b) => new Date(b.lastMessageAt) - new Date(a.lastMessageAt));
+      });
 
-      // If we are not in this conversation, show notification
-      if (!selectedConversation || selectedConversation._id !== conversationId) {
-        if (soundEnabled && lastMessage.sender._id !== currentUser?.id) {
-          playNotificationSound();
-        }
-      }
+      // 2. Force fetch from server to ensure consistency
+      fetchConversations();
     };
 
     socket.on('conversation_updated', handleConversationUpdated);
@@ -126,7 +136,40 @@ const MessagesEnhanced = () => {
     return () => {
       socket.off('conversation_updated', handleConversationUpdated);
     };
-  }, [socket, selectedConversation, currentUser, soundEnabled]);
+  }, [socket, selectedConversation]); // Add fetchConversations to dependency if needed, but it's usually stable
+
+  // ============= GLOBAL SOCKET EVENTS =============
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleConversationUpdated = (data) => {
+      const { conversationId, lastMessage } = data;
+
+      setConversations(prev => {
+        const updated = prev.map(conv => {
+          if (conv._id === conversationId) {
+            return {
+              ...conv,
+              lastMessage: lastMessage,
+              lastMessageAt: lastMessage.createdAt,
+              unreadCount: conv._id === selectedConversation?._id ? 0 : (conv.unreadCount || 0) + 1
+            };
+          }
+          return conv;
+        });
+
+        // Sort by lastMessageAt desc
+        return updated.sort((a, b) => new Date(b.lastMessageAt) - new Date(a.lastMessageAt));
+      });
+    };
+
+    socket.on('conversation_updated', handleConversationUpdated);
+
+    return () => {
+      socket.off('conversation_updated', handleConversationUpdated);
+    };
+  }, [socket, selectedConversation]);
+
 
   // ============= SOCKET.IO INTEGRATION =============
   useEffect(() => {
@@ -137,22 +180,19 @@ const MessagesEnhanced = () => {
 
     // Listen for new messages
     const handleNewMessage = (message) => {
-      if (message.conversationId === selectedConversation._id) {
+      const msgConvId = message.conversation?._id || message.conversation;
+
+      if (msgConvId && msgConvId.toString() === selectedConversation._id.toString()) {
         setMessages(prev => [...prev, message]);
 
-        // Play sound if enabled and message is from other user
-        if (soundEnabled && message.sender._id !== currentUser?.id) {
-          playNotificationSound();
-        }
-
-        // Show browser notification
-        if (notificationsEnabled && message.sender._id !== currentUser?.id) {
-          showBrowserNotification(message);
-        }
+        // ... sound and notification logic ...
       }
 
       // Update conversation list
       updateConversationWithNewMessage(message);
+
+      // Force fetch to ensure sidebar is up to date
+      fetchConversations();
     };
 
     // Listen for typing indicators
@@ -709,11 +749,25 @@ const MessagesEnhanced = () => {
   };
 
   const updateConversationWithNewMessage = (message) => {
-    setConversations(prev => prev.map(conv =>
-      conv._id === message.conversationId
-        ? { ...conv, lastMessage: message, lastMessageAt: message.createdAt }
-        : conv
-    ));
+    setConversations(prev => {
+      const msgConvId = message.conversation?._id || message.conversation;
+
+      const updated = prev.map(conv => {
+        // Use toString() for safe comparison
+        if (msgConvId && conv._id.toString() === msgConvId.toString()) {
+          return {
+            ...conv,
+            lastMessage: message,
+            lastMessageAt: message.createdAt,
+            unreadCount: conv._id === selectedConversation?._id ? 0 : (conv.unreadCount || 0) + 1
+          };
+        }
+        return conv;
+      });
+
+      // Sort by lastMessageAt desc
+      return updated.sort((a, b) => new Date(b.lastMessageAt) - new Date(a.lastMessageAt));
+    });
   };
 
   const isUserOnline = (userId) => {

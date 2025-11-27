@@ -188,11 +188,16 @@ exports.getMessages = async (req, res) => {
       {
         conversation: conversationId,
         sender: { $ne: req.user._id },
-        isRead: false
+        'readBy.userId': { $ne: req.user._id }
       },
       {
-        isRead: true,
-        readAt: new Date()
+        $set: { isRead: true, readAt: new Date() },
+        $addToSet: {
+          readBy: {
+            userId: req.user._id,
+            readAt: new Date()
+          }
+        }
       }
     );
 
