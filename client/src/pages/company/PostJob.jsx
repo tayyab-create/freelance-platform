@@ -2,32 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { companyAPI, uploadAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
-import {
-    FiBriefcase,
-    FiDollarSign,
-    FiClock,
-    FiCalendar,
-    FiFileText,
-    FiTag,
-    FiAward,
-    FiArrowLeft,
-    FiSend,
-    FiPaperclip,
-    FiX,
-    FiFile
-} from 'react-icons/fi';
+import { FiArrowLeft, FiSend } from 'react-icons/fi';
 import { toast } from '../../utils/toast';
-import { Select, PageHeader, ConfirmationModal, SuccessAnimation, DateTimePicker } from '../../components/shared';
-import DatePicker from '../../components/shared/DatePicker';
-import Input from '../../components/common/Input';
-import Textarea from '../../components/common/Textarea';
-import FileUpload from '../../components/common/FileUpload';
+import { PageHeader, ConfirmationModal, SuccessAnimation } from '../../components/shared';
 import AutoSaveIndicator from '../../components/common/AutoSaveIndicator';
 import UnsavedChangesModal from '../../components/common/UnsavedChangesModal';
 import { useFormValidation } from '../../hooks/useFormValidation';
 import { useAutoSave } from '../../hooks/useAutoSave';
 import { useUnsavedChangesWarning } from '../../hooks/useUnsavedChanges';
 import { validationRules, ValidationSchema } from '../../utils/validation';
+
+// Import sub-components
+import JobBasicInfo from './post-job/JobBasicInfo';
+import JobBudgetTimeline from './post-job/JobBudgetTimeline';
+import JobRequirements from './post-job/JobRequirements';
+import JobAttachments from './post-job/JobAttachments';
 
 const PostJob = () => {
     const navigate = useNavigate();
@@ -61,7 +50,6 @@ const PostJob = () => {
         handleBlur,
         handleSubmit,
         setFieldValue,
-        resetForm,
     } = useFormValidation(
         {
             title: '',
@@ -256,341 +244,36 @@ const PostJob = () => {
                 <div className="max-w-4xl mx-auto">
                     {/* Form */}
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                        {/* Job Title */}
-                        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center">
-                                    <FiBriefcase className="w-5 h-5 text-primary-600" />
-                                </div>
-                                <h2 className="text-xl font-bold text-gray-900">Job Title</h2>
-                            </div>
-                            <Input
-                                name="title"
-                                value={formData.title}
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                error={touched.title ? errors.title : ''}
-                                placeholder="e.g., Full Stack Developer, UI/UX Designer"
-                                required
-                                maxLength={200}
-                                showCharacterCount
-                                helperText="Choose a clear, descriptive title that highlights the role"
-                                className="mb-0"
-                            />
-                        </div>
+                        <JobBasicInfo
+                            formData={formData}
+                            handleChange={handleChange}
+                            handleBlur={handleBlur}
+                            touched={touched}
+                            errors={errors}
+                        />
 
-                        {/* Job Description */}
-                        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                                    <FiFileText className="w-5 h-5 text-blue-600" />
-                                </div>
-                                <h2 className="text-xl font-bold text-gray-900">Job Description</h2>
-                            </div>
-                            <Textarea
-                                name="description"
-                                value={formData.description}
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                error={touched.description ? errors.description : ''}
-                                placeholder="Describe the job, responsibilities, and what you're looking for in detail..."
-                                rows={6}
-                                required
-                                maxLength={5000}
-                                showCharacterCount
-                                helperText="Provide a detailed overview to attract qualified candidates"
-                                className="mb-0"
-                            />
-                        </div>
+                        <JobBudgetTimeline
+                            formData={formData}
+                            handleChange={handleChange}
+                            handleBlur={handleBlur}
+                            touched={touched}
+                            errors={errors}
+                            setFieldValue={setFieldValue}
+                        />
 
-                        {/* Category & Experience Level */}
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                                        <FiTag className="w-5 h-5 text-purple-600" />
-                                    </div>
-                                    <h2 className="text-lg font-bold text-gray-900">Category</h2>
-                                </div>
-                                <Select
-                                    name="category"
-                                    value={formData.category}
-                                    onChange={handleChange}
-                                    required
-                                    icon={FiTag}
-                                    options={[
-                                        { value: '', label: 'Select Category' },
-                                        { value: 'Web Development', label: 'Web Development' },
-                                        { value: 'Mobile Development', label: 'Mobile Development' },
-                                        { value: 'Design', label: 'Design' },
-                                        { value: 'Writing', label: 'Writing' },
-                                        { value: 'Marketing', label: 'Marketing' },
-                                        { value: 'Data Science', label: 'Data Science' }
-                                    ]}
-                                />
-                                {touched.category && errors.category && (
-                                    <p className="mt-2 text-sm text-red-600">{errors.category}</p>
-                                )}
-                            </div>
+                        <JobRequirements
+                            formData={formData}
+                            handleChange={handleChange}
+                            handleBlur={handleBlur}
+                        />
 
-                            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
-                                        <FiAward className="w-5 h-5 text-orange-600" />
-                                    </div>
-                                    <h2 className="text-lg font-bold text-gray-900">Experience Level</h2>
-                                </div>
-                                <Select
-                                    name="experienceLevel"
-                                    value={formData.experienceLevel}
-                                    onChange={handleChange}
-                                    required
-                                    icon={FiAward}
-                                    options={[
-                                        { value: 'entry', label: 'Entry Level' },
-                                        { value: 'intermediate', label: 'Intermediate' },
-                                        { value: 'expert', label: 'Expert' }
-                                    ]}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Skills/Tags */}
-                        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                                    <FiTag className="w-5 h-5 text-green-600" />
-                                </div>
-                                <h2 className="text-xl font-bold text-gray-900">Skills & Tags</h2>
-                            </div>
-                            <Input
-                                name="tags"
-                                value={formData.tags}
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                placeholder="React, Node.js, MongoDB, TypeScript (comma-separated)"
-                                helperText="Separate skills with commas to help candidates find your job"
-                                className="mb-0"
-                            />
-                        </div>
-
-                        {/* Budget & Salary Type */}
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                                        <FiDollarSign className="w-5 h-5 text-green-600" />
-                                    </div>
-                                    <h2 className="text-lg font-bold text-gray-900">Budget</h2>
-                                </div>
-                                <Input
-                                    type="number"
-                                    name="salary"
-                                    value={formData.salary}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    error={touched.salary ? errors.salary : ''}
-                                    placeholder="5000"
-                                    required
-                                    icon={FiDollarSign}
-                                    helperText={formData.salaryType === 'hourly' ? 'Per hour rate' : 'Total project budget'}
-                                    className="mb-0"
-                                />
-                            </div>
-
-                            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                                        <FiDollarSign className="w-5 h-5 text-blue-600" />
-                                    </div>
-                                    <h2 className="text-lg font-bold text-gray-900">Payment Type</h2>
-                                </div>
-                                <Select
-                                    name="salaryType"
-                                    value={formData.salaryType}
-                                    onChange={handleChange}
-                                    icon={FiDollarSign}
-                                    options={[
-                                        { value: 'fixed', label: 'Fixed Price' },
-                                        { value: 'hourly', label: 'Hourly Rate' }
-                                    ]}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Duration & Deadline */}
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                                        <FiClock className="w-5 h-5 text-purple-600" />
-                                    </div>
-                                    <h2 className="text-lg font-bold text-gray-900">Duration</h2>
-                                </div>
-                                <Input
-                                    type="text"
-                                    name="duration"
-                                    value={formData.duration}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    error={touched.duration ? errors.duration : ''}
-                                    placeholder="Auto-calculated from deadline"
-                                    readOnly
-                                    disabled
-                                    helperText="Duration is automatically calculated based on the deadline"
-                                    className="mb-0 bg-gray-50"
-                                />
-                            </div>
-
-                            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
-                                        <FiCalendar className="w-5 h-5 text-orange-600" />
-                                    </div>
-                                    <h2 className="text-lg font-bold text-gray-900">Deadline</h2>
-                                </div>
-                                <DateTimePicker
-                                    label="Deadline"
-                                    value={formData.deadline}
-                                    onChange={(date) => {
-                                        setFieldValue('deadline', date);
-
-                                        // Auto-calculate duration
-                                        if (date) {
-                                            const now = new Date();
-                                            const deadlineDate = new Date(date);
-                                            const diffTime = deadlineDate - now;
-
-                                            if (diffTime > 0) {
-                                                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                                                const months = Math.floor(diffDays / 30);
-                                                const days = diffDays % 30;
-
-                                                let durationStr = '';
-                                                if (months > 0) {
-                                                    durationStr += `${months} month${months > 1 ? 's' : ''}`;
-                                                }
-                                                if (days > 0) {
-                                                    if (durationStr) durationStr += ', ';
-                                                    durationStr += `${days} day${days > 1 ? 's' : ''}`;
-                                                }
-                                                if (!durationStr) {
-                                                    durationStr = 'Less than a day';
-                                                }
-
-                                                setFieldValue('duration', durationStr);
-                                            } else {
-                                                setFieldValue('duration', 'Expired');
-                                            }
-                                        }
-                                    }}
-                                    minDate={new Date()}
-                                    error={touched.deadline ? errors.deadline : ''}
-                                    placeholder="Select application deadline"
-                                    className="mb-0"
-                                />
-                                <p className="mt-1 text-sm text-gray-500">Application deadline (optional)</p>
-                            </div>
-                        </div>
-
-                        {/* Requirements */}
-                        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
-                                    <FiFileText className="w-5 h-5 text-red-600" />
-                                </div>
-                                <h2 className="text-xl font-bold text-gray-900">Requirements</h2>
-                            </div>
-                            <Textarea
-                                name="requirements"
-                                value={formData.requirements}
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                placeholder="3+ years of experience&#10;Strong knowledge of React&#10;Portfolio required&#10;(one requirement per line)"
-                                rows={6}
-                                helperText="Enter one requirement per line for clarity"
-                                showCharacterCount
-                                className="mb-0"
-                            />
-                        </div>
-
-                        {/* Attachments */}
-                        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center">
-                                    <FiPaperclip className="w-5 h-5 text-indigo-600" />
-                                </div>
-                                <h2 className="text-xl font-bold text-gray-900">Attachments (Optional)</h2>
-                            </div>
-
-                            <div className="space-y-3">
-                                {/* Upload Area */}
-                                {!uploadingFiles && (
-                                    <FileUpload
-                                        onFileSelect={handleFileUpload}
-                                        multiple={true}
-                                        accept="*/*"
-                                        maxSize={10}
-                                        showProgress={false}
-                                    >
-                                        <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:bg-gray-50 hover:border-primary-300 transition-all cursor-pointer group">
-                                            <div className="h-12 w-12 bg-primary-50 text-primary-600 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                                                <FiPaperclip className="h-6 w-6" />
-                                            </div>
-                                            <p className="text-sm font-medium text-gray-700">Click to attach files</p>
-                                            <p className="text-xs text-gray-400 mt-1">Documents, specifications, or references (max 10MB per file)</p>
-                                        </div>
-                                    </FileUpload>
-                                )}
-
-                                {/* Upload Progress */}
-                                {uploadingFiles && (
-                                    <div className="border-2 border-dashed border-gray-200 rounded-xl p-6">
-                                        <div className="space-y-3">
-                                            <div className="flex items-center justify-center gap-2 text-primary-600">
-                                                <div className="h-5 w-5 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
-                                                <span className="text-sm font-medium">Uploading files...</span>
-                                            </div>
-                                            <div className="w-full bg-gray-200 rounded-full h-2">
-                                                <div
-                                                    className="bg-primary-600 h-2 rounded-full transition-all duration-300"
-                                                    style={{ width: `${uploadProgress}%` }}
-                                                ></div>
-                                            </div>
-                                            <p className="text-xs text-center text-gray-500">{uploadProgress}%</p>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* File List */}
-                                {uploadedFiles.length > 0 && (
-                                    <div className="space-y-2">
-                                        {uploadedFiles.map((file, index) => (
-                                            <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-xl border border-gray-200">
-                                                <div className="flex items-center gap-3 overflow-hidden flex-1">
-                                                    <div className="p-2 bg-white rounded-lg border border-gray-100 text-blue-600">
-                                                        <FiFile className="h-4 w-4" />
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="text-sm font-medium text-gray-700 truncate">{file.fileName}</p>
-                                                        <p className="text-xs text-gray-500">
-                                                            {(file.fileSize / 1024 / 1024).toFixed(2)} MB
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleRemoveFile(index)}
-                                                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                                >
-                                                    <FiX className="h-4 w-4" />
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                        <JobAttachments
+                            uploadingFiles={uploadingFiles}
+                            uploadProgress={uploadProgress}
+                            uploadedFiles={uploadedFiles}
+                            handleFileUpload={handleFileUpload}
+                            handleRemoveFile={handleRemoveFile}
+                        />
 
                         {/* Action Buttons */}
                         <div className="flex flex-col sm:flex-row gap-4 pt-4">
