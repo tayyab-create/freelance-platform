@@ -183,7 +183,13 @@ const MessagesEnhanced = () => {
       const msgConvId = message.conversation?._id || message.conversation;
 
       if (msgConvId && msgConvId.toString() === selectedConversation._id.toString()) {
-        setMessages(prev => [...prev, message]);
+        setMessages(prev => {
+          // Prevent duplicates
+          if (prev.some(m => m._id === message._id)) {
+            return prev;
+          }
+          return [...prev, message];
+        });
 
         // ... sound and notification logic ...
       }
