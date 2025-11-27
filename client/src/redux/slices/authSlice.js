@@ -59,7 +59,8 @@ export const getMe = createAsyncThunk(
       return response.data;
     } catch (error) {
       const message = error.response?.data?.message || 'Failed to get user';
-      return rejectWithValue(message);
+      const statusCode = error.response?.status;
+      return rejectWithValue({ message, statusCode });
     }
   }
 );
@@ -130,14 +131,18 @@ const authSlice = createSlice({
         // Update localStorage with the latest user data
         localStorage.setItem('user', JSON.stringify(action.payload.user));
       })
-      .addCase(getMe.rejected, (state) => {
+      .addCase(getMe.rejected, (state, action) => {
         state.loading = false;
-        state.isAuthenticated = false;
-        state.user = null;
-        state.token = null;
-        // Clear localStorage on rejection
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        // Only clear auth if it's an unauthorized error (401)
+        // This prevents logout on network errors or server downtime
+        if (action.payload?.statusCode === 401) {
+          state.isAuthenticated = false;
+          state.user = null;
+          state.token = null;
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+        }
+        // For other errors (network issues, 500, etc.), keep the user logged in
       })
       // Logout
       .addCase(logout.fulfilled, (state) => {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Routes, Route, Link, useLocation } from "react-router-dom";
+import { Routes, Route, Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { getMe } from "./redux/slices/authSlice";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -9,9 +9,10 @@ import WorkerProfile from "./pages/worker/WorkerProfile";
 import CompanyProfile from "./pages/company/CompanyProfile";
 import Submissions from "./pages/company/Submissions";
 import MyReviews from "./pages/worker/MyReviews";
+import CompanyReviews from "./pages/company/MyReviews";
 import {
-  FiArrowRight, FiCheckCircle, FiSearch, FiShield, FiUsers, FiStar, FiTrendingUp, FiMenu,
-  FiCode, FiPenTool, FiMonitor, FiSmartphone, FiDatabase, FiLayout, FiDollarSign, FiGlobe, FiBriefcase, FiPieChart
+  FiArrowRight, FiCheckCircle, FiShield, FiUsers, FiStar, FiTrendingUp, FiMenu,
+  FiCode, FiPenTool, FiMonitor, FiSmartphone, FiDatabase, FiLayout, FiGlobe, FiPieChart
 } from 'react-icons/fi';
 
 import Messages from "./pages/shared/Messages";
@@ -549,6 +550,14 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={["company"]}>
               <Submissions />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/company/reviews"
+          element={
+            <ProtectedRoute allowedRoles={["company"]}>
+              <CompanyReviews />
             </ProtectedRoute>
           }
         />

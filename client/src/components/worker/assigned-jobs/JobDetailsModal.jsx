@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiMessageCircle, FiPlay, FiUpload, FiBriefcase, FiClock, FiDollarSign, FiCalendar, FiFile, FiAward, FiCheckCircle, FiAlertCircle, FiPaperclip, FiDownload, FiAlertTriangle, FiStar } from 'react-icons/fi';
-import { Modal, RevisionTimeline, StatusBadge, ReviewCard } from '../../shared';
+import { Modal, RevisionTimeline, StatusBadge, ReviewCard, ExpandableText } from '../../shared';
 import { workerAPI } from '../../../services/api';
 
 const JobDetailsModal = ({
@@ -220,7 +220,11 @@ const JobDetailsModal = ({
                                 <div>
                                     <label className="block text-sm font-bold text-orange-900 mb-2">Client's Feedback:</label>
                                     <div className="bg-white p-4 rounded-xl border border-orange-200">
-                                        <p className="text-gray-700 whitespace-pre-line break-words">{submissionDetails.revisionFeedback}</p>
+                                        <ExpandableText
+                                            text={submissionDetails.revisionFeedback}
+                                            limit={200}
+                                            textClassName="text-gray-700"
+                                        />
                                     </div>
                                 </div>
 
@@ -290,9 +294,11 @@ const JobDetailsModal = ({
                         Job Description
                     </h3>
                     <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
-                        <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
-                            {selectedJob.description}
-                        </p>
+                        <ExpandableText
+                            text={selectedJob.description}
+                            limit={300}
+                            textClassName="text-gray-600 text-sm leading-relaxed"
+                        />
                     </div>
                 </div>
 
@@ -386,9 +392,11 @@ const JobDetailsModal = ({
                                 <div>
                                     <label className="block text-sm font-bold text-gray-700 mb-2">Description</label>
                                     <div className="bg-white p-4 rounded-xl border border-gray-200">
-                                        <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
-                                            {submissionDetails.description}
-                                        </p>
+                                        <ExpandableText
+                                            text={submissionDetails.description}
+                                            limit={200}
+                                            textClassName="text-gray-600 text-sm leading-relaxed"
+                                        />
                                     </div>
                                 </div>
 
@@ -521,9 +529,11 @@ const JobDetailsModal = ({
                                         <div>
                                             <label className="block text-sm font-bold text-gray-700 mb-2">Description</label>
                                             <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                                                <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
-                                                    {submissionDetails.description}
-                                                </p>
+                                                <ExpandableText
+                                                    text={submissionDetails.description}
+                                                    limit={200}
+                                                    textClassName="text-gray-600 text-sm leading-relaxed"
+                                                />
                                             </div>
                                         </div>
 
@@ -664,6 +674,7 @@ const JobDetailsModal = ({
                                             review={reviewsData.workerReview}
                                             reviewerType="worker"
                                             reviewerName="You"
+                                            reviewerLogo={reviewsData.workerReview.workerInfo?.profilePicture}
                                         />
                                     ) : (
                                         <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6 text-center">

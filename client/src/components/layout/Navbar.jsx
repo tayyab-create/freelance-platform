@@ -32,9 +32,9 @@ const Sidebar = () => {
       { name: 'Browse Jobs', path: '/worker/jobs', icon: FiBriefcase },
       { name: 'My Applications', path: '/worker/applications', icon: FiFileText },
       { name: 'Assigned Jobs', path: '/worker/jobs/assigned', icon: FiCheckCircle },
-      { name: 'Reviews', path: '/worker/reviews', icon: FiStar },
       { name: 'Profile', path: '/worker/profile', icon: FiUser },
       { name: 'Messages', path: '/messages', icon: FiMessageCircle },
+      { name: 'Reviews', path: '/worker/reviews', icon: FiStar },
     ],
     company: [
       { name: 'Dashboard', path: '/company/dashboard', icon: FiHome },
@@ -42,7 +42,8 @@ const Sidebar = () => {
       { name: 'My Jobs', path: '/company/jobs', icon: FiBriefcase },
       { name: 'Submissions', path: '/company/submissions', icon: FiFileText },
       { name: 'Profile', path: '/company/profile', icon: FiUser },
-      { name: 'Messages', path: '/messages', icon: FiMessageCircle },
+      { name: 'Messages', path: '/company/messages', icon: FiMessageCircle },
+      { name: 'Reviews', path: '/company/reviews', icon: FiStar }
     ],
     admin: [
       { name: 'Dashboard', path: '/admin/dashboard', icon: FiHome },

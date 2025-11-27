@@ -1,5 +1,66 @@
 const { Job, Review, WorkerProfile } = require('../../models');
 
+// @desc    Get reviews for the company
+// @route   GET /api/companies/reviews
+// @access  Private/Company
+exports.getMyReviews = async (req, res) => {
+    try {
+        // Find all reviews where the company is being reviewed by workers
+        const reviews = await Review.find({
+            company: req.user._id,
+            reviewedBy: 'worker'
+        })
+        .populate('job', 'title')
+        .populate('worker', 'email')
+        .sort({ createdAt: -1 });
+
+        // Get worker profiles for all reviews
+        const workerIds = reviews.map(review => review.worker?._id).filter(Boolean);
+        const workerProfiles = await WorkerProfile.find({ user: { $in: workerIds } });
+
+        // Create a map of worker profiles by user ID
+        const profileMap = {};
+        workerProfiles.forEach(profile => {
+            profileMap[profile.user.toString()] = profile;
+        });
+
+        // Transform the data to match the frontend expectations
+        const transformedReviews = reviews.map(review => {
+            const workerId = review.worker?._id?.toString();
+            const workerProfile = profileMap[workerId];
+
+            return {
+                _id: review._id,
+                rating: review.rating,
+                reviewText: review.reviewText,
+                wouldHireAgain: review.wouldHireAgain,
+                tags: review.tags,
+                createdAt: review.createdAt,
+                job: {
+                    title: review.job?.title
+                },
+                workerInfo: {
+                    fullName: workerProfile?.fullName || 'Freelancer',
+                    profilePicture: workerProfile?.profilePicture || null
+                }
+            };
+        });
+
+        res.status(200).json({
+            success: true,
+            count: transformedReviews.length,
+            data: transformedReviews
+        });
+    } catch (error) {
+        console.error('Get Company Reviews Error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error',
+            error: error.message
+        });
+    }
+};
+
 // @desc    Review a worker
 // @route   POST /api/companies/review/:workerId
 // @access  Private/Company

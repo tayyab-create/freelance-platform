@@ -4,9 +4,11 @@
   "description": "Freelance platform backend",
   "main": "server.js",
   "scripts": {
+    "predev": "node scripts/kill-port.js 5000",
     "dev": "concurrently \"nodemon server.js\" \"npm run client\"",
     "client": "cd ../client && npm start",
     "start": "node server.js",
+    "kill-port": "node scripts/kill-port.js",
     "seed": "node scripts/seedData.js",
     "seed:huge": "node scripts/seedHugeData.js"
   },

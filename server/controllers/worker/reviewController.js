@@ -1,12 +1,16 @@
-const { Review, Job, CompanyProfile } = require('../../models');
+const { Review, Job, CompanyProfile, WorkerProfile } = require('../../models');
 const { getCompanyProfile } = require('../../utils/companyInfoHelper');
 
-// @desc    Get worker's reviews
+// @desc    Get worker's reviews (reviews received from companies)
 // @route   GET /api/workers/reviews
 // @access  Private/Worker
 exports.getMyReviews = async (req, res) => {
     try {
-        const reviews = await Review.find({ worker: req.user._id })
+        // Only get reviews where companies reviewed the worker, not reviews the worker wrote about companies
+        const reviews = await Review.find({
+            worker: req.user._id,
+            reviewedBy: 'company'
+        })
             .populate('job', 'title')
             .populate({
                 path: 'company',
@@ -125,9 +129,12 @@ exports.getJobReviews = async (req, res) => {
             }).populate('company', 'email')
         ]);
 
-        // Get company profile info if reviews exist
+        // Get company profile info and worker profile info if reviews exist
         let workerReviewData = null;
         let companyReviewData = null;
+
+        // Get worker profile for displaying worker's own avatar
+        const workerProfile = await WorkerProfile.findOne({ user: req.user._id });
 
         if (workerReview) {
             const reviewObj = workerReview.toObject();
@@ -139,6 +146,13 @@ exports.getJobReviews = async (req, res) => {
                         logo: companyProfile.logo
                     };
                 }
+            }
+            // Add worker's own profile info for their review
+            if (workerProfile) {
+                reviewObj.workerInfo = {
+                    fullName: workerProfile.fullName,
+                    profilePicture: workerProfile.profilePicture
+                };
             }
             workerReviewData = reviewObj;
         }

@@ -100,6 +100,7 @@ export const companyAPI = {
     requestRevision: (jobId, data) => api.put(`/companies/jobs/${jobId}/revision`, data),
     reviewWorker: (workerId, data) => api.post(`/companies/review/${workerId}`, data),
     getDashboard: () => api.get('/companies/dashboard'),
+    getMyReviews: () => api.get('/companies/reviews'),
 };
 
 // Job APIs

@@ -1,5 +1,6 @@
 import React from 'react';
 import { FiStar, FiUser, FiBriefcase } from 'react-icons/fi';
+import ExpandableText from './ExpandableText';
 
 const ReviewCard = ({ review, reviewerType, reviewerName, reviewerLogo }) => {
     if (!review) return null;
@@ -77,9 +78,11 @@ const ReviewCard = ({ review, reviewerType, reviewerName, reviewerLogo }) => {
 
             {/* Review Text */}
             <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
-                    {review.reviewText}
-                </p>
+                <ExpandableText
+                    text={review.reviewText}
+                    limit={150}
+                    textClassName="text-sm text-gray-700 leading-relaxed"
+                />
             </div>
 
             {/* Additional Tags/Skills (for company reviews) */}

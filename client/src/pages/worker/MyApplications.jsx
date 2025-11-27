@@ -370,8 +370,12 @@ const MyApplications = () => {
                   <FiFileText className="h-5 w-5 text-gray-400" />
                   Job Description
                 </h3>
-                <div className="prose prose-sm max-w-none text-gray-600 bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
-                  <p className="whitespace-pre-line leading-relaxed">{selectedApplication.job?.description}</p>
+                <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
+                  <ExpandableText
+                    text={selectedApplication.job?.description}
+                    limit={300}
+                    textClassName="text-gray-600 leading-relaxed"
+                  />
                 </div>
               </div>
 

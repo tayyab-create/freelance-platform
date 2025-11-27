@@ -209,6 +209,34 @@ app.use((req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-server.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-});
+// Function to try starting server on a port
+const startServer = (port, maxRetries = 5) => {
+  server.listen(port, () => {
+    console.log(`Server running in ${process.env.NODE_ENV} mode on port ${port}`);
+    console.log(`API available at http://localhost:${port}/api`);
+  });
+
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.log(`Port ${port} is already in use`);
+
+      if (maxRetries > 0) {
+        const nextPort = port + 1;
+        console.log(`Trying port ${nextPort}...`);
+        server.close();
+        setTimeout(() => {
+          startServer(nextPort, maxRetries - 1);
+        }, 1000);
+      } else {
+        console.error('Could not find an available port. Please free up port 5000 or set PORT in .env');
+        process.exit(1);
+      }
+    } else {
+      console.error('Server error:', err);
+      process.exit(1);
+    }
+  });
+};
+
+// Start the server
+startServer(PORT);
