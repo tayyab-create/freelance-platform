@@ -1,6 +1,6 @@
 import React from 'react';
 import { FiMessageCircle, FiPlay, FiUpload, FiBriefcase, FiClock, FiDollarSign, FiCalendar, FiFile, FiAward, FiCheckCircle, FiAlertCircle, FiPaperclip, FiDownload, FiAlertTriangle } from 'react-icons/fi';
-import { Modal, RevisionTimeline } from '../../shared';
+import { Modal, RevisionTimeline, StatusBadge } from '../../shared';
 
 const JobDetailsModal = ({
     isOpen,
@@ -88,7 +88,10 @@ const JobDetailsModal = ({
                         )}
                     </div>
                     <div className="flex-1">
-                        <h2 className="text-2xl font-black text-gray-900 mb-2 leading-tight">{selectedJob.title}</h2>
+                        <div className="flex justify-between items-start gap-4">
+                            <h2 className="text-2xl font-black text-gray-900 mb-2 leading-tight">{selectedJob.title}</h2>
+                            <StatusBadge status={selectedJob.status} />
+                        </div>
                         <div className="flex flex-wrap items-center gap-3 text-gray-600">
                             <span className="font-bold text-gray-900">{selectedJob.companyInfo?.companyName}</span>
                             {selectedJob.companyInfo?.tagline && (
@@ -130,27 +133,27 @@ const JobDetailsModal = ({
                         <p className="text-lg font-bold text-gray-900 capitalize">{selectedJob.experienceLevel}</p>
                     </div>
                     <div className={`p-4 rounded-2xl border ${isDeadlineApproaching(selectedJob.deadline) && (selectedJob.status === 'assigned' || selectedJob.status === 'in-progress')
-                            ? 'bg-red-50 border-red-100'
-                            : 'bg-gray-50 border-gray-100'
+                        ? 'bg-red-50 border-red-100'
+                        : 'bg-gray-50 border-gray-100'
                         }`}>
                         <div className={`flex items-center gap-2 mb-1 ${isDeadlineApproaching(selectedJob.deadline) && (selectedJob.status === 'assigned' || selectedJob.status === 'in-progress')
-                                ? 'text-red-600'
-                                : 'text-gray-500'
+                            ? 'text-red-600'
+                            : 'text-gray-500'
                             }`}>
                             <FiCalendar className="h-4 w-4" />
                             <span className="text-xs font-bold uppercase tracking-wider">Deadline</span>
                         </div>
                         <div className="flex flex-col">
                             <p className={`text-lg font-bold ${isDeadlineApproaching(selectedJob.deadline) && (selectedJob.status === 'assigned' || selectedJob.status === 'in-progress')
-                                    ? 'text-red-700'
-                                    : 'text-gray-900'
+                                ? 'text-red-700'
+                                : 'text-gray-900'
                                 }`}>
                                 {selectedJob.deadline ? new Date(selectedJob.deadline).toLocaleDateString() : 'None'}
                             </p>
                             {selectedJob.deadline && (
                                 <p className={`text-xs ${isDeadlineApproaching(selectedJob.deadline) && (selectedJob.status === 'assigned' || selectedJob.status === 'in-progress')
-                                        ? 'text-red-600'
-                                        : 'text-gray-500'
+                                    ? 'text-red-600'
+                                    : 'text-gray-500'
                                     }`}>
                                     {new Date(selectedJob.deadline).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </p>

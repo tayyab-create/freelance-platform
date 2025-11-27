@@ -226,28 +226,42 @@ const MyJobs = () => {
                                     </div>
 
                                     {/* Stats Grid */}
-                                    <div className="grid grid-cols-2 gap-3 mb-4">
-                                        <div className="p-3 bg-gray-50 rounded-xl group-hover:bg-white group-hover:shadow-sm group-hover:border-gray-100 border border-transparent transition-all">
-                                            <div className="text-xs text-gray-500 mb-1 font-medium">Applications</div>
-                                            <div className="flex items-center gap-2">
-                                                <FiUsers className="w-4 h-4 text-blue-500" />
-                                                <span className="text-lg font-bold text-gray-900">{job.totalApplications || 0}</span>
+                                    <div className="grid grid-cols-3 gap-2 mb-4">
+                                        <div className="p-2 bg-gray-50 rounded-xl group-hover:bg-white group-hover:shadow-sm group-hover:border-gray-100 border border-transparent transition-all">
+                                            <div className="text-[10px] text-gray-500 mb-1 font-medium uppercase tracking-wide">Applications</div>
+                                            <div className="flex items-center gap-1.5">
+                                                <FiUsers className="w-3.5 h-3.5 text-blue-500" />
+                                                <span className="text-sm font-bold text-gray-900">{job.totalApplications || 0}</span>
                                             </div>
                                         </div>
-                                        <div className="p-3 bg-gray-50 rounded-xl group-hover:bg-white group-hover:shadow-sm group-hover:border-gray-100 border border-transparent transition-all">
-                                            <div className="text-xs text-gray-500 mb-1 font-medium">Budget</div>
-                                            <div className="flex items-center gap-2">
-                                                <FiDollarSign className="w-4 h-4 text-emerald-500" />
-                                                <span className="text-lg font-bold text-gray-900">${job.salary}</span>
+                                        <div className="p-2 bg-gray-50 rounded-xl group-hover:bg-white group-hover:shadow-sm group-hover:border-gray-100 border border-transparent transition-all">
+                                            <div className="text-[10px] text-gray-500 mb-1 font-medium uppercase tracking-wide">Budget</div>
+                                            <div className="flex items-center gap-1.5">
+                                                <FiDollarSign className="w-3.5 h-3.5 text-emerald-500" />
+                                                <span className="text-sm font-bold text-gray-900">${job.salary}</span>
+                                            </div>
+                                        </div>
+                                        <div className="p-2 bg-gray-50 rounded-xl group-hover:bg-white group-hover:shadow-sm group-hover:border-gray-100 border border-transparent transition-all">
+                                            <div className="text-[10px] text-gray-500 mb-1 font-medium uppercase tracking-wide">Duration</div>
+                                            <div className="flex items-center gap-1.5">
+                                                <FiClock className="w-3.5 h-3.5 text-orange-500" />
+                                                <span className="text-sm font-bold text-gray-900 truncate" title={job.duration}>{job.duration || 'N/A'}</span>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Footer */}
                                     <div className="flex items-center justify-between pt-4 border-t border-gray-50">
-                                        <div className="flex items-center gap-1.5 text-xs font-medium text-gray-400">
-                                            <FiClock className="w-3.5 h-3.5" />
-                                            {new Date(job.createdAt).toLocaleDateString()}
+                                        <div className="flex gap-2 text-xs font-medium text-gray-400">
+                                            <FiClock className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                                            {job.deadline ? (
+                                                <div className="flex flex-col">
+                                                    <span className="text-gray-900 font-bold">Due {new Date(job.deadline).toLocaleDateString()}</span>
+                                                    <span className="text-[10px] text-gray-500">{new Date(job.deadline).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                </div>
+                                            ) : (
+                                                <span>Posted {new Date(job.createdAt).toLocaleDateString()}</span>
+                                            )}
                                         </div>
                                         <span className="text-xs font-bold text-gray-300 uppercase tracking-wider group-hover:text-primary-500 transition-colors">
                                             {job.salaryType}

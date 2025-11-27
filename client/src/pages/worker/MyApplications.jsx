@@ -3,7 +3,7 @@ import { workerAPI, messageAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { FiBriefcase, FiClock, FiCheckCircle, FiX, FiAlertCircle, FiFileText, FiAward, FiDollarSign, FiMessageCircle, FiPaperclip, FiFile } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import { PageHeader, EmptyState, SkeletonLoader, Modal } from '../../components/shared';
+import { PageHeader, EmptyState, SkeletonLoader, Modal, StatusBadge } from '../../components/shared';
 import ApplicationCard from '../../components/shared/ApplicationCard';
 import { useNavigate } from 'react-router-dom';
 
@@ -47,12 +47,6 @@ const MyApplications = () => {
 
   const handleStartConversation = async (application) => {
     if (!application?.job?.companyInfo?._id) {
-      // Fallback if companyInfo is not populated correctly but company ID is in job.company
-      // Note: In getMyApplications, job.company is populated with email/role, and companyInfo is added separately.
-      // Let's check if we can use job.company._id if companyInfo._id is missing.
-      // However, the backend populates companyInfo based on job.company._id.
-      // If companyInfo is missing, it might mean the company profile doesn't exist or something went wrong.
-      // But let's try to use the raw company ID if available.
       const companyId = application?.job?.company?._id;
       if (!companyId) {
         toast.error('Company information not available.');
@@ -74,13 +68,9 @@ const MyApplications = () => {
       }
     }
 
-    // If companyInfo is available (which it should be based on our controller logic)
     try {
-      // The backend controller for getOrCreateConversation expects { otherUserId, jobId }
-      // It seems I used createConversation in the previous turn which might be wrong if the API is getOrCreateConversation.
-      // Let's check the API service definition if possible, but based on JobDetails.jsx it was getOrCreateConversation.
       const response = await messageAPI.getOrCreateConversation({
-        otherUserId: application.job.company._id, // Use the user ID from the company object
+        otherUserId: application.job.company._id,
         jobId: application.job._id
       });
       toast.success('Opening conversation...');
@@ -95,7 +85,6 @@ const MyApplications = () => {
     ? applications
     : applications.filter(app => app.status === filter);
 
-  // Count applications by status
   const counts = {
     all: applications.length,
     pending: applications.filter(a => a.status === 'pending').length,
@@ -281,7 +270,10 @@ const MyApplications = () => {
                   )}
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-2xl font-black text-gray-900 mb-2 leading-tight">{selectedApplication.job?.title}</h2>
+                  <div className="flex justify-between items-start gap-4">
+                    <h2 className="text-2xl font-black text-gray-900 mb-2 leading-tight">{selectedApplication.job?.title}</h2>
+                    <StatusBadge status={selectedApplication.status} />
+                  </div>
                   <div className="flex flex-wrap items-center gap-3 text-gray-600">
                     <span className="font-bold text-gray-900">{selectedApplication.job?.companyInfo?.companyName}</span>
                     {selectedApplication.job?.companyInfo?.tagline && (
@@ -299,7 +291,7 @@ const MyApplications = () => {
               </div>
 
               {/* Key Stats Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
                   <div className="flex items-center gap-2 text-gray-500 mb-1">
                     <FiDollarSign className="h-4 w-4" />
@@ -328,6 +320,22 @@ const MyApplications = () => {
                     <span className="text-xs font-bold uppercase tracking-wider">Level</span>
                   </div>
                   <p className="text-lg font-bold text-gray-900 capitalize">{selectedApplication.job?.experienceLevel}</p>
+                </div>
+                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                  <div className="flex items-center gap-2 text-gray-500 mb-1">
+                    <FiClock className="h-4 w-4" />
+                    <span className="text-xs font-bold uppercase tracking-wider">Deadline</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <p className="text-lg font-bold text-gray-900">
+                      {selectedApplication.job?.deadline ? new Date(selectedApplication.job.deadline).toLocaleDateString() : 'None'}
+                    </p>
+                    {selectedApplication.job?.deadline && (
+                      <p className="text-xs text-gray-500">
+                        {new Date(selectedApplication.job.deadline).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -407,6 +415,44 @@ const MyApplications = () => {
                   Your Proposal
                 </h3>
                 <p className="text-blue-800 whitespace-pre-wrap leading-relaxed">{selectedApplication.proposal}</p>
+
+                {/* Proposal Attachments */}
+                {selectedApplication.attachments && selectedApplication.attachments.length > 0 && (
+                  <div className="mt-6 pt-6 border-t border-blue-200/50">
+                    <h4 className="text-sm font-bold text-blue-900 mb-3 flex items-center gap-2">
+                      <FiPaperclip className="h-4 w-4" />
+                      Attachments
+                    </h4>
+                    <div className="space-y-2">
+                      {selectedApplication.attachments.map((file, index) => (
+                        <a
+                          key={index}
+                          href={file.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 p-3 bg-white/60 hover:bg-white rounded-xl border border-blue-100 hover:border-blue-300 transition-all group"
+                        >
+                          <div className="p-2 bg-blue-100 rounded-lg text-blue-600 group-hover:bg-blue-200 transition-colors">
+                            <FiFile className="w-4 h-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-blue-900 truncate">
+                              {file.fileName}
+                            </p>
+                            <p className="text-xs text-blue-600">
+                              {file.fileSize ? `${(file.fileSize / 1024 / 1024).toFixed(2)} MB` : 'Download'}
+                            </p>
+                          </div>
+                          <div className="text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
