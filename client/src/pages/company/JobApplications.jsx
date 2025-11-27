@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { companyAPI, jobAPI, messageAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { toast } from '../../utils/toast';
-import { SkeletonLoader, PageHeader, ConfirmationModal, SuccessAnimation } from '../../components/shared';
+import { SkeletonLoader, PageHeader, ConfirmationModal, SuccessAnimation, ReviewCard } from '../../components/shared';
+import { FiStar, FiBriefcase } from 'react-icons/fi';
 import SubmissionDetailsModal from '../../components/company/SubmissionDetailsModal';
 import { getCompanyBreadcrumbs } from '../../utils/breadcrumbUtils';
 
@@ -12,6 +13,7 @@ import JobDetailsCard from './job-applications/JobDetailsCard';
 import SubmissionCard from './job-applications/SubmissionCard';
 import ApplicationFilter from './job-applications/ApplicationFilter';
 import ApplicationList from './job-applications/ApplicationList';
+
 
 const JobApplications = () => {
     const { id } = useParams();
@@ -24,6 +26,7 @@ const JobApplications = () => {
     const [messagingWorker, setMessagingWorker] = useState(null);
     const [showSubmissionModal, setShowSubmissionModal] = useState(false);
     const [processingSubmission, setProcessingSubmission] = useState(null);
+    const [companyProfile, setCompanyProfile] = useState(null);
 
     // Filters
     const [filter, setFilter] = useState('all');
@@ -40,20 +43,29 @@ const JobApplications = () => {
 
     const fetchData = async () => {
         try {
-            const [jobResponse, applicationsResponse] = await Promise.all([
+            const [jobResponse, applicationsResponse, profileResponse] = await Promise.all([
                 jobAPI.getJobById(id),
                 companyAPI.getJobApplications(id),
+                companyAPI.getProfile()
             ]);
 
             const jobData = jobResponse.data.data;
             setJob(jobData);
             setApplications(applicationsResponse.data.data);
+            setCompanyProfile(profileResponse.data.data);
 
             // Fetch submissions for all statuses except pending
             if (jobData.status !== 'pending') {
                 try {
                     const submissionsResponse = await companyAPI.getSubmissions();
-                    const jobSubmission = submissionsResponse.data.data.find(s => s.job._id === id);
+                    let jobSubmission = submissionsResponse.data.data.find(s => s.job._id === id);
+
+                    // If job is completed, fetch full submission details to get reviews
+                    if (jobData.status === 'completed' && jobSubmission) {
+                        const fullSubmissionResponse = await companyAPI.getSubmissionById(jobSubmission._id);
+                        jobSubmission = fullSubmissionResponse.data.data;
+                    }
+
                     setSubmission(jobSubmission);
                 } catch (err) {
                     console.error("Failed to fetch submissions", err);
@@ -173,12 +185,77 @@ const JobApplications = () => {
                 {/* Job Details Card */}
                 <JobDetailsCard job={job} applicationCount={applications.length} />
 
+                <div className="my-8 border-t border-gray-200" />
+
                 {/* Submission Section - Show only when submission exists */}
                 {submission && (
-                    <SubmissionCard
-                        submission={submission}
-                        onViewSubmission={() => navigate(`/company/submissions/${submission._id}`)}
-                    />
+                    <>
+                        <SubmissionCard
+                            submission={submission}
+                            onViewSubmission={() => navigate(`/company/submissions/${submission._id}`)}
+                        />
+                        <div className="my-8 border-t border-gray-200" />
+                    </>
+                )}
+
+                {/* Reviews Section - For Completed Jobs */}
+                {job?.status === 'completed' && submission && (
+                    <div className="mb-8 border-b border-gray-200 pb-8">
+                        <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                            <FiStar className="text-yellow-500 fill-yellow-500" />
+                            Project Reviews
+                        </h2>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Company Review */}
+                            {submission.companyReview ? (
+                                <ReviewCard
+                                    review={submission.companyReview}
+                                    reviewerType="company"
+                                    reviewerName={companyProfile?.companyName || "You"}
+                                    reviewerLogo={companyProfile?.logo}
+                                    projectTitle={job.title}
+                                />
+                            ) : (
+                                <div className="bg-orange-50 border border-orange-200 rounded-2xl p-8 text-center">
+                                    <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-100 rounded-full mb-4">
+                                        <FiStar className="h-8 w-8 text-orange-500" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-gray-900 mb-2">Leave a Review</h3>
+                                    <p className="text-gray-600 mb-6">
+                                        Share your experience working with the freelancer.
+                                    </p>
+                                    <button
+                                        onClick={() => navigate(`/company/submissions/${submission._id}`)}
+                                        className="px-6 py-2.5 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition-colors shadow-lg shadow-orange-500/30"
+                                    >
+                                        Write Review
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Worker Review */}
+                            {submission.workerReview ? (
+                                <ReviewCard
+                                    review={submission.workerReview}
+                                    reviewerType="worker"
+                                    reviewerName={submission.workerInfo?.fullName || 'Freelancer'}
+                                    reviewerLogo={submission.workerInfo?.profilePicture}
+                                    projectTitle={job.title}
+                                />
+                            ) : (
+                                <div className="bg-gray-50 border border-gray-200 border-dashed rounded-2xl p-8 text-center">
+                                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+                                        <FiBriefcase className="h-8 w-8 text-gray-400" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-gray-900 mb-2">Waiting for Review</h3>
+                                    <p className="text-gray-500">
+                                        The freelancer hasn't submitted their review yet.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 )}
 
                 {/* Applications Section */}
@@ -201,6 +278,8 @@ const JobApplications = () => {
                     assigningTo={assigningTo}
                     searchQuery={searchQuery}
                 />
+
+
 
                 {/* Submission Details Modal */}
                 <SubmissionDetailsModal

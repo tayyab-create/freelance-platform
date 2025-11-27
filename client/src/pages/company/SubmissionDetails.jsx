@@ -23,7 +23,7 @@ import {
     FiStar,
     FiThumbsUp
 } from 'react-icons/fi';
-import { StatusBadge, Avatar, RevisionTimeline, PageHeader, SkeletonLoader, ConfirmationModal, SuccessAnimation } from '../../components/shared';
+import { StatusBadge, Avatar, RevisionTimeline, PageHeader, SkeletonLoader, ConfirmationModal, SuccessAnimation, ReviewCard } from '../../components/shared';
 import RequestRevisionModal from '../../components/company/RequestRevisionModal';
 import ReviewModal from '../../components/company/ReviewModal';
 import { companyAPI } from '../../services/api';
@@ -146,146 +146,7 @@ const SubmissionDetails = () => {
         }
     };
 
-    const ReviewCard = ({ review, title, isCompany = false }) => {
-        const [isExpanded, setIsExpanded] = useState(false);
 
-        if (!review) return null;
-
-        const isLongText = review.reviewText.length > 150;
-
-        // Determine styles based on rating for freelancer reviews
-        const getTheme = (rating) => {
-            if (isCompany) {
-                return {
-                    container: 'bg-white border-primary-100 shadow-sm',
-                    headerText: 'text-primary-600',
-                    star: 'text-yellow-400 fill-yellow-400',
-                    ratingText: 'text-gray-900',
-                    quote: 'text-gray-200'
-                };
-            }
-
-            if (rating >= 5) return {
-                container: 'bg-emerald-50 border-emerald-100',
-                headerText: 'text-emerald-700',
-                star: 'text-emerald-500 fill-emerald-500',
-                ratingText: 'text-emerald-700',
-                quote: 'text-emerald-200'
-            };
-            if (rating >= 4) return {
-                container: 'bg-blue-50 border-blue-100',
-                headerText: 'text-blue-700',
-                star: 'text-blue-500 fill-blue-500',
-                ratingText: 'text-blue-700',
-                quote: 'text-blue-200'
-            };
-            if (rating >= 3) return {
-                container: 'bg-amber-50 border-amber-100',
-                headerText: 'text-amber-700',
-                star: 'text-amber-500 fill-amber-500',
-                ratingText: 'text-amber-700',
-                quote: 'text-amber-200'
-            };
-            return {
-                container: 'bg-red-50 border-red-100',
-                headerText: 'text-red-700',
-                star: 'text-red-500 fill-red-500',
-                ratingText: 'text-red-700',
-                quote: 'text-red-200'
-            };
-        };
-
-        const theme = getTheme(review.rating);
-
-        return (
-            <div className={`relative overflow-hidden rounded-2xl border p-6 transition-all duration-300 hover:shadow-md group ${theme.container}`}>
-                {/* Decorative Background Elements */}
-                <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none">
-                    <FiStar className="w-32 h-32" />
-                </div>
-
-                {/* Header */}
-                <div className="relative z-10 flex items-start justify-between mb-6">
-                    <div>
-                        <h3 className={`text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-2 ${theme.headerText}`}>
-                            {isCompany ? <FiUser className="w-3 h-3" /> : <FiUser className="w-3 h-3" />}
-                            {title}
-                        </h3>
-                        <div className="flex items-center gap-2">
-                            <div className="flex gap-0.5">
-                                {[...Array(5)].map((_, i) => (
-                                    <FiStar
-                                        key={i}
-                                        className={`w-5 h-5 ${i < review.rating
-                                            ? `${theme.star} drop-shadow-sm`
-                                            : 'text-gray-300'
-                                            }`}
-                                    />
-                                ))}
-                            </div>
-                            <span className={`text-lg font-bold ${theme.ratingText}`}>
-                                {review.rating}.0
-                            </span>
-                        </div>
-                    </div>
-                    <div className="text-xs font-medium text-gray-400 bg-white/50 px-3 py-1 rounded-full border border-gray-100/50 backdrop-blur-sm">
-                        {new Date(review.createdAt).toLocaleDateString(undefined, {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                        })}
-                    </div>
-                </div>
-
-                {/* Content */}
-                <div className="relative z-10 mb-6">
-                    <div className="relative">
-                        <span className={`absolute -top-2 -left-2 text-4xl font-serif leading-none select-none ${theme.quote}`}>"</span>
-                        <div className="text-gray-600 leading-relaxed text-sm pl-4 relative z-10 italic">
-                            {isExpanded ? review.reviewText : (
-                                <>
-                                    {review.reviewText.slice(0, 150)}
-                                    {isLongText && '...'}
-                                </>
-                            )}
-                        </div>
-                        <span className={`absolute -bottom-4 right-0 text-4xl font-serif leading-none select-none ${theme.quote}`}>"</span>
-                    </div>
-                    {isLongText && (
-                        <button
-                            onClick={() => setIsExpanded(!isExpanded)}
-                            className={`mt-2 text-xs font-bold hover:underline flex items-center gap-1 pl-4 relative z-20 ${theme.headerText}`}
-                        >
-                            {isExpanded ? (
-                                <>Show Less <FiChevronUp /></>
-                            ) : (
-                                <>Read More <FiChevronDown /></>
-                            )}
-                        </button>
-                    )}
-                </div>
-
-                {/* Footer */}
-                <div className={`relative z-10 flex flex-wrap items-center gap-3 pt-4 border-t ${isCompany ? 'border-gray-50' : 'border-gray-900/5'}`}>
-                    {isCompany && review.wouldHireAgain && (
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-xs font-bold border border-green-100">
-                            <FiThumbsUp className="w-3.5 h-3.5" />
-                            Would Hire Again
-                        </div>
-                    )}
-
-                    {review.tags && review.tags.map((tag, index) => (
-                        <span
-                            key={index}
-                            className="px-3 py-1.5 bg-white/60 text-gray-600 text-xs font-medium rounded-lg capitalize border border-gray-100/50 shadow-sm"
-                        >
-                            {tag.replace('-', ' ')}
-                        </span>
-                    ))}
-                </div>
-            </div>
-        );
-    };
     if (loading) {
         return (
             <DashboardLayout>
@@ -603,8 +464,9 @@ const SubmissionDetails = () => {
                                 {submission.companyReview ? (
                                     <ReviewCard
                                         review={submission.companyReview}
-                                        title="Your Review"
-                                        isCompany={true}
+                                        reviewerType="company"
+                                        reviewerName="You"
+                                        projectTitle={submission.job?.title}
                                     />
                                 ) : (
                                     <div className="bg-gradient-to-br from-primary-600 to-primary-700 rounded-2xl p-8 text-white shadow-lg flex flex-col justify-center items-center text-center">
@@ -628,7 +490,10 @@ const SubmissionDetails = () => {
                                 {submission.workerReview ? (
                                     <ReviewCard
                                         review={submission.workerReview}
-                                        title="Freelancer's Review"
+                                        reviewerType="worker"
+                                        reviewerName={submission.workerInfo?.fullName || 'Freelancer'}
+                                        reviewerLogo={submission.workerInfo?.profilePicture}
+                                        projectTitle={submission.job?.title}
                                     />
                                 ) : (
                                     <div className="bg-gray-50 border border-gray-200 border-dashed rounded-2xl p-8 flex flex-col justify-center items-center text-center">

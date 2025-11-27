@@ -8,7 +8,9 @@ import {
     FiPaperclip,
     FiDownload,
     FiChevronDown,
-    FiChevronUp
+    FiChevronUp,
+    FiTag,
+    FiCheckCircle
 } from 'react-icons/fi';
 import { StatusBadge } from '../../../components/shared';
 
@@ -58,6 +60,8 @@ const JobDetailsCard = ({ job, applicationCount }) => {
                     </div>
                 </div>
             </div>
+
+
 
             <div className="grid grid-cols-2 md:grid-cols-5 gap-6 pt-8 border-t border-gray-100">
                 <div className="p-4 bg-gray-50 rounded-xl">
@@ -134,6 +138,51 @@ const JobDetailsCard = ({ job, applicationCount }) => {
                     <div className="text-lg font-bold text-gray-900">{applicationCount}</div>
                 </div>
             </div>
+
+            {/* Requirements & Skills */}
+            {(job.requirements?.length > 0 || job.tags?.length > 0) && (
+                <div className="mt-8 bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* Requirements - Takes up 2 cols */}
+                        {job.requirements?.length > 0 && (
+                            <div className="lg:col-span-2">
+                                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                    <FiCheckCircle className="w-4 h-4 text-primary-600" />
+                                    Requirements
+                                </h3>
+                                <ul className="space-y-3">
+                                    {job.requirements.map((req, index) => (
+                                        <li key={index} className="flex items-start gap-3 text-gray-700 text-sm group">
+                                            <span className="mt-2 w-1.5 h-1.5 rounded-full bg-primary-500 flex-shrink-0 group-hover:scale-125 transition-transform" />
+                                            <span className="leading-relaxed">{req}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
+                        {/* Skills - Takes up 1 col */}
+                        {job.tags?.length > 0 && (
+                            <div className="lg:col-span-1">
+                                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                    <FiTag className="w-4 h-4 text-blue-600" />
+                                    Skills & Tags
+                                </h3>
+                                <div className="flex flex-wrap gap-2">
+                                    {job.tags.map((tag, index) => (
+                                        <span
+                                            key={index}
+                                            className="px-3 py-1.5 bg-white text-gray-700 text-sm font-medium rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 hover:text-blue-600 transition-colors cursor-default"
+                                        >
+                                            {tag}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Attachments */}
             {job.attachments && job.attachments.length > 0 && (

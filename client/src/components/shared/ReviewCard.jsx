@@ -150,7 +150,7 @@ const ReviewCard = ({ review, reviewerType, reviewerName, reviewerLogo, projectT
 
             {/* Footer */}
             <div className="relative z-10 flex flex-wrap items-center gap-3 pt-4 border-t border-black/5">
-                {review.wouldHireAgain && (
+                {reviewerType === 'company' && review.wouldHireAgain && (
                     <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border ${theme.badge}`}>
                         <FiThumbsUp className="w-3.5 h-3.5" />
                         Would Hire Again
