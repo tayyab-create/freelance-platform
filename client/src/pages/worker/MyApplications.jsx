@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { workerAPI, messageAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
-import { FiBriefcase, FiClock, FiCheckCircle, FiX, FiAlertCircle, FiFileText, FiAward, FiDollarSign, FiMessageCircle } from 'react-icons/fi';
+import { FiBriefcase, FiClock, FiCheckCircle, FiX, FiAlertCircle, FiFileText, FiAward, FiDollarSign, FiMessageCircle, FiPaperclip, FiFile } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { PageHeader, EmptyState, SkeletonLoader, Modal } from '../../components/shared';
 import ApplicationCard from '../../components/shared/ApplicationCard';
@@ -357,6 +357,44 @@ const MyApplications = () => {
                       >
                         {tag}
                       </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Job Attachments */}
+              {selectedApplication.job?.attachments && selectedApplication.job.attachments.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <FiPaperclip className="h-5 w-5 text-gray-400" />
+                    Job Attachments
+                  </h3>
+                  <div className="space-y-2">
+                    {selectedApplication.job.attachments.map((file, index) => (
+                      <a
+                        key={index}
+                        href={file.fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-4 bg-white hover:bg-indigo-50 rounded-xl border border-gray-200 hover:border-indigo-300 transition-all group"
+                      >
+                        <div className="p-2.5 bg-indigo-50 rounded-lg text-indigo-600 group-hover:bg-indigo-100 transition-colors">
+                          <FiFile className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate group-hover:text-indigo-600 transition-colors">
+                            {file.fileName}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {file.fileSize ? `${(file.fileSize / 1024 / 1024).toFixed(2)} MB` : 'Download'}
+                          </p>
+                        </div>
+                        <div className="text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </div>
+                      </a>
                     ))}
                   </div>
                 </div>
