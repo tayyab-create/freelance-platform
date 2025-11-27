@@ -1,4 +1,5 @@
 const { Job, Review, WorkerProfile } = require('../../models');
+const notificationService = require('../../services/notificationService');
 
 // @desc    Get reviews for the company
 // @route   GET /api/companies/reviews
@@ -136,6 +137,20 @@ exports.reviewWorker = async (req, res) => {
             .populate("job", "title")
             .populate("company", "email")
             .populate("worker", "email");
+
+        // Notify worker about new review
+        await notificationService.createNotification(
+            req.params.workerId,
+            'review',
+            'New Review Received',
+            `You received a ${rating}-star review for "${job.title}"`,
+            `/worker/reviews`,
+            {
+                jobId: jobId,
+                reviewId: review._id,
+                rating: rating
+            }
+        );
 
         res.status(201).json({
             success: true,

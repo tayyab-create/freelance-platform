@@ -1,4 +1,5 @@
 const { User, WorkerProfile, CompanyProfile, Job, Application } = require('../models');
+const notificationService = require('../services/notificationService');
 
 // @desc    Get admin dashboard statistics
 // @route   GET /api/admin/dashboard
@@ -237,6 +238,19 @@ exports.approveUser = async (req, res) => {
     user.status = 'approved';
     await user.save();
 
+    // Notify user about approval
+    const dashboardLink = user.role === 'worker' ? '/worker/dashboard' : '/company/dashboard';
+    await notificationService.createNotification(
+      user._id,
+      'system',
+      'Account Approved!',
+      `Congratulations! Your ${user.role} account has been approved. You can now access all platform features.`,
+      dashboardLink,
+      {
+        status: 'approved'
+      }
+    );
+
     res.status(200).json({
       success: true,
       message: 'User approved successfully',
@@ -268,6 +282,18 @@ exports.rejectUser = async (req, res) => {
 
     user.status = 'rejected';
     await user.save();
+
+    // Notify user about rejection
+    await notificationService.createNotification(
+      user._id,
+      'system',
+      'Account Application Update',
+      `We regret to inform you that your ${user.role} account application has not been approved at this time. Please contact support if you have questions.`,
+      '/login',
+      {
+        status: 'rejected'
+      }
+    );
 
     res.status(200).json({
       success: true,

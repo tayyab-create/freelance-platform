@@ -1,5 +1,6 @@
 const { Job, Submission, Review } = require('../../models');
 const { getCompanyProfile } = require('../../utils/companyInfoHelper');
+const notificationService = require('../../services/notificationService');
 
 // @desc    Get assigned jobs
 // @route   GET /api/workers/jobs/assigned
@@ -117,6 +118,21 @@ exports.submitWork = async (req, res) => {
                 job.status = 'submitted';
                 await job.save();
 
+                // Notify company about revision submission
+                await notificationService.createNotification(
+                    job.company,
+                    'submission',
+                    'Revision Submitted',
+                    `Revised work has been submitted for "${job.title}". Please review the changes.`,
+                    `/company/submissions`,
+                    {
+                        jobId: job._id,
+                        submissionId: existingSubmission._id,
+                        workerId: req.user._id,
+                        isRevision: true
+                    }
+                );
+
                 return res.status(200).json({
                     success: true,
                     message: 'Revision submitted successfully',
@@ -144,6 +160,20 @@ exports.submitWork = async (req, res) => {
         // Update job status
         job.status = 'submitted';
         await job.save();
+
+        // Notify company about submission
+        await notificationService.createNotification(
+            job.company,
+            'submission',
+            'Work Submitted',
+            `New work has been submitted for "${job.title}". Please review and provide feedback.`,
+            `/company/submissions`,
+            {
+                jobId: job._id,
+                submissionId: submission._id,
+                workerId: req.user._id
+            }
+        );
 
         res.status(201).json({
             success: true,
@@ -238,6 +268,20 @@ exports.startJob = async (req, res) => {
         // Update job status to in-progress
         job.status = 'in-progress';
         await job.save();
+
+        // Notify company that worker has started
+        await notificationService.createNotification(
+            job.company,
+            'job',
+            'Work Started',
+            `Work has started on "${job.title}"`,
+            `/company/jobs/${job._id}`,
+            {
+                jobId: job._id,
+                workerId: req.user._id,
+                status: 'in-progress'
+            }
+        );
 
         res.status(200).json({
             success: true,

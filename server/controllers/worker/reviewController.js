@@ -1,5 +1,6 @@
 const { Review, Job, CompanyProfile, WorkerProfile } = require('../../models');
 const { getCompanyProfile } = require('../../utils/companyInfoHelper');
+const notificationService = require('../../services/notificationService');
 
 // @desc    Get worker's reviews (reviews received from companies)
 // @route   GET /api/workers/reviews
@@ -254,6 +255,20 @@ exports.reviewCompany = async (req, res) => {
             {
                 averageRating: parseFloat(avgRating.toFixed(2)),
                 totalReviews: allReviews.length,
+            }
+        );
+
+        // Notify company about new review
+        await notificationService.createNotification(
+            req.params.companyId,
+            'review',
+            'New Review Received',
+            `You received a ${rating}-star review for "${job.title}"`,
+            `/company/reviews`,
+            {
+                jobId: jobId,
+                reviewId: review._id,
+                rating: rating
             }
         );
 

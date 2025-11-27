@@ -1,5 +1,6 @@
 const { Application, Job } = require('../../models');
 const { enrichWithCompanyInfo, getCompanyProfile } = require('../../utils/companyInfoHelper');
+const notificationService = require('../../services/notificationService');
 
 // @desc    Apply for a job
 // @route   POST /api/workers/apply/:jobId
@@ -53,6 +54,20 @@ exports.applyForJob = async (req, res) => {
         // Update job's total applications count
         job.totalApplications += 1;
         await job.save();
+
+        // Send notification to company
+        await notificationService.createNotification(
+            job.company,
+            'application',
+            'New Job Application',
+            `You received a new application for "${job.title}"`,
+            `/company/jobs/${job._id}/applications`,
+            {
+                jobId: job._id,
+                applicationId: application._id,
+                workerId: req.user._id
+            }
+        );
 
         res.status(201).json({
             success: true,

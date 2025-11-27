@@ -1,5 +1,6 @@
 const { Job, Submission, Review, CompanyProfile } = require('../../models');
 const { getWorkerProfile } = require('../../utils/workerInfoHelper');
+const notificationService = require('../../services/notificationService');
 
 // @desc    Get submissions for company's jobs
 // @route   GET /api/companies/submissions
@@ -116,6 +117,20 @@ exports.requestRevision = async (req, res) => {
         job.deadline = newDeadline;
         await job.save();
 
+        // Notify worker about revision request
+        await notificationService.createNotification(
+            job.assignedWorker,
+            'submission',
+            'Revision Requested',
+            `Revision has been requested for "${job.title}". Please check the feedback and resubmit by the new deadline.`,
+            `/worker/submission/${job._id}`,
+            {
+                jobId: job._id,
+                submissionId: submission._id,
+                revisionDeadline: newDeadline
+            }
+        );
+
         res.status(200).json({
             success: true,
             message: "Revision requested successfully",
@@ -169,6 +184,19 @@ exports.completeJob = async (req, res) => {
         await CompanyProfile.findOneAndUpdate(
             { user: req.user._id },
             { $inc: { totalJobsCompleted: 1 } }
+        );
+
+        // Notify worker about job completion
+        await notificationService.createNotification(
+            job.assignedWorker,
+            'submission',
+            'Work Approved!',
+            `Congratulations! Your work for "${job.title}" has been approved and the job is now complete. You can now submit a review.`,
+            `/worker/jobs/${job._id}/reviews`,
+            {
+                jobId: job._id,
+                status: 'completed'
+            }
         );
 
         res.status(200).json({

@@ -1,5 +1,6 @@
 const { Job, Application } = require('../../models');
 const { enrichWithWorkerInfo } = require('../../utils/workerInfoHelper');
+const notificationService = require('../../services/notificationService');
 
 // @desc    Get applications for a specific job
 // @route   GET /api/companies/jobs/:jobId/applications
@@ -81,11 +82,46 @@ exports.assignJob = async (req, res) => {
             respondedAt: Date.now(),
         });
 
-        // Reject other applications
+        // Send acceptance notification to selected worker
+        await notificationService.createNotification(
+            workerId,
+            'application',
+            'Application Accepted!',
+            `Congratulations! Your application for "${job.title}" has been accepted. You can now start working on this project.`,
+            `/worker/jobs/${job._id}`,
+            {
+                jobId: job._id,
+                applicationId: applicationId,
+                status: 'accepted'
+            }
+        );
+
+        // Reject other applications and notify rejected workers
+        const rejectedApplications = await Application.find({
+            job: req.params.jobId,
+            _id: { $ne: applicationId }
+        });
+
         await Application.updateMany(
             { job: req.params.jobId, _id: { $ne: applicationId } },
             { status: "rejected", respondedAt: Date.now() }
         );
+
+        // Send rejection notifications
+        for (const rejectedApp of rejectedApplications) {
+            await notificationService.createNotification(
+                rejectedApp.worker,
+                'application',
+                'Application Update',
+                `Thank you for your interest in "${job.title}". Unfortunately, we've decided to move forward with another candidate.`,
+                `/worker/applications`,
+                {
+                    jobId: job._id,
+                    applicationId: rejectedApp._id,
+                    status: 'rejected'
+                }
+            );
+        }
 
         res.status(200).json({
             success: true,
