@@ -38,6 +38,7 @@ exports.getSubmissions = async (req, res) => {
                         job: submission.job._id,
                         worker: submission.worker._id,
                         company: req.user._id,
+                        reviewedBy: 'company'
                     });
                 }
 

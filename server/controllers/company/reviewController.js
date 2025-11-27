@@ -92,10 +92,11 @@ exports.reviewWorker = async (req, res) => {
             });
         }
 
-        // Check if review already exists
+        // Check if review already exists (only check for company's review of worker)
         const existingReview = await Review.findOne({
             job: jobId,
             worker: req.params.workerId,
+            reviewedBy: 'company'
         });
 
         if (existingReview) {

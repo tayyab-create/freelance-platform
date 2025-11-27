@@ -49,8 +49,8 @@ const JobApplications = () => {
             setJob(jobData);
             setApplications(applicationsResponse.data.data);
 
-            // If job is assigned or completed, fetch submissions to check for any work
-            if (jobData.status === 'assigned' || jobData.status === 'completed') {
+            // Fetch submissions for all statuses except pending
+            if (jobData.status !== 'pending') {
                 try {
                     const submissionsResponse = await companyAPI.getSubmissions();
                     const jobSubmission = submissionsResponse.data.data.find(s => s.job._id === id);
@@ -173,11 +173,13 @@ const JobApplications = () => {
                 {/* Job Details Card */}
                 <JobDetailsCard job={job} applicationCount={applications.length} />
 
-                {/* Submission Section */}
-                <SubmissionCard
-                    submission={submission}
-                    onViewSubmission={() => setShowSubmissionModal(true)}
-                />
+                {/* Submission Section - Show only when submission exists */}
+                {submission && (
+                    <SubmissionCard
+                        submission={submission}
+                        onViewSubmission={() => setShowSubmissionModal(true)}
+                    />
+                )}
 
                 {/* Applications Section */}
                 <div className="mb-6">
