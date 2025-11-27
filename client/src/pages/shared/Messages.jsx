@@ -14,6 +14,8 @@ import {
 import { toast } from 'react-toastify';
 import Spinner from '../../components/common/Spinner';
 import { useSelector } from 'react-redux';
+import { PageHeader } from '../../components/shared';
+import { getBreadcrumbs } from '../../utils/breadcrumbUtils';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -47,7 +49,7 @@ const Messages = () => {
         });
       }
     }
-  }, [id]); // Only depend on id, not conversations
+  }, [id, conversations]); // Depend on both id and conversations
 
   useEffect(() => {
     fetchConversations();
@@ -238,7 +240,12 @@ const Messages = () => {
 
   return (
     <DashboardLayout>
-      <div className="h-[calc(100vh-120px)] flex">
+      <div className="mb-6">
+        <PageHeader
+          breadcrumbs={getBreadcrumbs(currentUser?.role, 'messages')}
+        />
+      </div>
+      <div className="h-[calc(100vh-200px)] flex">
         {/* Conversations Sidebar */}
         <div className="w-full md:w-96 border-r border-gray-200 bg-white flex flex-col">
           {/* Sidebar Header */}
