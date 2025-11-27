@@ -11,9 +11,9 @@ exports.getMyReviews = async (req, res) => {
             company: req.user._id,
             reviewedBy: 'worker'
         })
-        .populate('job', 'title')
-        .populate('worker', 'email')
-        .sort({ createdAt: -1 });
+            .populate('job', 'title')
+            .populate('worker', 'email')
+            .sort({ createdAt: -1 });
 
         // Get worker profiles for all reviews
         const workerIds = reviews.map(review => review.worker?._id).filter(Boolean);
@@ -119,9 +119,16 @@ exports.reviewWorker = async (req, res) => {
         });
 
         // Update worker's average rating
-        const allReviews = await Review.find({ worker: req.params.workerId });
-        const avgRating =
-            allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
+        // Only count reviews where companies reviewed the worker
+        const allReviews = await Review.find({
+            worker: req.params.workerId,
+            reviewedBy: 'company'
+        });
+
+        // Calculate average rating, handling case where there are no reviews yet
+        const avgRating = allReviews.length > 0
+            ? allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length
+            : 0;
 
         await WorkerProfile.findOneAndUpdate(
             { user: req.params.workerId },

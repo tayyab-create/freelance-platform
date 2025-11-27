@@ -16,8 +16,11 @@ exports.getProfile = async (req, res) => {
             });
         }
 
-        // 2️⃣ Fetch all reviews for this worker
-        const reviews = await Review.find({ worker: req.user._id })
+        // 2️⃣ Fetch all reviews for this worker (only company reviews of worker)
+        const reviews = await Review.find({
+            worker: req.user._id,
+            reviewedBy: 'company'
+        })
             .populate("job", "title")
             .populate("company", "email")
             .sort({ createdAt: -1 });

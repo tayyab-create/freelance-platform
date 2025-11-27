@@ -56,7 +56,10 @@ exports.getMyReviews = async (req, res) => {
 // @access  Public
 exports.getWorkerReviews = async (req, res) => {
     try {
-        const reviews = await Review.find({ worker: req.params.workerId })
+        const reviews = await Review.find({
+            worker: req.params.workerId,
+            reviewedBy: 'company'
+        })
             .populate('job', 'title')
             .populate({
                 path: 'company',
@@ -247,8 +250,11 @@ exports.reviewCompany = async (req, res) => {
 
         // Update company's average rating
         const allReviews = await Review.find({ company: req.params.companyId, reviewedBy: 'worker' });
-        const avgRating =
-            allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
+
+        // Calculate average rating, handling case where there are no reviews yet
+        const avgRating = allReviews.length > 0
+            ? allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length
+            : 0;
 
         await CompanyProfile.findOneAndUpdate(
             { user: req.params.companyId },

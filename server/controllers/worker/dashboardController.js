@@ -94,7 +94,10 @@ exports.getDashboard = async (req, res) => {
             recentActivities.push({ id: job._id, action: `Completed project: ${job.title}`, time: job.completedDate, type: 'job_completed' });
         });
 
-        const recentReviews = await Review.find({ worker: req.user._id }).sort('-createdAt').limit(3).populate('company', 'email');
+        const recentReviews = await Review.find({
+            worker: req.user._id,
+            reviewedBy: 'company'
+        }).sort('-createdAt').limit(3).populate('company', 'email');
         for (const review of recentReviews) {
             let companyName = 'Client';
             if (review.company) {
