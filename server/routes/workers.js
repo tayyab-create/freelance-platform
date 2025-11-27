@@ -31,6 +31,7 @@ router.get('/applications', applicationController.getMyApplications);
 
 // Job routes
 router.get('/jobs/assigned', checkApproval, jobController.getAssignedJobs);
+router.get('/jobs/assigned/:jobId', checkApproval, jobController.getAssignedJobById);
 router.put('/jobs/:jobId/start', checkApproval, jobController.startJob);
 router.post('/submit/:jobId', checkApproval, jobController.submitWork);
 router.get('/submission/:jobId', checkApproval, jobController.getSubmission);

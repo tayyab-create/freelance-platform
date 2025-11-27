@@ -27,12 +27,14 @@ import WorkerDashboard from "./pages/worker/WorkerDashboard";
 import BrowseJobs from "./pages/worker/BrowseJobs";
 import SavedSearches from "./pages/worker/SavedSearches";
 import JobDetails from "./pages/worker/JobDetails";
+import AssignedJobDetails from "./pages/worker/AssignedJobDetails";
 
 // Company Pages
 import CompanyDashboard from "./pages/company/CompanyDashboard";
 import PostJob from "./pages/company/PostJob";
 import MyJobs from "./pages/company/MyJobs";
 import JobApplications from "./pages/company/JobApplications";
+import SubmissionDetails from "./pages/company/SubmissionDetails";
 
 // Admin Pages
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -554,6 +556,14 @@ function App() {
           }
         />
         <Route
+          path="/company/submissions/:submissionId"
+          element={
+            <ProtectedRoute allowedRoles={["company"]}>
+              <SubmissionDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/company/reviews"
           element={
             <ProtectedRoute allowedRoles={["company"]}>
@@ -607,6 +617,14 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={["worker"]}>
               <AssignedJobs />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/worker/jobs/assigned/:jobId"
+          element={
+            <ProtectedRoute allowedRoles={["worker"]}>
+              <AssignedJobDetails />
             </ProtectedRoute>
           }
         />

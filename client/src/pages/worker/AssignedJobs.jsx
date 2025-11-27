@@ -142,22 +142,8 @@ const AssignedJobs = () => {
     }
   };
 
-  const handleViewDetails = async (job) => {
-    setSelectedJob(job);
-    setShowDetailsModal(true);
-
-    // If job is submitted, revision-requested, or completed, fetch submission details
-    if (job.status === 'submitted' || job.status === 'revision-requested' || job.status === 'completed') {
-      setLoadingSubmission(true);
-      try {
-        const response = await workerAPI.getSubmission(job._id);
-        setSubmissionDetails(response.data.data);
-      } catch (error) {
-        toast.error('Failed to load submission details');
-      } finally {
-        setLoadingSubmission(false);
-      }
-    }
+  const handleViewDetails = (job) => {
+    navigate(`/worker/jobs/assigned/${job._id}`);
   };
 
   const handleCloseDetailsModal = () => {

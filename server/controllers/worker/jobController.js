@@ -61,6 +61,65 @@ exports.getAssignedJobs = async (req, res) => {
     }
 };
 
+// @desc    Get assigned job by ID
+// @route   GET /api/workers/jobs/assigned/:jobId
+// @access  Private/Worker
+exports.getAssignedJobById = async (req, res) => {
+    try {
+        const jobId = req.params.jobId;
+
+        const job = await Job.findOne({
+            _id: jobId,
+            assignedWorker: req.user._id
+        }).populate('company', 'email');
+
+        if (!job) {
+            return res.status(404).json({
+                success: false,
+                message: 'Job not found or not assigned to you'
+            });
+        }
+
+        const jobObj = job.toObject();
+
+        // Get company profile
+        if (jobObj.company) {
+            const companyProfile = await getCompanyProfile(jobObj.company._id);
+            if (companyProfile) {
+                jobObj.companyInfo = {
+                    companyName: companyProfile.companyName,
+                    logo: companyProfile.logo,
+                    tagline: companyProfile.tagline
+                };
+            }
+        }
+
+        // Get client rating if job is completed
+        if (jobObj.status === 'completed') {
+            const review = await Review.findOne({
+                job: jobObj._id,
+                reviewedBy: 'company'
+            }).select('rating');
+
+            if (review) {
+                jobObj.clientRating = review.rating;
+            }
+        }
+
+        res.status(200).json({
+            success: true,
+            data: jobObj
+        });
+    } catch (error) {
+        console.error('Get Assigned Job By ID Error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error',
+            error: error.message
+        });
+    }
+};
+
 // @desc    Submit work for a job
 // @route   POST /api/workers/submit/:jobId
 // @access  Private/Worker

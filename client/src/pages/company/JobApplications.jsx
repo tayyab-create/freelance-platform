@@ -177,7 +177,7 @@ const JobApplications = () => {
                 {submission && (
                     <SubmissionCard
                         submission={submission}
-                        onViewSubmission={() => setShowSubmissionModal(true)}
+                        onViewSubmission={() => navigate(`/company/submissions/${submission._id}`)}
                     />
                 )}
 

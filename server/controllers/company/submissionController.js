@@ -63,6 +63,55 @@ exports.getSubmissions = async (req, res) => {
     }
 };
 
+// @desc    Get submission details by ID
+// @route   GET /api/companies/submissions/:submissionId
+// @access  Private/Company
+exports.getSubmissionById = async (req, res) => {
+    try {
+        const submission = await Submission.findOne({
+            _id: req.params.submissionId,
+            company: req.user._id
+        })
+            .populate("job", "title description salary status duration experienceLevel salaryType")
+            .populate("worker", "email");
+
+        if (!submission) {
+            return res.status(404).json({
+                success: false,
+                message: "Submission not found"
+            });
+        }
+
+        const submissionObj = submission.toObject();
+
+        // Get worker profile
+        if (submissionObj.worker) {
+            const workerProfile = await getWorkerProfile(submissionObj.worker._id);
+            if (workerProfile) {
+                submissionObj.workerInfo = {
+                    fullName: workerProfile.fullName,
+                    profilePicture: workerProfile.profilePicture,
+                    skills: workerProfile.skills,
+                    averageRating: workerProfile.averageRating,
+                    totalReviews: workerProfile.totalReviews,
+                };
+            }
+        }
+
+        res.status(200).json({
+            success: true,
+            data: submissionObj
+        });
+    } catch (error) {
+        console.error("Get Submission By ID Error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
+    }
+};
+
 // @desc    Request revision for a job submission
 // @route   PUT /api/companies/jobs/:jobId/revision
 // @access  Private/Company

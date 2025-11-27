@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { companyAPI } from '../../services/api';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Button from '../../components/common/Button';
 import {
@@ -22,6 +23,7 @@ import RequestRevisionModal from '../../components/company/RequestRevisionModal'
 import { SkeletonLoader, StatusBadge, Avatar, PageHeader, ConfirmationModal, SuccessAnimation } from '../../components/shared';
 
 const Submissions = () => {
+    const navigate = useNavigate();
     const [submissions, setSubmissions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all');
@@ -102,7 +104,7 @@ const Submissions = () => {
 
     const handleRequestRevision = (submission) => {
         setShowDetailsModal(false);
-        setSelectedSubmission(submission);
+        // setSelectedSubmission(submission);
         setShowRevisionModal(true);
     };
 
@@ -124,8 +126,11 @@ const Submissions = () => {
     };
 
     const handleViewDetails = (submission) => {
-        setSelectedSubmission(submission);
-        setShowDetailsModal(true);
+        navigate(`/company/submissions/${submission._id}`);
+        // Old modal approach - now using dedicated page
+        //
+        // setSelectedSubmission(submission);
+        // setShowDetailsModal(true);
     };
 
     const filteredSubmissions = submissions.filter(sub => {
