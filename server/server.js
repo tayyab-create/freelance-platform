@@ -6,7 +6,7 @@ const cors = require("cors");
 const path = require("path");
 const connectDB = require("./config/db");
 const jwt = require("jsonwebtoken");
-const { User } = require("./models");
+const { User, Message } = require("./models");
 
 // Load environment variables
 dotenv.config();
@@ -155,7 +155,22 @@ io.on("connection", (socket) => {
   });
 
   // Handle message read receipts
-  socket.on("message_read", (data) => {
+  socket.on("message_read", async (data) => {
+    // Update DB
+    try {
+      await Message.findByIdAndUpdate(data.messageId, {
+        $set: { isRead: true, readAt: new Date() },
+        $addToSet: {
+          readBy: {
+            userId: socket.userId,
+            readAt: new Date()
+          }
+        }
+      });
+    } catch (e) {
+      console.error("Error updating read receipt:", e);
+    }
+
     socket.to(data.conversationId).emit("message_read", {
       messageId: data.messageId,
       conversationId: data.conversationId,

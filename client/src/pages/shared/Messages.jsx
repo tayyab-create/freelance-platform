@@ -191,6 +191,14 @@ const MessagesEnhanced = () => {
           return [...prev, message];
         });
 
+        // Mark as read if we are the recipient and viewing the chat
+        if (message.sender._id !== currentUser?.id) {
+          socket.emit('message_read', {
+            messageId: message._id,
+            conversationId: selectedConversation._id,
+          });
+        }
+
         // ... sound and notification logic ...
       }
 
