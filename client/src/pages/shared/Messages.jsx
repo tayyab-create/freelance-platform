@@ -191,6 +191,8 @@ const MessagesEnhanced = () => {
           return [...prev, message];
         });
 
+
+
         // Mark as read if we are the recipient and viewing the chat
         if (message.sender._id !== currentUser?.id) {
           socket.emit('message_read', {
@@ -253,6 +255,24 @@ const MessagesEnhanced = () => {
       }
     };
 
+    // Listen for message updates (edits)
+    const handleMessageUpdated = ({ messageId, conversationId, content, edited, editedAt }) => {
+      if (conversationId === selectedConversation._id) {
+        setMessages(prev => prev.map(msg =>
+          msg._id === messageId
+            ? { ...msg, content, edited, editedAt }
+            : msg
+        ));
+      }
+    };
+
+    // Listen for message deletions
+    const handleMessageDeleted = ({ messageId, conversationId }) => {
+      if (conversationId === selectedConversation._id) {
+        setMessages(prev => prev.filter(msg => msg._id !== messageId));
+      }
+    };
+
     socket.on('new_message', handleNewMessage);
     socket.on('user_typing', handleUserTyping);
     socket.on('user_stop_typing', handleUserStopTyping);
@@ -260,6 +280,8 @@ const MessagesEnhanced = () => {
     socket.on('user_offline', handleUserOffline);
     socket.on('message_read', handleMessageRead);
     socket.on('message_reaction', handleMessageReaction);
+    socket.on('message_updated', handleMessageUpdated);
+    socket.on('message_deleted', handleMessageDeleted);
 
     return () => {
       socket.emit('leave_conversation', selectedConversation._id);
@@ -270,6 +292,8 @@ const MessagesEnhanced = () => {
       socket.off('user_offline', handleUserOffline);
       socket.off('message_read', handleMessageRead);
       socket.off('message_reaction', handleMessageReaction);
+      socket.off('message_updated', handleMessageUpdated);
+      socket.off('message_deleted', handleMessageDeleted);
     };
   }, [socket, selectedConversation, currentUser, soundEnabled, notificationsEnabled]);
 

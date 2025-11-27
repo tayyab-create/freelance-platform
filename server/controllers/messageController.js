@@ -378,6 +378,15 @@ exports.editMessage = async (req, res) => {
     message.edited = true;
     message.editedAt = new Date();
     await message.save();
+    // Emit socket event
+    const io = req.app.get('io');
+    io.to(conversationId).emit('message_updated', {
+      messageId: message._id,
+      conversationId: conversationId,
+      content: message.content,
+      edited: true,
+      editedAt: message.editedAt
+    });
 
     res.status(200).json({
       success: true,
@@ -440,6 +449,13 @@ exports.deleteMessage = async (req, res) => {
       conversation.lastMessageAt = latestMessage ? latestMessage.createdAt : conversation.lastMessageAt;
       await conversation.save();
     }
+
+    // Emit socket event
+    const io = req.app.get('io');
+    io.to(conversationId).emit('message_deleted', {
+      messageId: messageId,
+      conversationId: conversationId
+    });
 
     res.status(200).json({
       success: true,
