@@ -20,6 +20,10 @@ const workerProfileSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  location: {
+    type: String,
+    trim: true
+  },
   bio: {
     type: String,
     maxlength: 500

@@ -55,12 +55,7 @@ const companyProfileSchema = new mongoose.Schema({
     phone: String
   },
   taxDocuments: [{
-    documentName: String,
-    documentUrl: String,
-    uploadedAt: {
-      type: Date,
-      default: Date.now
-    }
+    type: String // File URLs
   }],
   totalJobsPosted: {
     type: Number,

@@ -12,6 +12,13 @@ const {
 // @access  Private
 exports.saveOnboardingProgress = async (req, res) => {
     try {
+        console.log('🔵 [BACKEND] Save onboarding progress request received');
+        console.log('🔵 [BACKEND] User ID:', req.user._id);
+        console.log('🔵 [BACKEND] Step:', req.body.step);
+        console.log('🔵 [BACKEND] Profile data:', req.body.profileData);
+        console.log('🔵 [BACKEND] Profile picture:', req.body.profileData?.profilePicture);
+        console.log('🔵 [BACKEND] Resume:', req.body.profileData?.resume);
+
         const user = await User.findById(req.user._id);
         const { step, profileData } = req.body;
 
@@ -26,15 +33,18 @@ exports.saveOnboardingProgress = async (req, res) => {
         if (step !== undefined) {
             user.onboardingStep = step;
             await user.save();
+            console.log('🔵 [BACKEND] Updated user onboarding step to:', step);
         }
 
         // Update profile based on role  
         const Profile = user.role === 'worker' ? WorkerProfile : CompanyProfile;
         let profile = await Profile.findOne({ user: user._id });
+        console.log('🔵 [BACKEND] Found profile:', profile ? 'Yes' : 'No');
 
         if (profile && profileData) {
             // Update profile fields
             Object.keys(profileData).forEach(key => {
+                console.log(`🔵 [BACKEND] Setting ${key}:`, profileData[key]);
                 profile[key] = profileData[key];
             });
 
@@ -44,7 +54,11 @@ exports.saveOnboardingProgress = async (req, res) => {
                 : calculateCompanyProfileCompleteness(profile);
 
             profile.profileCompleteness = completeness;
+            console.log('🔵 [BACKEND] Saving profile with completeness:', completeness);
+            console.log('🔵 [BACKEND] Profile picture in DB:', profile.profilePicture);
+            console.log('🔵 [BACKEND] Resume in DB:', profile.resume);
             await profile.save();
+            console.log('🔵 [BACKEND] Profile saved successfully');
         }
 
         res.status(200).json({
@@ -55,7 +69,7 @@ exports.saveOnboardingProgress = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Save Onboarding Progress Error:', error);
+        console.error('❌ [BACKEND] Save Onboarding Progress Error:', error);
         res.status(500).json({
             success: false,
             message: 'Error saving progress',

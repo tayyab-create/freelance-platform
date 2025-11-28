@@ -9,6 +9,7 @@ const FileUpload = ({
   maxSize = 10, // MB
   preview = false,
   currentImage = null,
+  value = null,
   label = "Upload File",
   children,
   showProgress = true,
@@ -28,8 +29,12 @@ const FileUpload = ({
   const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
-    setPreviewUrl(currentImage);
-  }, [currentImage]);
+    if (currentImage) {
+      setPreviewUrl(currentImage);
+    } else if (typeof value === 'string' && value.length > 0 && preview) {
+      setPreviewUrl(value);
+    }
+  }, [currentImage, value, preview]);
 
   const validateFile = (file) => {
     if (file.size > maxSize * 1024 * 1024) {
@@ -175,9 +180,8 @@ const FileUpload = ({
       {children ? (
         <div
           onClick={handleClick}
-          className={`cursor-pointer inline-block relative group ${
-            disabled ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
+          className={`cursor-pointer inline-block relative group ${disabled ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
         >
           {children}
         </div>
@@ -207,11 +211,10 @@ const FileUpload = ({
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                isDragging
-                  ? 'border-primary-500 bg-primary-50'
-                  : 'border-gray-300 hover:border-primary-400'
-              } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+              className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${isDragging
+                ? 'border-primary-500 bg-primary-50'
+                : 'border-gray-300 hover:border-primary-400'
+                } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
             >
               <FiUpload className="mx-auto h-12 w-12 text-gray-400 mb-3" />
               <p className="text-sm text-gray-600 mb-1">

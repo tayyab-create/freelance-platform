@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import Spinner from '../common/Spinner';
 
-const ProtectedRoute = ({ children, allowedRoles = [] }) => {
+const ProtectedRoute = ({ children, allowedRoles = [], allowPending = false }) => {
   const { isAuthenticated, user, loading } = useSelector((state) => state.auth);
 
   if (loading) {
@@ -23,8 +23,10 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   }
 
   // Check if user is approved (except for admin)
-  if (user?.role !== 'admin' && user?.status !== 'approved') {
-    return <Navigate to="/pending-approval" replace />;
+  // If allowPending is true, we skip this check (for onboarding pages)
+  if (user?.role !== 'admin' && user?.status !== 'approved' && !allowPending) {
+    // If user is pending, redirect to status page (which handles both pending and rejected)
+    return <Navigate to="/onboarding/status" replace />;
   }
 
   return children;

@@ -466,6 +466,15 @@ function App() {
         />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/register" element={<Register />} />
+        <Route
+          path="/onboarding/status"
+          element={
+            <ProtectedRoute allowedRoles={["worker", "company"]} allowPending={true}>
+              <OnboardingStatus />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/pending-approval" element={<PendingApproval />} />
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route
@@ -482,6 +491,14 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={["worker"]}>
               <WorkerDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/worker/onboarding"
+          element={
+            <ProtectedRoute allowedRoles={["worker"]} allowPending={true}>
+              <WorkerOnboarding />
             </ProtectedRoute>
           }
         />
@@ -523,6 +540,14 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={["company"]}>
               <CompanyDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/company/onboarding"
+          element={
+            <ProtectedRoute allowedRoles={["company"]} allowPending={true}>
+              <CompanyOnboarding />
             </ProtectedRoute>
           }
         />

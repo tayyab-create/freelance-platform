@@ -1,4 +1,4 @@
-import React from 'prop-types';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { User, Mail, Phone, MapPin, Briefcase, DollarSign, FileText, Check, AlertCircle } from 'lucide-react';
 

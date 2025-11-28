@@ -62,7 +62,17 @@ const Register = () => {
   useEffect(() => {
     if (isAuthenticated && user) {
       if (user.status === 'pending') {
-        navigate('/pending-approval');
+        // If onboarding is not complete, redirect to onboarding flow
+        if (!user.onboardingCompleted) {
+          if (user.role === 'worker') {
+            navigate('/worker/onboarding');
+          } else if (user.role === 'company') {
+            navigate('/company/onboarding');
+          }
+        } else {
+          // If onboarding is complete but status is pending, go to status page
+          navigate('/onboarding/status');
+        }
       } else if (user.status === 'approved') {
         if (user.role === 'worker') {
           navigate('/worker/dashboard');
@@ -71,6 +81,8 @@ const Register = () => {
         } else if (user.role === 'admin') {
           navigate('/admin/dashboard');
         }
+      } else if (user.status === 'rejected') {
+        navigate('/onboarding/status');
       }
     }
 
@@ -128,14 +140,14 @@ const Register = () => {
               type="button"
               onClick={() => handleRoleChange('worker')}
               className={`group relative p-4 rounded-xl border-2 text-left transition-all duration-300 flex flex-col gap-3 ${formData.role === 'worker'
-                  ? 'border-primary-600 bg-primary-50/50 ring-2 ring-primary-100 shadow-lg shadow-primary-500/10'
-                  : 'border-gray-100 hover:border-primary-200 hover:bg-gray-50 hover:shadow-md'
+                ? 'border-primary-600 bg-primary-50/50 ring-2 ring-primary-100 shadow-lg shadow-primary-500/10'
+                : 'border-gray-100 hover:border-primary-200 hover:bg-gray-50 hover:shadow-md'
                 }`}
             >
               <div
                 className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${formData.role === 'worker'
-                    ? 'bg-primary-600 text-white'
-                    : 'bg-gray-100 text-gray-500 group-hover:bg-primary-100 group-hover:text-primary-600'
+                  ? 'bg-primary-600 text-white'
+                  : 'bg-gray-100 text-gray-500 group-hover:bg-primary-100 group-hover:text-primary-600'
                   }`}
               >
                 <FiUser className="w-5 h-5" />
@@ -164,14 +176,14 @@ const Register = () => {
               type="button"
               onClick={() => handleRoleChange('company')}
               className={`group relative p-4 rounded-xl border-2 text-left transition-all duration-300 flex flex-col gap-3 ${formData.role === 'company'
-                  ? 'border-primary-600 bg-primary-50/50 ring-2 ring-primary-100 shadow-lg shadow-primary-500/10'
-                  : 'border-gray-100 hover:border-primary-200 hover:bg-gray-50 hover:shadow-md'
+                ? 'border-primary-600 bg-primary-50/50 ring-2 ring-primary-100 shadow-lg shadow-primary-500/10'
+                : 'border-gray-100 hover:border-primary-200 hover:bg-gray-50 hover:shadow-md'
                 }`}
             >
               <div
                 className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${formData.role === 'company'
-                    ? 'bg-primary-600 text-white'
-                    : 'bg-gray-100 text-gray-500 group-hover:bg-primary-100 group-hover:text-primary-600'
+                  ? 'bg-primary-600 text-white'
+                  : 'bg-gray-100 text-gray-500 group-hover:bg-primary-100 group-hover:text-primary-600'
                   }`}
               >
                 <FiBriefcase className="w-5 h-5" />

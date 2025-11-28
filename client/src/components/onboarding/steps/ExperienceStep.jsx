@@ -2,15 +2,16 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Input from '../../common/Input';
 import Textarea from '../../common/Textarea';
-import { Plus, X, Briefcase, Calendar, Building } from 'lucide-react';
+import DatePicker from '../../shared/DatePicker';
+import { Plus, X, Briefcase, Building } from 'lucide-react';
 
 const ExperienceStep = ({ formData, onChange, errors = {} }) => {
     const [showExperienceForm, setShowExperienceForm] = useState(false);
     const [currentExperience, setCurrentExperience] = useState({
         title: '',
         company: '',
-        startDate: '',
-        endDate: '',
+        startDate: null,
+        endDate: null,
         current: false,
         description: ''
     });
@@ -22,8 +23,8 @@ const ExperienceStep = ({ formData, onChange, errors = {} }) => {
             setCurrentExperience({
                 title: '',
                 company: '',
-                startDate: '',
-                endDate: '',
+                startDate: null,
+                endDate: null,
                 current: false,
                 description: ''
             });
@@ -79,7 +80,7 @@ const ExperienceStep = ({ formData, onChange, errors = {} }) => {
 
                 {/* Experience Form */}
                 {showExperienceForm && (
-                    <div className="card mb-4 space-y-4">
+                    <div className="card mb-4 space-y-4 animate-fadeIn">
                         <Input
                             label="Job Title"
                             name="title"
@@ -101,24 +102,21 @@ const ExperienceStep = ({ formData, onChange, errors = {} }) => {
                         />
 
                         <div className="grid grid-cols-2 gap-4">
-                            <Input
+                            <DatePicker
                                 label="Start Date"
-                                name="startDate"
-                                type="month"
                                 value={currentExperience.startDate}
-                                onChange={(e) => setCurrentExperience({ ...currentExperience, startDate: e.target.value })}
+                                onChange={(date) => setCurrentExperience({ ...currentExperience, startDate: date })}
                                 required
-                                icon={Calendar}
+                                maxDate={new Date()}
                             />
 
                             {!currentExperience.current && (
-                                <Input
+                                <DatePicker
                                     label="End Date"
-                                    name="endDate"
-                                    type="month"
                                     value={currentExperience.endDate}
-                                    onChange={(e) => setCurrentExperience({ ...currentExperience, endDate: e.target.value })}
-                                    icon={Calendar}
+                                    onChange={(date) => setCurrentExperience({ ...currentExperience, endDate: date })}
+                                    minDate={currentExperience.startDate}
+                                    disabled={!currentExperience.startDate}
                                 />
                             )}
                         </div>
@@ -128,7 +126,7 @@ const ExperienceStep = ({ formData, onChange, errors = {} }) => {
                                 type="checkbox"
                                 id="current"
                                 checked={currentExperience.current}
-                                onChange={(e) => setCurrentExperience({ ...currentExperience, current: e.target.checked, endDate: '' })}
+                                onChange={(e) => setCurrentExperience({ ...currentExperience, current: e.target.checked, endDate: null })}
                                 className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                             />
                             <label htmlFor="current" className="text-sm font-medium text-gray-700 cursor-pointer">
@@ -151,7 +149,8 @@ const ExperienceStep = ({ formData, onChange, errors = {} }) => {
                             <button
                                 type="button"
                                 onClick={handleAddExperience}
-                                className="btn-primary flex-1"
+                                disabled={!currentExperience.title || !currentExperience.company || !currentExperience.startDate}
+                                className="btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Save Experience
                             </button>
@@ -174,7 +173,7 @@ const ExperienceStep = ({ formData, onChange, errors = {} }) => {
                                 <button
                                     type="button"
                                     onClick={() => handleRemoveExperience(index)}
-                                    className="absolute top-4 right-4 text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors p-1 rounded-full hover:bg-red-50"
                                 >
                                     <X className="w-5 h-5" />
                                 </button>
@@ -224,7 +223,7 @@ const ExperienceStep = ({ formData, onChange, errors = {} }) => {
                 {formData.portfolioLinks && formData.portfolioLinks.length > 0 ? (
                     <div className="space-y-3">
                         {formData.portfolioLinks.map((link, index) => (
-                            <div key={index} className="flex gap-2">
+                            <div key={index} className="flex gap-2 items-start">
                                 <Input
                                     name={`portfolio-${index}`}
                                     type="url"
@@ -236,7 +235,7 @@ const ExperienceStep = ({ formData, onChange, errors = {} }) => {
                                 <button
                                     type="button"
                                     onClick={() => handleRemovePortfolioLink(index)}
-                                    className="btn-danger px-4"
+                                    className="mt-1 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                                 >
                                     <X className="w-5 h-5" />
                                 </button>

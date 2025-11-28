@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Input from '../../common/Input';
-import Textarea from '../../common/Textarea';
+import Input from '../../../common/Input';
+import Textarea from '../../../common/Textarea';
 import { Building, Globe, Briefcase, Users } from 'lucide-react';
 
 const CompanyInfoStep = ({ formData, onChange, errors = {} }) => {
@@ -80,10 +80,10 @@ const CompanyInfoStep = ({ formData, onChange, errors = {} }) => {
                             type="button"
                             onClick={() => onChange({ ...formData, companySize: size })}
                             className={`
-                p-3 rounded-xl border-2 transition-all duration-300 font-medium text-sm
+                p-3 rounded-lg border transition-colors duration-200 font-medium text-sm
                 ${formData.companySize === size
-                                    ? 'border-primary-500 bg-primary-50 text-primary-700 shadow-md'
-                                    : 'border-gray-200 bg-white hover:border-primary-300 text-gray-600'
+                                    ? 'border-primary-500 bg-primary-50 text-primary-700'
+                                    : 'border-gray-200 bg-white hover:border-gray-300 text-gray-600'
                                 }
               `}
                         >

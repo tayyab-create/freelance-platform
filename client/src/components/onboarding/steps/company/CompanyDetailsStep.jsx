@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Input from '../../common/Input';
+import Input from '../../../common/Input';
 import { User, Mail, Phone, MapPin, Linkedin, Facebook, Twitter, Instagram } from 'lucide-react';
 
 const CompanyDetailsStep = ({ formData, onChange, errors = {} }) => {

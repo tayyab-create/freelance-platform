@@ -24,7 +24,7 @@ const PersonalInfoStep = ({ formData, onChange, onFileUpload, errors = {} }) => 
                     name="profilePicture"
                     accept="image/*"
                     value={formData.profilePicture}
-                    onChange={handlePhotoUpload}
+                    onFileSelect={handlePhotoUpload}
                     helperText="Upload a professional photo (JPG, PNG - max 5MB)"
                     maxSize={5}
                     preview

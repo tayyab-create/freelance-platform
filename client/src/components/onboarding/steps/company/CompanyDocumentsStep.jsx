@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import FileUpload from '../../common/FileUpload';
-import Input from '../../common/Input';
+import FileUpload from '../../../common/FileUpload';
+import Input from '../../../common/Input';
 import { FileText, Image, Video, ShieldCheck } from 'lucide-react';
 
 const CompanyDocumentsStep = ({ formData, onChange, onFileUpload, errors = {} }) => {
@@ -28,7 +28,7 @@ const CompanyDocumentsStep = ({ formData, onChange, onFileUpload, errors = {} })
                     name="logo"
                     accept="image/*"
                     value={formData.logo}
-                    onChange={(file) => onFileUpload('logo', file)}
+                    onFileSelect={(file) => onFileUpload('logo', file)}
                     helperText="PNG, JPG, or SVG (max 2MB). Square ratio recommended."
                     maxSize={2}
                     preview
@@ -90,8 +90,8 @@ const CompanyDocumentsStep = ({ formData, onChange, onFileUpload, errors = {} })
                     </div>
                 </div>
 
-                <div className="card bg-blue-50 border-blue-100 mb-4 p-4">
-                    <p className="text-sm text-blue-800">
+                <div className="alert alert-info mb-4">
+                    <p className="text-sm">
                         <strong>Tip:</strong> Companies with video introductions get 40% more applications from top talent.
                     </p>
                 </div>
@@ -100,7 +100,7 @@ const CompanyDocumentsStep = ({ formData, onChange, onFileUpload, errors = {} })
                     name="companyVideo"
                     accept="video/*"
                     value={formData.companyVideo}
-                    onChange={(file) => onFileUpload('companyVideo', file)}
+                    onFileSelect={(file) => onFileUpload('companyVideo', file)}
                     helperText="MP4, MOV (max 50MB). Keep it under 2 minutes."
                     maxSize={50}
                 />
