@@ -7,6 +7,8 @@ const Submission = require('./Submission');
 const Review = require('./Review');
 const Conversation = require('./Conversation');
 const Message = require('./Message');
+const Notification = require('./Notification');
+const ApprovalHistory = require('./ApprovalHistory');
 
 module.exports = {
   User,
@@ -17,5 +19,7 @@ module.exports = {
   Submission,
   Review,
   Conversation,
-  Message
+  Message,
+  Notification,
+  ApprovalHistory
 };

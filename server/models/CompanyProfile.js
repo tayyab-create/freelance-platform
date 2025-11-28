@@ -79,6 +79,39 @@ const companyProfileSchema = new mongoose.Schema({
     default: 0,
     min: 0,
     max: 5
+  },
+  // Onboarding specific fields
+  registrationNumber: {
+    type: String,
+    trim: true
+  },
+  foundedYear: {
+    type: Number,
+    min: 1800,
+    max: new Date().getFullYear()
+  },
+  numberOfEmployees: {
+    type: Number,
+    min: 1
+  },
+  socialMedia: {
+    twitter: String,
+    facebook: String,
+    instagram: String
+  },
+  benefits: [{
+    type: String,
+    trim: true
+  }],
+  companyVideo: {
+    type: String, // Video file URL
+    default: ''
+  },
+  profileCompleteness: {
+    type: Number,
+    min: 0,
+    max: 100,
+    default: 0
   }
 }, {
   timestamps: true

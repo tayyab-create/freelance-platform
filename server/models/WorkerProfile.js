@@ -126,7 +126,42 @@ const workerProfileSchema = new mongoose.Schema({
       type: Date,
       default: Date.now
     }
-  }]
+  }],
+  // Onboarding specific fields
+  resume: {
+    type: String, // File URL
+    default: ''
+  },
+  portfolioLinks: [{
+    type: String,
+    trim: true
+  }],
+  videoIntroduction: {
+    type: String, // Video file URL
+    default: ''
+  },
+  preferredJobTypes: [{
+    type: String,
+    enum: ['full-time', 'part-time', 'contract', 'freelance']
+  }],
+  willingToRelocate: {
+    type: Boolean,
+    default: false
+  },
+  expectedSalary: {
+    min: Number,
+    max: Number,
+    currency: {
+      type: String,
+      default: 'USD'
+    }
+  },
+  profileCompleteness: {
+    type: Number,
+    min: 0,
+    max: 100,
+    default: 0
+  }
 }, {
   timestamps: true
 });
