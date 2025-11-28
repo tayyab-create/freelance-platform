@@ -4,7 +4,7 @@ import FileUpload from '../../../common/FileUpload';
 import Input from '../../../common/Input';
 import { FileText, Image, Video, ShieldCheck } from 'lucide-react';
 
-const CompanyDocumentsStep = ({ formData, onChange, onFileUpload, errors = {} }) => {
+const CompanyDocumentsStep = ({ formData, onChange, onFileUpload, errors = {}, isUploading = false, uploadProgress = 0 }) => {
     const handleRegistrationNumberChange = (e) => {
         onChange({ ...formData, registrationNumber: e.target.value });
     };
@@ -32,6 +32,8 @@ const CompanyDocumentsStep = ({ formData, onChange, onFileUpload, errors = {} })
                     helperText="PNG, JPG, or SVG (max 2MB). Square ratio recommended."
                     maxSize={2}
                     preview
+                    isUploading={isUploading}
+                    uploadProgress={uploadProgress}
                 />
                 {errors.logo && (
                     <p className="mt-2 text-sm text-red-600">{errors.logo}</p>
@@ -72,6 +74,8 @@ const CompanyDocumentsStep = ({ formData, onChange, onFileUpload, errors = {} })
                         onFileSelect={(files) => onFileUpload('taxDocuments', files)}
                         helperText="Upload official documents proving business registration (max 10MB each)"
                         maxSize={10}
+                        isUploading={isUploading}
+                        uploadProgress={uploadProgress}
                     />
                 </div>
             </div>
@@ -103,6 +107,8 @@ const CompanyDocumentsStep = ({ formData, onChange, onFileUpload, errors = {} })
                     onFileSelect={(file) => onFileUpload('companyVideo', file)}
                     helperText="MP4, MOV (max 50MB). Keep it under 2 minutes."
                     maxSize={50}
+                    isUploading={isUploading}
+                    uploadProgress={uploadProgress}
                 />
             </div>
         </div>

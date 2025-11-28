@@ -5,7 +5,7 @@ const fs = require('fs');
 // Ensure uploads directory structure exists
 const createUploadDirectories = () => {
   const baseDir = './uploads';
-  const subdirs = ['profiles', 'logos', 'submissions', 'documents', 'messages', 'general'];
+  const subdirs = ['profiles', 'logos', 'submissions', 'documents', 'messages', 'general', 'company-video', 'company-logo', 'tax-documents'];
 
   if (!fs.existsSync(baseDir)) {
     fs.mkdirSync(baseDir, { recursive: true });
@@ -78,18 +78,25 @@ const fileFilter = (req, file, cb) => {
     'text/css',
     'text/javascript',
     'application/json',
+    // Videos
+    'video/mp4',
+    'video/mpeg',
+    'video/quicktime',
+    'video/x-msvideo',
+    'video/x-ms-wmv',
+    'video/webm',
   ];
 
-  const allowedExtensions = /\.(jpg|jpeg|png|gif|webp|svg|pdf|doc|docx|xls|xlsx|ppt|pptx|txt|csv|zip|rar|7z|html|css|js|json)$/i;
+  const allowedExtensions = /\.(jpg|jpeg|png|gif|webp|svg|pdf|doc|docx|xls|xlsx|ppt|pptx|txt|csv|zip|rar|7z|html|css|js|json|mp4|mov|avi|wmv|webm|mpeg)$/i;
 
   // Check MIME type and extension
-  const mimeTypeAllowed = allowedMimeTypes.includes(file.mimetype) || file.mimetype.startsWith('image/');
+  const mimeTypeAllowed = allowedMimeTypes.includes(file.mimetype) || file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/');
   const extname = allowedExtensions.test(path.extname(file.originalname).toLowerCase());
 
   if (mimeTypeAllowed && extname) {
     return cb(null, true);
   } else {
-    cb(new Error(`Invalid file type "${file.mimetype}". Please upload a valid image, document, or archive file.`));
+    cb(new Error(`Invalid file type "${file.mimetype}". Please upload a valid image, document, video, or archive file.`));
   }
 };
 

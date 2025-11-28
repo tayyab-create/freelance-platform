@@ -96,8 +96,11 @@ const Register = () => {
   };
 
   const onSubmit = async (values) => {
+    console.log('onSubmit called with values:', values);
+
     // Check confirm password match
     if (values.password !== values.confirmPassword) {
+      console.log('Password mismatch!');
       return;
     }
 
@@ -113,25 +116,33 @@ const Register = () => {
       userData.companyName = values.companyName;
     }
 
+    console.log('Dispatching register with userData:', userData);
     dispatch(register(userData));
   };
 
-  const isFormValid =
-    !errors.email &&
-    !errors.password &&
-    !confirmPasswordError &&
-    (formData.role === 'worker' ? !errors.fullName : !errors.companyName) &&
-    formData.email &&
-    formData.password &&
-    formData.confirmPassword &&
-    (formData.role === 'worker' ? formData.fullName : formData.companyName);
+  const isFormValid = () => {
+    const hasNoErrors = !errors.email && !errors.password && !confirmPasswordError;
+    const hasAllFields = formData.email && formData.password && formData.confirmPassword;
+    const hasNameField = formData.role === 'worker' ? formData.fullName : formData.companyName;
+    const hasNoNameError = formData.role === 'worker' ? !errors.fullName : !errors.companyName;
+
+    const valid = hasNoErrors && hasAllFields && hasNameField && hasNoNameError;
+    console.log('Form validation:', { hasNoErrors, hasAllFields, hasNameField, hasNoNameError, valid });
+    return valid;
+  };
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    console.log('Form submitted, formData:', formData);
+    onSubmit(formData);
+  };
 
   return (
     <AuthLayout
       title="Create Account"
       subtitle="Join our platform and start your journey"
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleFormSubmit} className="space-y-6">
         {/* Role Selection */}
         <div>
           <label className="label mb-3">I want to join as a</label>
@@ -313,8 +324,9 @@ const Register = () => {
           variant="primary"
           fullWidth
           loading={loading}
-          disabled={loading || !isFormValid}
+          disabled={loading || !isFormValid()}
           className="shadow-xl shadow-primary-500/20"
+          onClick={() => console.log('Create Account button clicked!, disabled:', loading || !isFormValid())}
         >
           Create Account
         </Button>

@@ -131,16 +131,16 @@ const Login = () => {
             <span className="px-4 bg-white text-gray-500">New to the platform?</span>
           </div>
         </div>
-
-        <div className="text-center">
-          <Link
-            to="/register"
-            className="inline-flex items-center justify-center w-full px-4 py-3 border-2 border-gray-100 rounded-xl text-sm font-bold text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-200 transition-all duration-200"
-          >
-            Create an account
-          </Link>
-        </div>
       </form>
+
+      <div className="text-center">
+        <Link
+          to="/register"
+          className="inline-flex items-center justify-center w-full px-4 py-3 border-2 border-gray-100 rounded-xl text-sm font-bold text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-200 transition-all duration-200"
+        >
+          Create an account
+        </Link>
+      </div>
     </AuthLayout>
   );
 };
