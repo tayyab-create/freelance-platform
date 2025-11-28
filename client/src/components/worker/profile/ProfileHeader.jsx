@@ -1,9 +1,8 @@
 import React from 'react';
-import { FiEdit2, FiSave, FiX, FiUser, FiTrash2, FiPhone } from 'react-icons/fi';
+import { FiEdit2, FiSave, FiX, FiUser, FiTrash2, FiPhone, FiMail, FiMapPin, FiDollarSign } from 'react-icons/fi';
 import FileUpload from '../../common/FileUpload';
 import Spinner from '../../common/Spinner';
 import { ExpandableText } from '../../shared';
-
 import Textarea from '../../common/Textarea';
 
 const ProfileHeader = ({
@@ -20,6 +19,22 @@ const ProfileHeader = ({
     handleBasicInfoChange,
     uploadKey
 }) => {
+    const jobTypes = ['full-time', 'part-time', 'contract', 'freelance'];
+
+    const handleJobTypeChange = (type) => {
+        const currentTypes = basicInfo.preferredJobTypes || [];
+        const newTypes = currentTypes.includes(type)
+            ? currentTypes.filter(t => t !== type)
+            : [...currentTypes, type];
+
+        handleBasicInfoChange({
+            target: {
+                name: 'preferredJobTypes',
+                value: newTypes
+            }
+        });
+    };
+
     return (
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
             {/* Header Actions */}
@@ -158,13 +173,95 @@ const ProfileHeader = ({
                                         className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                     />
                                 </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                                    <input
+                                        type="text"
+                                        name="location"
+                                        value={basicInfo.location}
+                                        onChange={handleBasicInfoChange}
+                                        placeholder="City, Country"
+                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                    />
+                                </div>
+                                <div className="flex items-center pt-6">
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            name="willingToRelocate"
+                                            checked={basicInfo.willingToRelocate}
+                                            onChange={handleBasicInfoChange}
+                                            className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                                        />
+                                        <span className="text-sm font-medium text-gray-700">Willing to Relocate</span>
+                                    </label>
+                                </div>
+
+                                {/* Salary Expectations */}
+                                <div className="md:col-span-2 grid grid-cols-3 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Min Salary</label>
+                                        <input
+                                            type="number"
+                                            name="expectedSalaryMin"
+                                            value={basicInfo.expectedSalaryMin}
+                                            onChange={handleBasicInfoChange}
+                                            placeholder="Min"
+                                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Max Salary</label>
+                                        <input
+                                            type="number"
+                                            name="expectedSalaryMax"
+                                            value={basicInfo.expectedSalaryMax}
+                                            onChange={handleBasicInfoChange}
+                                            placeholder="Max"
+                                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+                                        <select
+                                            name="expectedSalaryCurrency"
+                                            value={basicInfo.expectedSalaryCurrency}
+                                            onChange={handleBasicInfoChange}
+                                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        >
+                                            <option value="USD">USD</option>
+                                            <option value="EUR">EUR</option>
+                                            <option value="GBP">GBP</option>
+                                            <option value="PKR">PKR</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {/* Job Types */}
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Job Types</label>
+                                    <div className="flex flex-wrap gap-4">
+                                        {jobTypes.map((type) => (
+                                            <label key={type} className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={basicInfo.preferredJobTypes?.includes(type)}
+                                                    onChange={() => handleJobTypeChange(type)}
+                                                    className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                                                />
+                                                <span className="text-sm text-gray-700 capitalize">{type}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+
                                 <div className="md:col-span-2">
                                     <Textarea
                                         label="Bio"
                                         name="bio"
                                         value={basicInfo.bio}
                                         onChange={handleBasicInfoChange}
-                                        placeholder="My BIO is the perfect and I need it alwayss!!"
+                                        placeholder="Tell us about yourself..."
                                         rows={3}
                                         maxLength={500}
                                         showCharacterCount
@@ -175,25 +272,56 @@ const ProfileHeader = ({
                             <div>
                                 <div className="flex flex-wrap items-center gap-3 mb-2">
                                     <h2 className="text-2xl font-bold text-gray-900">{profile?.fullName}</h2>
-                                    {profile?.availability === 'available' && (
-                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-full border border-emerald-200">
-                                            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500"></div>
-                                            Available for work
+                                    <span className={`px-3 py-1 rounded-full text-xs font-medium border ${profile?.availability === 'available'
+                                        ? 'bg-green-50 text-green-700 border-green-200'
+                                        : 'bg-gray-50 text-gray-600 border-gray-200'
+                                        }`}>
+                                        {profile?.availability === 'available' ? 'Available for Work' : 'Busy / Unavailable'}
+                                    </span>
+                                    {profile?.willingToRelocate && (
+                                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                                            Willing to Relocate
                                         </span>
                                     )}
                                 </div>
-                                {profile?.phone && (
-                                    <p className="text-gray-600 mb-3 flex items-center gap-2">
-                                        <FiPhone className="h-4 w-4" />
-                                        {profile.phone}
-                                    </p>
-                                )}
-                                {profile?.bio && (
-                                    <ExpandableText
-                                        text={profile.bio}
-                                        limit={200}
-                                        textClassName="text-gray-700 leading-relaxed"
-                                    />
+
+                                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-4">
+                                    {profile?.location && (
+                                        <div className="flex items-center gap-1">
+                                            <FiMapPin className="w-4 h-4" />
+                                            <span>{profile.location}</span>
+                                        </div>
+                                    )}
+                                    <div className="flex items-center gap-1">
+                                        <FiPhone className="w-4 h-4" />
+                                        <span>{profile?.phone || 'No phone added'}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <FiMail className="w-4 h-4" />
+                                        <span>{profile?.email}</span>
+                                    </div>
+                                    {profile?.expectedSalary && (profile.expectedSalary.min || profile.expectedSalary.max) && (
+                                        <div className="flex items-center gap-1">
+                                            <FiDollarSign className="w-4 h-4" />
+                                            <span>
+                                                {profile.expectedSalary.currency} {profile.expectedSalary.min?.toLocaleString()} - {profile.expectedSalary.max?.toLocaleString()}
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <p className="text-gray-600 leading-relaxed max-w-2xl mb-4">
+                                    {profile?.bio || 'No bio added yet.'}
+                                </p>
+
+                                {profile?.preferredJobTypes?.length > 0 && (
+                                    <div className="flex flex-wrap gap-2 mb-4">
+                                        {profile.preferredJobTypes.map((type, index) => (
+                                            <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md capitalize">
+                                                {type}
+                                            </span>
+                                        ))}
+                                    </div>
                                 )}
                             </div>
                         )}

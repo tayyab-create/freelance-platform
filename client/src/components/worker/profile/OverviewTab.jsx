@@ -105,6 +105,13 @@ const OverviewTab = ({
                     {editing ? (
                         <div className="space-y-3">
                             <Input
+                                label="Website"
+                                name="website"
+                                value={basicInfo.website}
+                                onChange={handleBasicInfoChange}
+                                placeholder="https://yourwebsite.com"
+                            />
+                            <Input
                                 label="GitHub"
                                 name="githubProfile"
                                 value={basicInfo.githubProfile}
@@ -118,32 +125,101 @@ const OverviewTab = ({
                                 onChange={handleBasicInfoChange}
                                 placeholder="username"
                             />
+                            <Input
+                                label="Twitter / X"
+                                name="twitterProfile"
+                                value={basicInfo.twitterProfile}
+                                onChange={handleBasicInfoChange}
+                                placeholder="username"
+                            />
+                            <Input
+                                label="Dribbble"
+                                name="dribbbleProfile"
+                                value={basicInfo.dribbbleProfile}
+                                onChange={handleBasicInfoChange}
+                                placeholder="username"
+                            />
+                            <Input
+                                label="Behance"
+                                name="behanceProfile"
+                                value={basicInfo.behanceProfile}
+                                onChange={handleBasicInfoChange}
+                                placeholder="username"
+                            />
+                            <Input
+                                label="Instagram"
+                                name="instagramProfile"
+                                value={basicInfo.instagramProfile}
+                                onChange={handleBasicInfoChange}
+                                placeholder="username"
+                            />
+                            <Input
+                                label="StackOverflow"
+                                name="stackoverflowProfile"
+                                value={basicInfo.stackoverflowProfile}
+                                onChange={handleBasicInfoChange}
+                                placeholder="username"
+                            />
                         </div>
                     ) : (
                         <div className="space-y-3">
-                            {profile?.githubProfile ? (
-                                <a
-                                    href={profile.githubProfile}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 transition-colors"
-                                >
+                            {profile?.website && (
+                                <a href={profile.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 transition-colors">
+                                    <span className="font-medium">Website</span>
+                                </a>
+                            )}
+                            {profile?.githubProfile && (
+                                <a href={profile.githubProfile} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 transition-colors">
                                     <FiGithub className="h-5 w-5" />
                                     <span className="font-medium">GitHub</span>
                                 </a>
-                            ) : <p className="text-sm text-gray-400">No GitHub linked</p>}
-
-                            {profile?.linkedinProfile ? (
-                                <a
-                                    href={profile.linkedinProfile}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-3 p-3 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 transition-colors"
-                                >
+                            )}
+                            {profile?.linkedinProfile && (
+                                <a href={profile.linkedinProfile} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 transition-colors">
                                     <FiLinkedin className="h-5 w-5" />
                                     <span className="font-medium">LinkedIn</span>
                                 </a>
-                            ) : <p className="text-sm text-gray-400">No LinkedIn linked</p>}
+                            )}
+                            {/* Add other social links display here if needed, or keep it minimal */}
+                        </div>
+                    )}
+                </div>
+
+                {/* Documents & Media */}
+                <div className="md:col-span-3 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">Documents & Media</h3>
+                    {editing ? (
+                        <div className="grid md:grid-cols-2 gap-4">
+                            <Input
+                                label="Resume URL"
+                                name="resume"
+                                value={basicInfo.resume}
+                                onChange={handleBasicInfoChange}
+                                placeholder="https://..."
+                            />
+                            <Input
+                                label="Video Introduction URL"
+                                name="videoIntroduction"
+                                value={basicInfo.videoIntroduction}
+                                onChange={handleBasicInfoChange}
+                                placeholder="https://..."
+                            />
+                        </div>
+                    ) : (
+                        <div className="flex gap-4">
+                            {profile?.resume && (
+                                <a href={profile.resume} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-primary-50 text-primary-700 rounded-lg font-medium hover:bg-primary-100 transition-colors">
+                                    View Resume
+                                </a>
+                            )}
+                            {profile?.videoIntroduction && (
+                                <a href={profile.videoIntroduction} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-gray-50 text-gray-700 rounded-lg font-medium hover:bg-gray-100 transition-colors">
+                                    Watch Video Intro
+                                </a>
+                            )}
+                            {!profile?.resume && !profile?.videoIntroduction && (
+                                <p className="text-gray-400 text-sm">No documents or media added.</p>
+                            )}
                         </div>
                     )}
                 </div>

@@ -27,10 +27,25 @@ const WorkerProfile = () => {
         fullName: '',
         phone: '',
         bio: '',
+        location: '',
+        website: '',
         githubProfile: '',
         linkedinProfile: '',
+        twitterProfile: '',
+        dribbbleProfile: '',
+        behanceProfile: '',
+        instagramProfile: '',
+        stackoverflowProfile: '',
         hourlyRate: '',
         availability: 'available',
+        willingToRelocate: false,
+        expectedSalaryMin: '',
+        expectedSalaryMax: '',
+        expectedSalaryCurrency: 'USD',
+        preferredJobTypes: [],
+        videoIntroduction: '',
+        resume: '',
+        portfolioLinks: [],
     });
 
     const [skills, setSkills] = useState('');
@@ -159,10 +174,25 @@ const WorkerProfile = () => {
                 fullName: profileData.fullName || '',
                 phone: profileData.phone || '',
                 bio: profileData.bio || '',
+                location: profileData.location || '',
+                website: profileData.website || '',
                 githubProfile: profileData.githubProfile || '',
                 linkedinProfile: profileData.linkedinProfile || '',
+                twitterProfile: profileData.twitterProfile || '',
+                dribbbleProfile: profileData.dribbbleProfile || '',
+                behanceProfile: profileData.behanceProfile || '',
+                instagramProfile: profileData.instagramProfile || '',
+                stackoverflowProfile: profileData.stackoverflowProfile || '',
                 hourlyRate: profileData.hourlyRate || '',
                 availability: profileData.availability || 'available',
+                willingToRelocate: profileData.willingToRelocate || false,
+                expectedSalaryMin: profileData.expectedSalary?.min || '',
+                expectedSalaryMax: profileData.expectedSalary?.max || '',
+                expectedSalaryCurrency: profileData.expectedSalary?.currency || 'USD',
+                preferredJobTypes: profileData.preferredJobTypes || [],
+                videoIntroduction: profileData.videoIntroduction || '',
+                resume: profileData.resume || '',
+                portfolioLinks: profileData.portfolioLinks || [],
             });
             setSkills(profileData.skills?.join(', ') || '');
         } catch (error) {
@@ -173,10 +203,11 @@ const WorkerProfile = () => {
     };
 
     const handleBasicInfoChange = (e) => {
-        setBasicInfo({
-            ...basicInfo,
-            [e.target.name]: e.target.value,
-        });
+        const { name, value, type, checked } = e.target;
+        setBasicInfo(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
     };
 
     const handleSaveBasicInfo = async () => {
@@ -185,6 +216,11 @@ const WorkerProfile = () => {
             const updateData = {
                 ...basicInfo,
                 skills: skills.split(',').map(s => s.trim()).filter(s => s),
+                expectedSalary: {
+                    min: basicInfo.expectedSalaryMin,
+                    max: basicInfo.expectedSalaryMax,
+                    currency: basicInfo.expectedSalaryCurrency
+                }
             };
 
             await workerAPI.updateProfile(updateData);
