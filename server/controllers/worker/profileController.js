@@ -91,7 +91,17 @@ exports.updateProfile = async (req, res) => {
             socialLinks,
             githubProfile,
             linkedinProfile,
-            profilePicture
+            profilePicture,
+            resume,
+            preferredJobTypes,
+            willingToRelocate,
+            expectedSalary,
+            website,
+            twitterProfile,
+            dribbbleProfile,
+            behanceProfile,
+            instagramProfile,
+            stackoverflowProfile
         } = req.body;
 
         let profile = await WorkerProfile.findOne({ user: req.user._id });
@@ -113,6 +123,12 @@ exports.updateProfile = async (req, res) => {
                 socialLinks,
                 githubProfile,
                 linkedinProfile,
+                website,
+                twitterProfile,
+                dribbbleProfile,
+                behanceProfile,
+                instagramProfile,
+                stackoverflowProfile,
                 profilePicture
             });
         } else {
@@ -130,7 +146,17 @@ exports.updateProfile = async (req, res) => {
             if (socialLinks !== undefined) profile.socialLinks = socialLinks;
             if (githubProfile !== undefined) profile.githubProfile = githubProfile;
             if (linkedinProfile !== undefined) profile.linkedinProfile = linkedinProfile;
+            if (website !== undefined) profile.website = website;
+            if (twitterProfile !== undefined) profile.twitterProfile = twitterProfile;
+            if (dribbbleProfile !== undefined) profile.dribbbleProfile = dribbbleProfile;
+            if (behanceProfile !== undefined) profile.behanceProfile = behanceProfile;
+            if (instagramProfile !== undefined) profile.instagramProfile = instagramProfile;
+            if (stackoverflowProfile !== undefined) profile.stackoverflowProfile = stackoverflowProfile;
             if (profilePicture !== undefined) profile.profilePicture = profilePicture;
+            if (resume !== undefined) profile.resume = resume;
+            if (preferredJobTypes !== undefined) profile.preferredJobTypes = preferredJobTypes;
+            if (willingToRelocate !== undefined) profile.willingToRelocate = willingToRelocate;
+            if (expectedSalary !== undefined) profile.expectedSalary = expectedSalary;
 
             await profile.save();
         }

@@ -21,6 +21,7 @@ const Input = ({
   autoComplete,
   className = '',
   inputClassName = '',
+  iconClassName = '',
 }) => {
   const hasError = Boolean(error);
   const hasSuccess = Boolean(success) && !hasError;
@@ -50,7 +51,7 @@ const Input = ({
       <div className="relative">
         {Icon && (
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Icon className="h-5 w-5 text-gray-400" />
+            <Icon className={`h-5 w-5 ${iconClassName || 'text-gray-400'}`} />
           </div>
         )}
         <input
@@ -69,11 +70,9 @@ const Input = ({
           aria-describedby={
             hasError ? `${name}-error` : helperText ? `${name}-helper` : undefined
           }
-          className={`input-field ${Icon ? 'pl-10' : ''} ${
-            StatusIcon ? 'pr-10' : ''
-          } ${getBorderColor()} ${
-            disabled ? 'bg-gray-100 cursor-not-allowed opacity-60' : ''
-          } ${inputClassName}`}
+          className={`input-field ${Icon ? 'pl-10' : ''} ${StatusIcon ? 'pr-10' : ''
+            } ${getBorderColor()} ${disabled ? 'bg-gray-100 cursor-not-allowed opacity-60' : ''
+            } ${inputClassName}`}
         />
         {StatusIcon && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">

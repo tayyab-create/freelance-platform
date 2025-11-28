@@ -43,16 +43,17 @@ const WorkerProfile = () => {
         expectedSalaryMax: '',
         expectedSalaryCurrency: 'USD',
         preferredJobTypes: [],
-        videoIntroduction: '',
         resume: '',
         portfolioLinks: [],
     });
 
-    const [skills, setSkills] = useState('');
+    const [skills, setSkills] = useState([]);
     const [showExpModal, setShowExpModal] = useState(false);
     const [showCertModal, setShowCertModal] = useState(false);
     const [uploadingImage, setUploadingImage] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
+    const [uploadingResume, setUploadingResume] = useState(false);
+    const [resumeUploadProgress, setResumeUploadProgress] = useState(0);
 
     const [experienceForm, setExperienceForm] = useState({
         title: '',
@@ -109,8 +110,37 @@ const WorkerProfile = () => {
         }
     };
 
+    const handleResumeUpload = async (file) => {
+        if (!file) return;
+
+        setUploadingResume(true);
+        setResumeUploadProgress(0);
+        try {
+            const response = await uploadAPI.uploadSingle(
+                file,
+                'documents',
+                (progress) => setResumeUploadProgress(progress)
+            );
+            const fileUrl = `http://localhost:5000${response.data.data.fileUrl}`;
+
+            // Update basic info state immediately
+            setBasicInfo(prev => ({ ...prev, resume: fileUrl }));
+            toast.success('Resume uploaded!');
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || 'Failed to upload resume';
+            toast.error(errorMessage);
+        } finally {
+            setUploadingResume(false);
+            setResumeUploadProgress(0);
+        }
+    };
+
     const handleDeleteProfilePicture = () => {
         setItemToDelete({ type: 'profilePicture', name: 'Profile Picture' });
+    };
+
+    const handleDeleteResume = () => {
+        setItemToDelete({ type: 'resume', name: 'Resume' });
     };
 
     const handleDeleteExperience = (id) => {
@@ -141,6 +171,8 @@ const WorkerProfile = () => {
                 ...prev,
                 certifications: prev.certifications.filter(c => c._id !== item.id)
             }));
+        } else if (item.type === 'resume') {
+            setBasicInfo(prev => ({ ...prev, resume: '' }));
         }
 
         executeWithUndo({
@@ -151,6 +183,8 @@ const WorkerProfile = () => {
                     await workerAPI.deleteExperience(item.id);
                 } else if (item.type === 'certification') {
                     await workerAPI.deleteCertification(item.id);
+                } else if (item.type === 'resume') {
+                    await workerAPI.updateProfile({ resume: '' });
                 }
                 // Fetch profile to sync state after actual deletion
                 fetchProfile();
@@ -190,11 +224,10 @@ const WorkerProfile = () => {
                 expectedSalaryMax: profileData.expectedSalary?.max || '',
                 expectedSalaryCurrency: profileData.expectedSalary?.currency || 'USD',
                 preferredJobTypes: profileData.preferredJobTypes || [],
-                videoIntroduction: profileData.videoIntroduction || '',
                 resume: profileData.resume || '',
                 portfolioLinks: profileData.portfolioLinks || [],
             });
-            setSkills(profileData.skills?.join(', ') || '');
+            setSkills(profileData.skills || []);
         } catch (error) {
             toast.error('Failed to load profile');
         } finally {
@@ -215,7 +248,7 @@ const WorkerProfile = () => {
         try {
             const updateData = {
                 ...basicInfo,
-                skills: skills.split(',').map(s => s.trim()).filter(s => s),
+                skills: skills,
                 expectedSalary: {
                     min: basicInfo.expectedSalaryMin,
                     max: basicInfo.expectedSalaryMax,
@@ -368,6 +401,10 @@ const WorkerProfile = () => {
                             handleBasicInfoChange={handleBasicInfoChange}
                             skills={skills}
                             setSkills={setSkills}
+                            handleResumeUpload={handleResumeUpload}
+                            uploadingResume={uploadingResume}
+                            resumeUploadProgress={resumeUploadProgress}
+                            handleDeleteResume={handleDeleteResume}
                         />
                     )}
 
@@ -417,7 +454,11 @@ const WorkerProfile = () => {
                     onClose={() => setItemToDelete(null)}
                     onConfirm={handleDeleteConfirm}
                     itemName={itemToDelete?.name}
-                    itemType={itemToDelete?.type === 'profilePicture' ? 'image' : itemToDelete?.type}
+                    itemType={
+                        itemToDelete?.type === 'profilePicture' ? 'image' :
+                            itemToDelete?.type === 'resume' ? 'document' :
+                                itemToDelete?.type
+                    }
                 />
             </div>
         </DashboardLayout>

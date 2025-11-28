@@ -4,6 +4,9 @@ import FileUpload from '../../common/FileUpload';
 import Spinner from '../../common/Spinner';
 import { ExpandableText } from '../../shared';
 import Textarea from '../../common/Textarea';
+import Input from '../../common/Input';
+import Checkbox from '../../common/Checkbox';
+import CustomSelect from '../../shared/CustomSelect';
 
 const ProfileHeader = ({
     profile,
@@ -151,106 +154,105 @@ const ProfileHeader = ({
                     {/* Basic Info */}
                     <div className="flex-1 w-full space-y-4">
                         {editing ? (
-                            <div className="grid md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                                    <input
-                                        type="text"
-                                        name="fullName"
-                                        value={basicInfo.fullName}
-                                        onChange={handleBasicInfoChange}
-                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                                    <input
-                                        type="text"
-                                        name="phone"
-                                        value={basicInfo.phone}
-                                        onChange={handleBasicInfoChange}
-                                        placeholder="03074190230"
-                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                                    <input
-                                        type="text"
+                            <div className="grid md:grid-cols-2 gap-5">
+                                <Input
+                                    label="Full Name"
+                                    name="fullName"
+                                    value={basicInfo.fullName}
+                                    onChange={handleBasicInfoChange}
+                                    icon={FiUser}
+                                    placeholder="e.g. John Doe"
+                                />
+                                <Input
+                                    label="Phone"
+                                    name="phone"
+                                    value={basicInfo.phone}
+                                    onChange={handleBasicInfoChange}
+                                    icon={FiPhone}
+                                    placeholder="+1 (555) 000-0000"
+                                />
+                                <div className="md:col-span-2 grid md:grid-cols-2 gap-5">
+                                    <Input
+                                        label="Location"
                                         name="location"
                                         value={basicInfo.location}
                                         onChange={handleBasicInfoChange}
+                                        icon={FiMapPin}
                                         placeholder="City, Country"
-                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                     />
-                                </div>
-                                <div className="flex items-center pt-6">
-                                    <label className="flex items-center gap-2 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            name="willingToRelocate"
-                                            checked={basicInfo.willingToRelocate}
-                                            onChange={handleBasicInfoChange}
-                                            className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-                                        />
-                                        <span className="text-sm font-medium text-gray-700">Willing to Relocate</span>
-                                    </label>
+                                    <div className="flex items-center h-full pt-6">
+                                        <div className="p-3 bg-blue-50 rounded-xl w-full border border-blue-100">
+                                            <Checkbox
+                                                label="I am willing to relocate for the right opportunity"
+                                                name="willingToRelocate"
+                                                checked={basicInfo.willingToRelocate}
+                                                onChange={handleBasicInfoChange}
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {/* Salary Expectations */}
-                                <div className="md:col-span-2 grid grid-cols-3 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Min Salary</label>
-                                        <input
+                                <div className="md:col-span-2 p-5 bg-gray-50 rounded-xl border border-gray-100">
+                                    <label className="block text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+                                        <FiDollarSign className="text-green-600" />
+                                        Salary Expectations
+                                    </label>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <Input
+                                            label="Min Salary"
                                             type="number"
                                             name="expectedSalaryMin"
                                             value={basicInfo.expectedSalaryMin}
                                             onChange={handleBasicInfoChange}
                                             placeholder="Min"
-                                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                            className="mb-0"
                                         />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Max Salary</label>
-                                        <input
+                                        <Input
+                                            label="Max Salary"
                                             type="number"
                                             name="expectedSalaryMax"
                                             value={basicInfo.expectedSalaryMax}
                                             onChange={handleBasicInfoChange}
                                             placeholder="Max"
-                                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                            className="mb-0"
                                         />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
-                                        <select
-                                            name="expectedSalaryCurrency"
-                                            value={basicInfo.expectedSalaryCurrency}
-                                            onChange={handleBasicInfoChange}
-                                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                                        >
-                                            <option value="USD">USD</option>
-                                            <option value="EUR">EUR</option>
-                                            <option value="GBP">GBP</option>
-                                            <option value="PKR">PKR</option>
-                                        </select>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Currency</label>
+                                            <CustomSelect
+                                                name="expectedSalaryCurrency"
+                                                value={basicInfo.expectedSalaryCurrency}
+                                                onChange={handleBasicInfoChange}
+                                                options={[
+                                                    { value: 'USD', label: 'USD' },
+                                                    { value: 'EUR', label: 'EUR' },
+                                                    { value: 'GBP', label: 'GBP' },
+                                                    { value: 'PKR', label: 'PKR' },
+                                                ]}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
 
                                 {/* Job Types */}
                                 <div className="md:col-span-2">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Job Types</label>
-                                    <div className="flex flex-wrap gap-4">
+                                    <label className="block text-sm font-medium text-gray-700 mb-3">Preferred Job Types</label>
+                                    <div className="flex flex-wrap gap-3">
                                         {jobTypes.map((type) => (
-                                            <label key={type} className="flex items-center gap-2 cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={basicInfo.preferredJobTypes?.includes(type)}
-                                                    onChange={() => handleJobTypeChange(type)}
-                                                    className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-                                                />
-                                                <span className="text-sm text-gray-700 capitalize">{type}</span>
-                                            </label>
+                                            <div key={type} className={`
+                                                transition-all duration-200 rounded-lg border
+                                                ${basicInfo.preferredJobTypes?.includes(type)
+                                                    ? 'bg-primary-50 border-primary-200 shadow-sm'
+                                                    : 'bg-white border-gray-200 hover:border-gray-300'}
+                                            `}>
+                                                <div className="px-3 py-2">
+                                                    <Checkbox
+                                                        label={type.charAt(0).toUpperCase() + type.slice(1)}
+                                                        checked={basicInfo.preferredJobTypes?.includes(type)}
+                                                        onChange={() => handleJobTypeChange(type)}
+                                                    />
+                                                </div>
+                                            </div>
                                         ))}
                                     </div>
                                 </div>
@@ -261,8 +263,8 @@ const ProfileHeader = ({
                                         name="bio"
                                         value={basicInfo.bio}
                                         onChange={handleBasicInfoChange}
-                                        placeholder="Tell us about yourself..."
-                                        rows={3}
+                                        placeholder="Tell us about your professional background, key skills, and what you're looking for..."
+                                        rows={4}
                                         maxLength={500}
                                         showCharacterCount
                                     />

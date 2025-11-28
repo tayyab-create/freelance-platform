@@ -2,6 +2,8 @@ import React from 'react';
 import Input from '../../common/Input';
 import Button from '../../common/Button';
 import DatePicker from '../../shared/DatePicker';
+import Textarea from '../../common/Textarea';
+import Checkbox from '../../common/Checkbox';
 
 const ExperienceModal = ({
     showExpModal,
@@ -34,15 +36,22 @@ const ExperienceModal = ({
                                 onChange={date => setExperienceForm({ ...experienceForm, endDate: date })}
                                 disabled={experienceForm.current}
                             />
-                            <label className="flex items-center gap-2 text-sm text-gray-600">
-                                <input type="checkbox" checked={experienceForm.current} onChange={e => setExperienceForm({ ...experienceForm, current: e.target.checked })} className="rounded text-primary-600" />
-                                I currently work here
-                            </label>
+                            <div className="pt-2">
+                                <Checkbox
+                                    label="I currently work here"
+                                    checked={experienceForm.current}
+                                    onChange={e => setExperienceForm({ ...experienceForm, current: e.target.checked })}
+                                />
+                            </div>
                         </div>
                     </div>
                     <div>
-                        <label className="label text-sm font-bold text-gray-700 mb-1 block">Description</label>
-                        <textarea value={experienceForm.description} onChange={e => setExperienceForm({ ...experienceForm, description: e.target.value })} className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:border-primary-500 outline-none" rows="3" />
+                        <Textarea
+                            label="Description"
+                            value={experienceForm.description}
+                            onChange={e => setExperienceForm({ ...experienceForm, description: e.target.value })}
+                            rows={3}
+                        />
                     </div>
                     <div className="flex gap-3 pt-2">
                         <Button type="button" variant="secondary" onClick={() => setShowExpModal(false)} className="flex-1">Cancel</Button>
