@@ -31,8 +31,14 @@ const FileUpload = ({
   useEffect(() => {
     if (currentImage) {
       setPreviewUrl(currentImage);
-    } else if (typeof value === 'string' && value.length > 0 && preview) {
-      setPreviewUrl(value);
+    } else if (typeof value === 'string' && value.length > 0) {
+      if (preview) {
+        setPreviewUrl(value);
+      } else {
+        // For non-preview files (like PDFs), set a fake file object to show the name
+        const fileName = value.split('/').pop() || 'Uploaded File';
+        setSelectedFile({ name: fileName, size: 0 });
+      }
     }
   }, [currentImage, value, preview]);
 
