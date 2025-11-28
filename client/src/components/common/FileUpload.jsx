@@ -194,19 +194,31 @@ const FileUpload = ({
       ) : (
         <>
           {preview && previewUrl ? (
-            <div className="relative inline-block">
-              <img
-                src={previewUrl}
-                alt="Preview"
-                className="h-32 w-32 object-cover rounded-lg border-2 border-gray-300"
-              />
-              {selectedFile && !disabled && (
+            <div className="space-y-2">
+              <div className="relative inline-block">
+                <img
+                  src={previewUrl}
+                  alt="Preview"
+                  className="h-32 w-32 object-cover rounded-lg border-2 border-gray-300"
+                />
+                {selectedFile && !disabled && (
+                  <button
+                    type="button"
+                    onClick={handleRemove}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                  >
+                    <FiX className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              {!disabled && (
                 <button
                   type="button"
-                  onClick={handleRemove}
-                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                  onClick={handleClick}
+                  className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
                 >
-                  <FiX className="h-4 w-4" />
+                  <FiUpload className="h-4 w-4" />
+                  Replace Photo
                 </button>
               )}
             </div>

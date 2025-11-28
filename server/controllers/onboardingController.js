@@ -57,8 +57,30 @@ exports.saveOnboardingProgress = async (req, res) => {
             console.log('🔵 [BACKEND] Saving profile with completeness:', completeness);
             console.log('🔵 [BACKEND] Profile picture in DB:', profile.profilePicture);
             console.log('🔵 [BACKEND] Resume in DB:', profile.resume);
-            await profile.save();
-            console.log('🔵 [BACKEND] Profile saved successfully');
+
+            // Retry save if version conflict occurs
+            let retries = 3;
+            while (retries > 0) {
+                try {
+                    await profile.save();
+                    console.log('🔵 [BACKEND] Profile saved successfully');
+                    break;
+                } catch (saveError) {
+                    if (saveError.name === 'VersionError' && retries > 1) {
+                        console.log(`⚠️ [BACKEND] Version conflict, retrying... (${retries - 1} attempts left)`);
+                        // Reload the profile to get the latest version
+                        await profile.reload();
+                        // Reapply the changes
+                        Object.keys(profileData).forEach(key => {
+                            profile[key] = profileData[key];
+                        });
+                        profile.profileCompleteness = completeness;
+                        retries--;
+                    } else {
+                        throw saveError;
+                    }
+                }
+            }
         }
 
         res.status(200).json({
