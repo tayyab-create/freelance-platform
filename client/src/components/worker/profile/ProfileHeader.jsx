@@ -76,9 +76,9 @@ const ProfileHeader = ({
 
             {/* Profile Content */}
             <div className="p-6">
-                <div className="flex flex-col md:flex-row gap-6 items-start">
+                <div className="flex flex-col md:flex-row gap-6 items-stretch">
                     {/* Profile Picture */}
-                    <div className="flex-shrink-0">
+                    <div className="flex-shrink-0 md:w-48">
                         <div className="relative">
                             {editing ? (
                                 <div className="relative">
@@ -90,12 +90,12 @@ const ProfileHeader = ({
                                         uploadProgress={uploadProgress}
                                         showProgress={true}
                                     >
-                                        <div className="relative h-32 w-32 rounded-xl overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-gray-300 transition-all bg-gray-50 flex items-center justify-center group">
+                                        <div className="relative w-48 h-48 md:w-full md:h-auto md:aspect-square rounded-xl overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-gray-300 transition-all bg-gray-50 flex items-center justify-center group mx-auto md:mx-0">
                                             {profile?.profilePicture ? (
                                                 <img
                                                     src={profile.profilePicture}
                                                     alt="Profile"
-                                                    className="h-full w-full object-cover"
+                                                    className="h-full w-full object-contain"
                                                 />
                                             ) : (
                                                 <div className="text-gray-300">
@@ -127,12 +127,12 @@ const ProfileHeader = ({
                                     )}
                                 </div>
                             ) : (
-                                <div className="relative h-32 w-32 rounded-xl overflow-hidden border-2 border-gray-200 bg-gray-50 flex items-center justify-center">
+                                <div className="relative w-48 h-48 md:w-full md:h-auto md:aspect-square rounded-xl overflow-hidden border-2 border-gray-200 bg-gray-50 flex items-center justify-center mx-auto md:mx-0">
                                     {profile?.profilePicture ? (
                                         <img
                                             src={profile.profilePicture}
                                             alt="Profile"
-                                            className="h-full w-full object-cover"
+                                            className="h-full w-full object-contain"
                                         />
                                     ) : (
                                         <div className="text-gray-300">
