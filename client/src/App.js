@@ -683,6 +683,14 @@ function App() {
           }
         />
         <Route
+          path="/messages/:id"
+          element={
+            <ProtectedRoute allowedRoles={["worker", "company"]}>
+              <Messages />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/worker/messages"
           element={
             <ProtectedRoute allowedRoles={["worker"]}>
@@ -691,7 +699,23 @@ function App() {
           }
         />
         <Route
+          path="/worker/messages/:id"
+          element={
+            <ProtectedRoute allowedRoles={["worker"]}>
+              <Messages />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/company/messages"
+          element={
+            <ProtectedRoute allowedRoles={["company"]}>
+              <Messages />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/company/messages/:id"
           element={
             <ProtectedRoute allowedRoles={["company"]}>
               <Messages />
