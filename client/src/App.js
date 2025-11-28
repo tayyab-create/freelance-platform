@@ -21,6 +21,7 @@ import Messages from "./pages/shared/Messages";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import PendingApproval from "./pages/auth/PendingApproval";
+import OnboardingStatus from "./pages/auth/OnboardingStatus";
 
 // Worker Pages
 import WorkerDashboard from "./pages/worker/WorkerDashboard";
@@ -650,14 +651,6 @@ function App() {
         {/* Message Routes */}
         <Route
           path="/messages"
-          element={
-            <ProtectedRoute allowedRoles={["worker", "company"]}>
-              <Messages />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/messages/:id"
           element={
             <ProtectedRoute allowedRoles={["worker", "company"]}>
               <Messages />
