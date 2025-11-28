@@ -51,7 +51,7 @@ const ReviewCard = ({ review, reviewerType, reviewerName, reviewerLogo, projectT
     const theme = getTheme(review.rating);
 
     return (
-        <div className={`relative overflow-hidden rounded-2xl border p-6 transition-all duration-300 group ${theme.container}`}>
+        <div className={`relative overflow-hidden rounded-2xl border p-6 transition-all duration-300 group h-full flex flex-col ${theme.container}`}>
             {/* Decorative Background Elements */}
             <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none transition-transform duration-500 group-hover:scale-110">
                 <FiStar className="w-32 h-32" />
@@ -59,7 +59,7 @@ const ReviewCard = ({ review, reviewerType, reviewerName, reviewerLogo, projectT
 
             {/* Header */}
             <div className="relative z-10 flex items-start justify-between mb-6">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 flex-1 min-w-0">
                     {/* Avatar/Logo */}
                     <div className="flex-shrink-0">
                         {reviewerLogo ? (
@@ -80,8 +80,8 @@ const ReviewCard = ({ review, reviewerType, reviewerName, reviewerLogo, projectT
                     </div>
 
                     {/* Info */}
-                    <div>
-                        <h4 className={`text-base font-bold truncate max-w-[150px] ${theme.headerText}`} title={reviewerName}>
+                    <div className="min-w-0 flex-1">
+                        <h4 className={`text-base font-bold truncate ${theme.headerText}`} title={reviewerName}>
                             {reviewerName}
                         </h4>
                         <div className="flex items-center gap-2">
@@ -103,7 +103,7 @@ const ReviewCard = ({ review, reviewerType, reviewerName, reviewerLogo, projectT
                     </div>
                 </div>
 
-                <div className="text-xs font-medium text-gray-400 bg-white/50 px-3 py-1 rounded-full border border-white/50 backdrop-blur-sm">
+                <div className="text-xs font-medium text-gray-400 bg-white/50 px-3 py-1 rounded-full border border-white/50 backdrop-blur-sm whitespace-nowrap ml-2">
                     {new Date(review.createdAt).toLocaleDateString(undefined, {
                         year: 'numeric',
                         month: 'short',
@@ -116,12 +116,12 @@ const ReviewCard = ({ review, reviewerType, reviewerName, reviewerLogo, projectT
             {projectTitle && (
                 <div className="relative z-10 mb-4 pb-4 border-b border-black/5">
                     <p className="text-xs font-bold uppercase tracking-wider opacity-60 mb-1">Project</p>
-                    <p className="font-bold text-gray-900 truncate" title={projectTitle}>{projectTitle}</p>
+                    <p className="font-bold text-gray-900 line-clamp-1" title={projectTitle}>{projectTitle}</p>
                 </div>
             )}
 
-            {/* Content */}
-            <div className="relative z-10 mb-6">
+            {/* Content - Grows to fill available space */}
+            <div className="relative z-10 mb-6 flex-1">
                 <div className="relative">
                     <span className={`absolute -top-2 -left-2 text-4xl font-serif leading-none select-none opacity-50 ${theme.quote}`}>"</span>
                     <div className="text-gray-700 leading-relaxed text-sm pl-4 relative z-10 italic">
@@ -136,7 +136,10 @@ const ReviewCard = ({ review, reviewerType, reviewerName, reviewerLogo, projectT
                 </div>
                 {isLongText && (
                     <button
-                        onClick={() => setIsExpanded(!isExpanded)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setIsExpanded(!isExpanded);
+                        }}
                         className={`mt-2 text-xs font-bold hover:underline flex items-center gap-1 pl-4 relative z-20 ${theme.button}`}
                     >
                         {isExpanded ? (
@@ -148,23 +151,29 @@ const ReviewCard = ({ review, reviewerType, reviewerName, reviewerLogo, projectT
                 )}
             </div>
 
-            {/* Footer */}
-            <div className="relative z-10 flex flex-wrap items-center gap-3 pt-4 border-t border-black/5">
-                {reviewerType === 'company' && review.wouldHireAgain && (
-                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border ${theme.badge}`}>
-                        <FiThumbsUp className="w-3.5 h-3.5" />
-                        Would Hire Again
+            {/* Footer - Stays at bottom */}
+            <div className="relative z-10 pt-4 border-t border-black/5 mt-auto space-y-3">
+                {/* Tags - Displayed as compact chips */}
+                {review.tags && review.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                        {review.tags.map((tag, index) => (
+                            <span
+                                key={index}
+                                className="inline-flex items-center px-2.5 py-1 bg-white/70 text-gray-700 text-xs font-medium rounded-md border border-black/10 shadow-sm hover:bg-white/90 transition-colors"
+                            >
+                                {tag.replace(/-/g, ' ')}
+                            </span>
+                        ))}
                     </div>
                 )}
 
-                {review.tags && review.tags.map((tag, index) => (
-                    <span
-                        key={index}
-                        className="px-3 py-1.5 bg-white/60 text-gray-600 text-xs font-medium rounded-lg capitalize border border-black/5 shadow-sm"
-                    >
-                        {tag.replace('-', ' ')}
-                    </span>
-                ))}
+                {/* Would Hire Again Badge - Always at the bottom */}
+                {reviewerType === 'company' && review.wouldHireAgain && (
+                    <div className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold border ${theme.badge}`}>
+                        <FiThumbsUp className="w-4 h-4" />
+                        <span>Would Hire Again</span>
+                    </div>
+                )}
             </div>
         </div>
     );
