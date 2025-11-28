@@ -28,6 +28,7 @@ import BrowseJobs from "./pages/worker/BrowseJobs";
 import SavedSearches from "./pages/worker/SavedSearches";
 import JobDetails from "./pages/worker/JobDetails";
 import AssignedJobDetails from "./pages/worker/AssignedJobDetails";
+import WorkerOnboarding from "./pages/worker/WorkerOnboarding";
 
 // Company Pages
 import CompanyDashboard from "./pages/company/CompanyDashboard";
@@ -35,6 +36,7 @@ import PostJob from "./pages/company/PostJob";
 import MyJobs from "./pages/company/MyJobs";
 import JobApplications from "./pages/company/JobApplications";
 import SubmissionDetails from "./pages/company/SubmissionDetails";
+import CompanyOnboarding from "./pages/company/CompanyOnboarding";
 
 // Admin Pages
 import AdminLogin from "./pages/admin/AdminLogin";

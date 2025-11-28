@@ -127,26 +127,23 @@ const Register = () => {
             <button
               type="button"
               onClick={() => handleRoleChange('worker')}
-              className={`group relative p-4 rounded-xl border-2 text-left transition-all duration-300 flex flex-col gap-3 ${
-                formData.role === 'worker'
+              className={`group relative p-4 rounded-xl border-2 text-left transition-all duration-300 flex flex-col gap-3 ${formData.role === 'worker'
                   ? 'border-primary-600 bg-primary-50/50 ring-2 ring-primary-100 shadow-lg shadow-primary-500/10'
                   : 'border-gray-100 hover:border-primary-200 hover:bg-gray-50 hover:shadow-md'
-              }`}
+                }`}
             >
               <div
-                className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-                  formData.role === 'worker'
+                className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${formData.role === 'worker'
                     ? 'bg-primary-600 text-white'
                     : 'bg-gray-100 text-gray-500 group-hover:bg-primary-100 group-hover:text-primary-600'
-                }`}
+                  }`}
               >
                 <FiUser className="w-5 h-5" />
               </div>
               <div>
                 <div
-                  className={`font-bold transition-colors ${
-                    formData.role === 'worker' ? 'text-primary-900' : 'text-gray-900'
-                  }`}
+                  className={`font-bold transition-colors ${formData.role === 'worker' ? 'text-primary-900' : 'text-gray-900'
+                    }`}
                 >
                   Freelancer
                 </div>
@@ -166,26 +163,23 @@ const Register = () => {
             <button
               type="button"
               onClick={() => handleRoleChange('company')}
-              className={`group relative p-4 rounded-xl border-2 text-left transition-all duration-300 flex flex-col gap-3 ${
-                formData.role === 'company'
+              className={`group relative p-4 rounded-xl border-2 text-left transition-all duration-300 flex flex-col gap-3 ${formData.role === 'company'
                   ? 'border-primary-600 bg-primary-50/50 ring-2 ring-primary-100 shadow-lg shadow-primary-500/10'
                   : 'border-gray-100 hover:border-primary-200 hover:bg-gray-50 hover:shadow-md'
-              }`}
+                }`}
             >
               <div
-                className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-                  formData.role === 'company'
+                className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${formData.role === 'company'
                     ? 'bg-primary-600 text-white'
                     : 'bg-gray-100 text-gray-500 group-hover:bg-primary-100 group-hover:text-primary-600'
-                }`}
+                  }`}
               >
                 <FiBriefcase className="w-5 h-5" />
               </div>
               <div>
                 <div
-                  className={`font-bold transition-colors ${
-                    formData.role === 'company' ? 'text-primary-900' : 'text-gray-900'
-                  }`}
+                  className={`font-bold transition-colors ${formData.role === 'company' ? 'text-primary-900' : 'text-gray-900'
+                    }`}
                 >
                   Company
                 </div>
