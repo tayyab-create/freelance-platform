@@ -25,8 +25,13 @@ const ProtectedRoute = ({ children, allowedRoles = [], allowPending = false }) =
   // Check if user is approved (except for admin)
   // If allowPending is true, we skip this check (for onboarding pages)
   if (user?.role !== 'admin' && user?.status !== 'approved' && !allowPending) {
-    // If user is pending, redirect to status page (which handles both pending and rejected)
-    return <Navigate to="/onboarding/status" replace />;
+    // If user is not approved and not on an allowed pending page, redirect to onboarding
+    if (user?.role === 'worker') {
+      return <Navigate to="/worker/onboarding" replace />;
+    } else if (user?.role === 'company') {
+      return <Navigate to="/company/onboarding" replace />;
+    }
+    return <Navigate to="/login" replace />;
   }
 
   return children;

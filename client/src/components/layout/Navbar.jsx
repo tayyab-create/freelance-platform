@@ -11,7 +11,7 @@ import {
 import GlobalSearch from '../shared/GlobalSearch';
 import NotificationBell from './NotificationBell';
 
-const Navbar = () => {
+const Navbar = ({ disableNavigation = false }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -129,6 +129,8 @@ const Navbar = () => {
                 </span>
               )}
             </Link>
+
+            {/* Notification Bell - Always visible now */}
             {!isCollapsed && <NotificationBell />}
           </div>
 
@@ -142,15 +144,18 @@ const Navbar = () => {
           {/* Global Search Trigger */}
           <div className="px-4 pt-6 pb-2">
             <button
-              onClick={() => setIsSearchOpen(true)}
+              onClick={() => !disableNavigation && setIsSearchOpen(true)}
+              disabled={disableNavigation}
               className={`
                 w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300
                 bg-gray-50 text-gray-500 border border-gray-100
-                hover:bg-white hover:border-primary-200 hover:text-primary-600 hover:shadow-lg hover:shadow-primary-500/10
-                active:scale-95
+                ${disableNavigation
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:bg-white hover:border-primary-200 hover:text-primary-600 hover:shadow-lg hover:shadow-primary-500/10 active:scale-95'
+                }
                 ${isCollapsed ? 'justify-center px-0' : ''}
               `}
-              title="Search (Ctrl+K)"
+              title={disableNavigation ? 'Search disabled during onboarding' : 'Search (Ctrl+K)'}
               aria-label="Search"
             >
               <FiSearch className={`${isCollapsed ? 'h-6 w-6' : 'h-5 w-5'} flex-shrink-0`} />
@@ -170,24 +175,34 @@ const Navbar = () => {
               return (
                 <Link
                   key={link.path}
-                  to={link.path}
-                  onClick={() => setIsMobileOpen(false)}
+                  to={disableNavigation ? '#' : link.path}
+                  onClick={(e) => {
+                    if (disableNavigation) {
+                      e.preventDefault();
+                      return;
+                    }
+                    setIsMobileOpen(false);
+                  }}
                   className={`
                     flex items-center gap-4 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300
                     group relative overflow-hidden
+                    ${disableNavigation ? 'opacity-50 cursor-not-allowed' : ''}
                     ${isLinkActive
                       ? 'bg-primary-600 text-white shadow-lg shadow-primary-600/30 translate-x-1'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-primary-600 hover:translate-x-1'
+                      : disableNavigation
+                        ? 'text-gray-400'
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-primary-600 hover:translate-x-1'
                     }
                     ${isCollapsed ? 'justify-center px-0' : ''}
                   `}
                   title={isCollapsed ? link.name : ''}
                   aria-current={isLinkActive ? 'page' : undefined}
+                  aria-disabled={disableNavigation}
                 >
                   <link.icon className={`
                     ${isCollapsed ? 'h-6 w-6' : 'h-5 w-5'} 
                     flex-shrink-0 transition-transform duration-300
-                    ${isLinkActive ? 'scale-110' : 'group-hover:scale-110'}
+                    ${isLinkActive ? 'scale-110' : disableNavigation ? '' : 'group-hover:scale-110'}
                   `} />
                   {!isCollapsed && <span className="text-sm tracking-wide">{link.name}</span>}
 

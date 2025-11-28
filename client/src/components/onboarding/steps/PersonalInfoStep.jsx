@@ -17,6 +17,20 @@ const PersonalInfoStep = ({ formData, onChange, onFileUpload, errors = {} }) => 
 
     return (
         <div className="space-y-6">
+            {/* Profile Picture */}
+            <div>
+                <FileUpload
+                    label="Profile Picture"
+                    name="profilePicture"
+                    accept="image/*"
+                    value={formData.profilePicture}
+                    onFileSelect={handlePhotoUpload}
+                    helperText="Upload a professional photo (JPG, PNG - max 5MB)"
+                    maxSize={5}
+                    preview
+                />
+            </div>
+
             {/* Full Name */}
             <Input
                 label="Full Name"
@@ -47,20 +61,6 @@ const PersonalInfoStep = ({ formData, onChange, onFileUpload, errors = {} }) => 
                 helperText="Include country code for international numbers"
                 maxLength={20}
             />
-
-            {/* Profile Picture */}
-            <div>
-                <FileUpload
-                    label="Profile Picture"
-                    name="profilePicture"
-                    accept="image/*"
-                    value={formData.profilePicture}
-                    onFileSelect={handlePhotoUpload}
-                    helperText="Upload a professional photo (JPG, PNG - max 5MB)"
-                    maxSize={5}
-                    preview
-                />
-            </div>
 
             {/* Professional Bio */}
             <Textarea

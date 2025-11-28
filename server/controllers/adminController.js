@@ -299,12 +299,13 @@ exports.rejectUser = async (req, res) => {
     await logRejection(user._id, req.user._id, reason || 'No reason provided');
 
     // Notify user about rejection
+    const onboardingLink = user.role === 'worker' ? '/worker/onboarding' : '/company/onboarding';
     await notificationService.createNotification(
       user._id,
       'system',
       'Account Application Update',
       `We regret to inform you that your ${user.role} account application has not been approved. Reason: ${reason || 'Not specified'}. Please update your profile and resubmit.`,
-      '/login',
+      onboardingLink,
       {
         status: 'rejected',
         reason: reason

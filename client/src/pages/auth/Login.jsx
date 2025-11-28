@@ -23,16 +23,12 @@ const Login = () => {
     if (isAuthenticated && user) {
       // Check if user is pending approval or rejected
       if (user.status === 'pending' || user.status === 'rejected') {
-        // If onboarding is not complete, redirect to onboarding flow
-        if (!user.onboardingCompleted && user.status !== 'rejected') {
-          if (user.role === 'worker') {
-            navigate('/worker/onboarding');
-          } else if (user.role === 'company') {
-            navigate('/company/onboarding');
-          }
-        } else {
-          // If onboarding is complete or rejected, go to status page
-          navigate('/onboarding/status');
+        // Redirect to onboarding flow for both pending and rejected users
+        // The onboarding page will handle showing the status/history
+        if (user.role === 'worker') {
+          navigate('/worker/onboarding');
+        } else if (user.role === 'company') {
+          navigate('/company/onboarding');
         }
         return;
       }

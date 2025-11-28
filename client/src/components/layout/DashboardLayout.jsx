@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import Sidebar from './Navbar'; // Importing from Navbar.jsx which now exports Sidebar
 
-const DashboardLayout = ({ children }) => {
+const DashboardLayout = ({ children, disableNavigation = false }) => {
   const { user } = useSelector((state) => state.auth);
 
   const getThemeClass = () => {
@@ -13,7 +13,7 @@ const DashboardLayout = ({ children }) => {
 
   return (
     <div className={`min-h-screen flex ${getThemeClass()}`}>
-      <Sidebar />
+      <Sidebar disableNavigation={disableNavigation} />
       {/* Main Content Area - shifts based on sidebar width */}
       <main className="flex-1 lg:ml-64 transition-all duration-300 p-8">
         <div className="max-w-7xl mx-auto">

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import OnboardingLayout from '../../components/onboarding/OnboardingLayout';
+import DashboardLayout from '../../components/layout/DashboardLayout';
+import OnboardingInfoPanel from '../../components/onboarding/OnboardingInfoPanel';
 import PersonalInfoStep from '../../components/onboarding/steps/PersonalInfoStep';
 import SkillsStep from '../../components/onboarding/steps/SkillsStep';
 import ExperienceStep from '../../components/onboarding/steps/ExperienceStep';
@@ -53,6 +54,9 @@ const WorkerOnboarding = () => {
     const [isSaving, setIsSaving] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [profileCompleteness, setProfileCompleteness] = useState(0);
+    const [status, setStatus] = useState(null);
+    const [rejectionReason, setRejectionReason] = useState(null);
+    const [approvalHistory, setApprovalHistory] = useState([]);
 
     // Load saved progress on mount
     useEffect(() => {
@@ -61,24 +65,24 @@ const WorkerOnboarding = () => {
                 console.log('🔵 [LOAD] Fetching onboarding status...');
                 const response = await api.get('/auth/onboarding/status');
                 console.log('🔵 [LOAD] Onboarding status response:', response.data);
+
                 if (response.data.onboardingStep) {
                     setCurrentStep(response.data.onboardingStep + 1);
                 }
                 setProfileCompleteness(response.data.profileCompleteness || 0);
+                setStatus(response.data.status);
+                setRejectionReason(response.data.rejectionReason);
+                setApprovalHistory(response.data.approvalHistory || []);
 
                 // Load profile data
                 console.log('🔵 [LOAD] Fetching user profile...');
                 const profileResponse = await api.get('/auth/me');
                 console.log('🔵 [LOAD] Profile response:', profileResponse.data);
-                console.log('🔵 [LOAD] Profile data:', profileResponse.data.profile);
                 if (profileResponse.data.profile) {
                     const loadedData = {
                         ...formData,
                         ...profileResponse.data.profile
                     };
-                    console.log('🔵 [LOAD] Setting form data to:', loadedData);
-                    console.log('🔵 [LOAD] Profile picture URL:', loadedData.profilePicture);
-                    console.log('🔵 [LOAD] Resume URL:', loadedData.resume);
                     setFormData(loadedData);
                 }
             } catch (error) {
@@ -131,7 +135,6 @@ const WorkerOnboarding = () => {
     const handleFileUpload = async (fieldName, file) => {
         // Handle file deletion (when user clicks X)
         if (!file) {
-            console.log(`🗑️ [DELETE] Removing ${fieldName}...`);
             const newFormData = {
                 ...formData,
                 [fieldName]: null
@@ -141,30 +144,21 @@ const WorkerOnboarding = () => {
             return;
         }
 
-        console.log(`📤 [UPLOAD] Starting upload for ${fieldName}...`);
-        console.log(`📤 [UPLOAD] File:`, file);
         setIsUploading(true);
         try {
             // Upload file immediately
             const uploadType = fieldName === 'profilePicture' ? 'profile-picture' : 'documents';
-            console.log(`📤 [UPLOAD] Upload type:`, uploadType);
             const response = await uploadAPI.uploadSingle(file, uploadType);
-            console.log(`📤 [UPLOAD] Upload response:`, response);
-            console.log(`📤 [UPLOAD] response.data:`, response.data);
-            console.log(`📤 [UPLOAD] Full response structure:`, JSON.stringify(response.data, null, 2));
-            console.log(`📤 [UPLOAD] File URL:`, response.data.data.fileUrl);
 
             const newFormData = {
                 ...formData,
                 [fieldName]: `${API_URL}${response.data.data.fileUrl}`
             };
-            console.log(`📤 [UPLOAD] Updating form data for ${fieldName}:`, newFormData[fieldName]);
             setFormData(newFormData);
 
             toast.success(`${fieldName === 'profilePicture' ? 'Profile picture' : 'File'} uploaded successfully`);
         } catch (error) {
             console.error(`❌ [UPLOAD] Error uploading ${fieldName}:`, error);
-            console.error(`❌ [UPLOAD] Error response:`, error.response?.data);
             toast.error(`Failed to upload ${fieldName === 'profilePicture' ? 'profile picture' : 'file'}`);
         } finally {
             setIsUploading(false);
@@ -271,16 +265,20 @@ const WorkerOnboarding = () => {
 
         setIsSaving(true);
         try {
-            await api.post('/auth/onboarding/submit');
+            const response = await api.post('/auth/onboarding/submit');
 
-            // Show success message and redirect to status page
+            // Update local state instead of redirecting
+            setStatus(response.data.status);
             toast.success('Profile submitted successfully! You will be notified once your application is reviewed.');
-            navigate('/onboarding/status');
+
+            // Optionally refresh full status to get updated history
+            const statusResponse = await api.get('/auth/onboarding/status');
+            setApprovalHistory(statusResponse.data.approvalHistory || []);
+
         } catch (error) {
             const message = error.response?.data?.message || 'Error submitting profile';
             toast.error(message);
 
-            // If incomplete, show missing fields
             if (error.response?.data?.missingFields) {
                 console.log('Missing fields:', error.response.data.missingFields);
             }
@@ -338,54 +336,74 @@ const WorkerOnboarding = () => {
         }
     };
 
-    const getStepTitle = () => {
-        return STEPS[currentStep - 1]?.label || '';
-    };
-
-    const getStepSubtitle = () => {
-        const subtitles = [
-            'Let us know about you',
-            'Showcase your expertise and set your rate',
-            'Tell us about your professional journey',
-            'Upload your credentials',
-            'One final look before submitting'
-        ];
-        return subtitles[currentStep - 1] || '';
-    };
-
-    const isStepValid = () => {
-        // Basic validation - could be more sophisticated
-        switch (currentStep) {
-            case 1:
-                return formData.fullName && formData.phone && formData.location && formData.bio && formData.bio.length >= 50;
-            case 2:
-                return formData.skills?.length >= 3 && formData.hourlyRate && formData.preferredJobTypes?.length > 0;
-            case 3:
-                return true; // Experience is optional
-            case 4:
-                return formData.resume || (formData.experience && formData.experience.length > 0);
-            case 5:
-                return profileCompleteness >= 70;
-            default:
-                return false;
-        }
-    };
-
     return (
-        <OnboardingLayout
-            steps={STEPS}
-            currentStep={currentStep}
-            title={getStepTitle()}
-            subtitle={getStepSubtitle()}
-            onBack={handleBack}
-            onNext={handleNext}
-            isLastStep={currentStep === STEPS.length}
-            isValid={isStepValid()}
-            isSaving={isSaving || isUploading}
-            profileCompleteness={profileCompleteness}
-        >
-            {renderStep()}
-        </OnboardingLayout>
+        <DashboardLayout disableNavigation={true}>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Main Content - Steps (2 Columns) */}
+                <div className="lg:col-span-2 space-y-6">
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+                        {/* Step Header */}
+                        <div className="mb-8">
+                            <h2 className="text-2xl font-bold text-gray-900">{STEPS[currentStep - 1]?.label}</h2>
+                            <p className="text-gray-500">{STEPS[currentStep - 1]?.subtitle}</p>
+
+                            {/* Step Progress Dots */}
+                            <div className="flex items-center gap-2 mt-4">
+                                {STEPS.map((step, index) => (
+                                    <div
+                                        key={step.id}
+                                        className={`h-2 rounded-full transition-all duration-300 ${index + 1 === currentStep
+                                                ? 'w-8 bg-primary-600'
+                                                : index + 1 < currentStep
+                                                    ? 'w-2 bg-primary-200'
+                                                    : 'w-2 bg-gray-100'
+                                            }`}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Step Content */}
+                        <div className="min-h-[400px]">
+                            {renderStep()}
+                        </div>
+
+                        {/* Navigation Buttons */}
+                        <div className="flex items-center justify-between pt-8 mt-8 border-t border-gray-100">
+                            <button
+                                onClick={handleBack}
+                                disabled={currentStep === 1 || isSaving}
+                                className={`px-6 py-2.5 rounded-xl font-medium transition-all ${currentStep === 1
+                                        ? 'text-gray-300 cursor-not-allowed'
+                                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                            >
+                                Back
+                            </button>
+                            <button
+                                onClick={handleNext}
+                                disabled={isSaving || isUploading}
+                                className="px-8 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-600/20 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            >
+                                {isSaving ? 'Saving...' : currentStep === STEPS.length ? 'Submit Profile' : 'Next Step'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Side Panel - Info (1 Column) */}
+                <div className="lg:col-span-1">
+                    <div className="sticky top-8">
+                        <OnboardingInfoPanel
+                            profileCompleteness={profileCompleteness}
+                            status={status}
+                            rejectionReason={rejectionReason}
+                            approvalHistory={approvalHistory}
+                        />
+                    </div>
+                </div>
+            </div>
+        </DashboardLayout>
     );
 };
 

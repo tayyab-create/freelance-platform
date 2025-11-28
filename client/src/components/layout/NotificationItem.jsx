@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { markNotificationAsRead, deleteNotification } from '../../redux/slices/notificationSlice';
 import {
   BriefcaseIcon,
@@ -80,10 +80,40 @@ const NotificationItem = ({ notification, onClose }) => {
     return 'Just now';
   };
 
+  const { user } = useSelector((state) => state.auth);
+
   const handleClick = () => {
     // Mark as read if unread
     if (!notification.read) {
       dispatch(markNotificationAsRead(notification._id));
+    }
+
+    // Special handling for rejection notifications (backward compatibility)
+    if (notification.type === 'system' &&
+      (notification.title === 'Account Application Update' || notification.message.includes('not been approved'))) {
+      if (user?.role === 'worker') {
+        navigate('/worker/onboarding');
+        onClose?.();
+        return;
+      } else if (user?.role === 'company') {
+        navigate('/company/onboarding');
+        onClose?.();
+        return;
+      }
+    }
+
+    // Special handling for approval notifications (backward compatibility)
+    if (notification.type === 'system' &&
+      (notification.title === 'Account Approved!' || notification.message.includes('approved'))) {
+      if (user?.role === 'worker') {
+        navigate('/worker/dashboard');
+        onClose?.();
+        return;
+      } else if (user?.role === 'company') {
+        navigate('/company/dashboard');
+        onClose?.();
+        return;
+      }
     }
 
     // Navigate to link if available
@@ -101,9 +131,8 @@ const NotificationItem = ({ notification, onClose }) => {
   return (
     <div
       onClick={handleClick}
-      className={`group flex items-start gap-4 p-4 hover:bg-white/80 transition-all duration-300 cursor-pointer relative ${
-        !notification.read ? 'bg-primary-50/30' : 'bg-transparent'
-      }`}
+      className={`group flex items-start gap-4 p-4 hover:bg-white/80 transition-all duration-300 cursor-pointer relative ${!notification.read ? 'bg-primary-50/30' : 'bg-transparent'
+        }`}
     >
       {/* Unread indicator bar */}
       {!notification.read && (
