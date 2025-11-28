@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Input from '../../common/Input';
 import { Plus, X, Briefcase, DollarSign } from 'lucide-react';
@@ -6,6 +6,11 @@ import { Plus, X, Briefcase, DollarSign } from 'lucide-react';
 const SkillsStep = ({ formData, onChange, errors = {} }) => {
     const [skillInput, setSkillInput] = useState('');
     const [preferredJobType, setPreferredJobType] = useState(formData.preferredJobTypes || []);
+
+    // Sync local state with formData when it changes (e.g., when loaded from database)
+    useEffect(() => {
+        setPreferredJobType(formData.preferredJobTypes || []);
+    }, [formData.preferredJobTypes]);
 
     const handleAddSkill = () => {
         if (skillInput.trim() && !formData.skills?.includes(skillInput.trim())) {

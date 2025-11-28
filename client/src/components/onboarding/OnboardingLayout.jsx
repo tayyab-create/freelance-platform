@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { ArrowLeft, Save, CheckCircle } from 'lucide-react';
 import StepIndicator from './StepIndicator';
-import AutoSaveIndicator from '../common/AutoSaveIndicator';
 
 const OnboardingLayout = ({
     children,
@@ -81,10 +80,7 @@ const OnboardingLayout = ({
                         {subtitle && <p className="text-gray-600">{subtitle}</p>}
                     </div>
 
-                    {/* Auto-save Indicator */}
-                    <div className="mb-6">
-                        <AutoSaveIndicator isSaving={isSaving} lastSaved={lastSaved} />
-                    </div>
+
 
                     {/* Step Content */}
                     <div className="mb-8">
@@ -158,12 +154,7 @@ const OnboardingLayout = ({
                     </div>
                 </div>
 
-                {/* Helper Text */}
-                <div className="text-center mt-6 text-sm text-gray-500">
-                    <p>
-                        Your progress is automatically saved. You can complete this later.
-                    </p>
-                </div>
+
             </div>
         </div>
     );

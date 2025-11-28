@@ -40,6 +40,30 @@ const workerProfileSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  website: {
+    type: String,
+    trim: true
+  },
+  twitterProfile: {
+    type: String,
+    trim: true
+  },
+  dribbbleProfile: {
+    type: String,
+    trim: true
+  },
+  behanceProfile: {
+    type: String,
+    trim: true
+  },
+  instagramProfile: {
+    type: String,
+    trim: true
+  },
+  stackoverflowProfile: {
+    type: String,
+    trim: true
+  },
   certifications: [{
     title: {
       type: String,

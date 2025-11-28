@@ -52,7 +52,6 @@ const WorkerOnboarding = () => {
     const [errors, setErrors] = useState({});
     const [isSaving, setIsSaving] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
-    const [lastSaved, setLastSaved] = useState(null);
     const [profileCompleteness, setProfileCompleteness] = useState(0);
 
     // Load saved progress on mount
@@ -90,46 +89,39 @@ const WorkerOnboarding = () => {
         loadProgress();
     }, []);
 
-    // Auto-save functionality (debounced)
+    // Calculate profile completeness in real-time
     useEffect(() => {
-        const timer = setTimeout(() => {
-            if (!isSaving && Object.keys(formData).length > 0) {
-                handleAutoSave(true);
-            }
-        }, 3000);
+        const calculateCompleteness = () => {
+            let completedFields = 0;
+            const totalFields = 13; // Total number of important fields
 
-        return () => clearTimeout(timer);
-    }, [formData, currentStep]);
+            // Personal Info (5 fields)
+            if (formData.fullName) completedFields++;
+            if (formData.phone) completedFields++;
+            if (formData.bio && formData.bio.length >= 50) completedFields++;
+            if (formData.location) completedFields++;
+            if (formData.profilePicture) completedFields++;
 
-    const handleAutoSave = async (silent = false) => {
-        console.log('💾 [SAVE] Starting auto-save...');
-        console.log('💾 [SAVE] Current step:', currentStep - 1);
-        console.log('💾 [SAVE] Form data to save:', formData);
-        console.log('💾 [SAVE] Profile picture:', formData.profilePicture);
-        console.log('💾 [SAVE] Resume:', formData.resume);
-        setIsSaving(true);
-        try {
-            const savePayload = {
-                step: currentStep - 1,
-                profileData: formData
-            };
-            console.log('💾 [SAVE] Payload:', savePayload);
-            const response = await api.put('/auth/onboarding/save', savePayload);
-            console.log('💾 [SAVE] Save response:', response.data);
-            setLastSaved(new Date());
-            if (!silent) {
-                toast.success('Draft saved successfully');
-            }
-        } catch (error) {
-            console.error('❌ [SAVE] Auto-save error:', error);
-            console.error('❌ [SAVE] Error response:', error.response?.data);
-            if (!silent) {
-                toast.error('Failed to save draft');
-            }
-        } finally {
-            setIsSaving(false);
-        }
-    };
+            // Skills & Preferences (4 fields)
+            if (formData.skills && formData.skills.length >= 3) completedFields++;
+            if (formData.hourlyRate && formData.hourlyRate > 0) completedFields++;
+            if (formData.preferredJobTypes && formData.preferredJobTypes.length > 0) completedFields++;
+            if (formData.willingToRelocate !== undefined) completedFields++;
+
+            // Experience & Portfolio (2 fields)
+            if (formData.experience && formData.experience.length > 0) completedFields++;
+            if (formData.portfolioLinks && formData.portfolioLinks.length > 0) completedFields++;
+
+            // Verification (2 fields)
+            if (formData.resume) completedFields++;
+            if (formData.experience && formData.experience.length > 0) completedFields++; // Alternative to resume
+
+            const percentage = Math.round((completedFields / totalFields) * 100);
+            setProfileCompleteness(percentage);
+        };
+
+        calculateCompleteness();
+    }, [formData]);
 
     const handleFormChange = (newData) => {
         setFormData(newData);
@@ -137,7 +129,17 @@ const WorkerOnboarding = () => {
     };
 
     const handleFileUpload = async (fieldName, file) => {
-        if (!file) return;
+        // Handle file deletion (when user clicks X)
+        if (!file) {
+            console.log(`🗑️ [DELETE] Removing ${fieldName}...`);
+            const newFormData = {
+                ...formData,
+                [fieldName]: null
+            };
+            setFormData(newFormData);
+            toast.info(`${fieldName === 'profilePicture' ? 'Profile picture' : 'File'} removed`);
+            return;
+        }
 
         console.log(`📤 [UPLOAD] Starting upload for ${fieldName}...`);
         console.log(`📤 [UPLOAD] File:`, file);
@@ -236,9 +238,22 @@ const WorkerOnboarding = () => {
             return;
         }
 
+        // Save current step data before moving to next step
         if (currentStep < STEPS.length) {
-            setCurrentStep(prev => prev + 1);
-            await handleAutoSave(true);
+            setIsSaving(true);
+            try {
+                const savePayload = {
+                    step: currentStep - 1,
+                    profileData: formData
+                };
+                await api.put('/auth/onboarding/save', savePayload);
+                setCurrentStep(prev => prev + 1);
+            } catch (error) {
+                console.error('❌ [SAVE] Error saving step:', error);
+                toast.error('Failed to save progress. Please try again.');
+            } finally {
+                setIsSaving(false);
+            }
         } else {
             // Submit for review
             await handleSubmit();
@@ -364,11 +379,9 @@ const WorkerOnboarding = () => {
             subtitle={getStepSubtitle()}
             onBack={handleBack}
             onNext={handleNext}
-            onSave={() => handleAutoSave(false)}
             isLastStep={currentStep === STEPS.length}
             isValid={isStepValid()}
             isSaving={isSaving || isUploading}
-            lastSaved={lastSaved}
             profileCompleteness={profileCompleteness}
         >
             {renderStep()}

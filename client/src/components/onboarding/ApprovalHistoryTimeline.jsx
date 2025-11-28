@@ -10,26 +10,28 @@ const ApprovalHistoryTimeline = ({ history = [] }) => {
     // Sort history by date (newest first)
     const sortedHistory = [...history].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-    const getStatusIcon = (status) => {
-        switch (status) {
+    const getStatusIcon = (action) => {
+        switch (action) {
             case 'approved':
                 return <CheckCircle className="w-5 h-5 text-green-500" />;
             case 'rejected':
                 return <XCircle className="w-5 h-5 text-red-500" />;
             case 'submitted':
+            case 'resubmitted':
                 return <FileText className="w-5 h-5 text-blue-500" />;
             default:
                 return <Clock className="w-5 h-5 text-gray-400" />;
         }
     };
 
-    const getStatusColor = (status) => {
-        switch (status) {
+    const getStatusColor = (action) => {
+        switch (action) {
             case 'approved':
                 return 'bg-green-100 border-green-200';
             case 'rejected':
                 return 'bg-red-50 border-red-200';
             case 'submitted':
+            case 'resubmitted':
                 return 'bg-blue-50 border-blue-200';
             default:
                 return 'bg-gray-50 border-gray-200';
@@ -57,18 +59,18 @@ const ApprovalHistoryTimeline = ({ history = [] }) => {
                 {sortedHistory.map((event, index) => (
                     <div key={index} className="relative animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
                         {/* Timeline Dot */}
-                        <div className={`absolute -left-[33px] top-1 w-8 h-8 rounded-full border-4 border-white flex items-center justify-center ${getStatusColor(event.status)}`}>
-                            {getStatusIcon(event.status)}
+                        <div className={`absolute -left-[33px] top-1 w-8 h-8 rounded-full border-4 border-white flex items-center justify-center ${getStatusColor(event.action)}`}>
+                            {getStatusIcon(event.action)}
                         </div>
 
                         {/* Content Card */}
-                        <div className={`card p-4 border ${getStatusColor(event.status)}`}>
+                        <div className={`card p-4 border ${getStatusColor(event.action)}`}>
                             <div className="flex justify-between items-start mb-2">
                                 <div>
                                     <h4 className="font-bold text-gray-900 capitalize">
-                                        {event.status === 'submitted' ? 'Application Submitted' :
-                                            event.status === 'resubmitted' ? 'Application Resubmitted' :
-                                                `Application ${event.status}`}
+                                        {event.action === 'submitted' ? 'Application Submitted' :
+                                            event.action === 'resubmitted' ? 'Application Resubmitted' :
+                                                `Application ${event.action}`}
                                     </h4>
                                     <p className="text-xs text-gray-500">{formatDate(event.timestamp)}</p>
                                 </div>
@@ -78,6 +80,15 @@ const ApprovalHistoryTimeline = ({ history = [] }) => {
                                 <div className="mt-3 bg-white/50 rounded-lg p-3 text-sm text-gray-700">
                                     <span className="font-semibold block mb-1">Feedback:</span>
                                     {event.reason}
+                                </div>
+                            )}
+
+                            {event.metadata?.changes && event.metadata.changes.length > 0 && (
+                                <div className="mt-3 bg-blue-50/50 rounded-lg p-3 text-sm text-blue-700">
+                                    <span className="font-semibold block mb-1">Updated:</span>
+                                    {event.metadata.changes.map(field =>
+                                        field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())
+                                    ).join(', ')}
                                 </div>
                             )}
 
@@ -97,7 +108,7 @@ const ApprovalHistoryTimeline = ({ history = [] }) => {
 ApprovalHistoryTimeline.propTypes = {
     history: PropTypes.arrayOf(
         PropTypes.shape({
-            status: PropTypes.string.isRequired,
+            action: PropTypes.string.isRequired,
             timestamp: PropTypes.string.isRequired,
             reason: PropTypes.string,
             reviewedBy: PropTypes.string

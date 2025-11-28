@@ -52,6 +52,31 @@ const logResubmission = async (userId, userRole, req) => {
             ? calculateWorkerProfileCompleteness(profile)
             : calculateCompanyProfileCompleteness(profile);
 
+        // Find previous rejection to compare changes
+        const lastRejection = await ApprovalHistory.findOne({
+            user: userId,
+            action: 'rejected'
+        }).sort({ timestamp: -1 }).lean();
+
+        let changes = [];
+        if (lastRejection && lastRejection.profileSnapshot) {
+            const oldProfile = lastRejection.profileSnapshot;
+
+            // Helper to check if field changed
+            const hasChanged = (key) => {
+                const oldVal = JSON.stringify(oldProfile[key]);
+                const newVal = JSON.stringify(profile[key]);
+                return oldVal !== newVal;
+            };
+
+            // Check important fields based on role
+            const fieldsToCheck = userRole === 'worker'
+                ? ['fullName', 'bio', 'skills', 'hourlyRate', 'experience', 'resume', 'profilePicture']
+                : ['companyName', 'description', 'industry', 'website', 'location', 'logo'];
+
+            changes = fieldsToCheck.filter(field => hasChanged(field));
+        }
+
         await ApprovalHistory.create({
             user: userId,
             action: 'resubmitted',
@@ -60,7 +85,8 @@ const logResubmission = async (userId, userRole, req) => {
             metadata: {
                 profileCompleteness: completeness,
                 ipAddress: req.ip || req.connection.remoteAddress,
-                userAgent: req.get('user-agent')
+                userAgent: req.get('user-agent'),
+                changes: changes // Store list of changed fields
             }
         });
     } catch (error) {

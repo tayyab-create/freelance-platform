@@ -1,5 +1,6 @@
 const { User, WorkerProfile, CompanyProfile, Job, Application } = require('../models');
 const notificationService = require('../services/notificationService');
+const { logApproval, logRejection } = require('../middleware/approvalHistory');
 
 // @desc    Get admin dashboard statistics
 // @route   GET /api/admin/dashboard
@@ -238,6 +239,9 @@ exports.approveUser = async (req, res) => {
     user.status = 'approved';
     await user.save();
 
+    // Log approval action
+    await logApproval(user._id, req.user._id);
+
     // Notify user about approval
     const dashboardLink = user.role === 'worker' ? '/worker/dashboard' : '/company/dashboard';
     await notificationService.createNotification(
@@ -271,6 +275,7 @@ exports.approveUser = async (req, res) => {
 // @access  Private/Admin
 exports.rejectUser = async (req, res) => {
   try {
+    const { reason } = req.body;
     const user = await User.findById(req.params.id);
 
     if (!user) {
@@ -281,17 +286,28 @@ exports.rejectUser = async (req, res) => {
     }
 
     user.status = 'rejected';
+    // Store rejection reason in profile if needed, but mainly in history
+    if (user.role === 'worker') {
+      await WorkerProfile.findOneAndUpdate({ user: user._id }, { rejectionReason: reason });
+    } else if (user.role === 'company') {
+      await CompanyProfile.findOneAndUpdate({ user: user._id }, { rejectionReason: reason });
+    }
+
     await user.save();
+
+    // Log rejection action
+    await logRejection(user._id, req.user._id, reason || 'No reason provided');
 
     // Notify user about rejection
     await notificationService.createNotification(
       user._id,
       'system',
       'Account Application Update',
-      `We regret to inform you that your ${user.role} account application has not been approved at this time. Please contact support if you have questions.`,
+      `We regret to inform you that your ${user.role} account application has not been approved. Reason: ${reason || 'Not specified'}. Please update your profile and resubmit.`,
       '/login',
       {
-        status: 'rejected'
+        status: 'rejected',
+        reason: reason
       }
     );
 

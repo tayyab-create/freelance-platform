@@ -37,7 +37,7 @@ const FileUpload = ({
       } else {
         // For non-preview files (like PDFs), set a fake file object to show the name
         const fileName = value.split('/').pop() || 'Uploaded File';
-        setSelectedFile({ name: fileName, size: 0 });
+        setSelectedFile({ name: fileName, size: -1, isUploaded: true }); // -1 indicates already uploaded file
       }
     }
   }, [currentImage, value, preview]);
@@ -164,6 +164,7 @@ const FileUpload = ({
   };
 
   const formatFileSize = (bytes) => {
+    if (bytes === -1) return 'Uploaded'; // Already uploaded file
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;

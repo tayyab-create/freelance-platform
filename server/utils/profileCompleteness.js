@@ -23,8 +23,6 @@ const calculateWorkerProfileCompleteness = (profile) => {
         profilePicture: { value: profile.profilePicture, weight: 5 },
         resume: { value: profile.resume, weight: 15 },
         experience: { value: profile.experience && profile.experience.length > 0, weight: 12 },
-        githubProfile: { value: profile.githubProfile, weight: 5 },
-        linkedinProfile: { value: profile.linkedinProfile, weight: 5 },
 
         // Nice to have fields
         certifications: { value: profile.certifications && profile.certifications.length > 0, weight: 3 },
@@ -102,9 +100,6 @@ const getWorkerMissingFields = (profile) => {
     if (!profile.hourlyRate) missing.push('Hourly Rate');
     if (!profile.resume && (!profile.experience || profile.experience.length === 0)) {
         missing.push('Resume or Work Experience');
-    }
-    if (!profile.linkedinProfile && !profile.githubProfile) {
-        missing.push('LinkedIn or GitHub Profile');
     }
 
     return missing;

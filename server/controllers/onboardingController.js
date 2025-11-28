@@ -42,45 +42,29 @@ exports.saveOnboardingProgress = async (req, res) => {
         console.log('🔵 [BACKEND] Found profile:', profile ? 'Yes' : 'No');
 
         if (profile && profileData) {
-            // Update profile fields
-            Object.keys(profileData).forEach(key => {
-                console.log(`🔵 [BACKEND] Setting ${key}:`, profileData[key]);
-                profile[key] = profileData[key];
-            });
-
-            // Calculate and update completeness
+            // Calculate completeness
             const completeness = user.role === 'worker'
-                ? calculateWorkerProfileCompleteness(profile)
-                : calculateCompanyProfileCompleteness(profile);
+                ? calculateWorkerProfileCompleteness({ ...profile.toObject(), ...profileData })
+                : calculateCompanyProfileCompleteness({ ...profile.toObject(), ...profileData });
 
-            profile.profileCompleteness = completeness;
-            console.log('🔵 [BACKEND] Saving profile with completeness:', completeness);
-            console.log('🔵 [BACKEND] Profile picture in DB:', profile.profilePicture);
-            console.log('🔵 [BACKEND] Resume in DB:', profile.resume);
+            // Use findOneAndUpdate to avoid version conflicts
+            // This bypasses Mongoose's optimistic concurrency control
+            const updateData = {
+                ...profileData,
+                profileCompleteness: completeness
+            };
 
-            // Retry save if version conflict occurs
-            let retries = 3;
-            while (retries > 0) {
-                try {
-                    await profile.save();
-                    console.log('🔵 [BACKEND] Profile saved successfully');
-                    break;
-                } catch (saveError) {
-                    if (saveError.name === 'VersionError' && retries > 1) {
-                        console.log(`⚠️ [BACKEND] Version conflict, retrying... (${retries - 1} attempts left)`);
-                        // Reload the profile to get the latest version
-                        await profile.reload();
-                        // Reapply the changes
-                        Object.keys(profileData).forEach(key => {
-                            profile[key] = profileData[key];
-                        });
-                        profile.profileCompleteness = completeness;
-                        retries--;
-                    } else {
-                        throw saveError;
-                    }
-                }
-            }
+            console.log('🔵 [BACKEND] Updating profile with data:', updateData);
+            console.log('🔵 [BACKEND] Profile picture in update:', updateData.profilePicture);
+            console.log('🔵 [BACKEND] Resume in update:', updateData.resume);
+
+            profile = await Profile.findOneAndUpdate(
+                { user: user._id },
+                { $set: updateData },
+                { new: true, runValidators: true }
+            );
+
+            console.log('🔵 [BACKEND] Profile updated successfully');
         }
 
         res.status(200).json({

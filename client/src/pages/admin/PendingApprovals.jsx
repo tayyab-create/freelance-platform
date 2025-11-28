@@ -134,12 +134,20 @@ const PendingApprovals = () => {
                   <div key={user._id} className="p-6 hover:bg-gray-50 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                       {/* Avatar/Icon */}
-                      <div className={`h-12 w-12 rounded-xl flex items-center justify-center text-xl font-bold ${user.role === 'worker'
-                        ? 'bg-purple-100 text-purple-600'
-                        : 'bg-blue-100 text-blue-600'
-                        }`}>
-                        {user.role === 'worker' ? <FiUser /> : <FiBriefcase />}
-                      </div>
+                      {profile?.profilePicture ? (
+                        <img
+                          src={profile.profilePicture}
+                          alt="Profile"
+                          className="h-12 w-12 rounded-xl object-cover border border-gray-100"
+                        />
+                      ) : (
+                        <div className={`h-12 w-12 rounded-xl flex items-center justify-center text-xl font-bold ${user.role === 'worker'
+                          ? 'bg-purple-100 text-purple-600'
+                          : 'bg-blue-100 text-blue-600'
+                          }`}>
+                          {user.role === 'worker' ? <FiUser /> : <FiBriefcase />}
+                        </div>
+                      )}
 
                       {/* Info */}
                       <div>

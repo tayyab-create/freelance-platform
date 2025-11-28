@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import Input from '../../common/Input';
 import Textarea from '../../common/Textarea';
 import FileUpload from '../../common/FileUpload';
-import { User, Mail, Phone, MapPin } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Globe, Linkedin, Github, Twitter, Dribbble, Layout, Instagram, Code } from 'lucide-react';
 
 const PersonalInfoStep = ({ formData, onChange, onFileUpload, errors = {} }) => {
     const handleChange = (e) => {
@@ -17,20 +17,6 @@ const PersonalInfoStep = ({ formData, onChange, onFileUpload, errors = {} }) => 
 
     return (
         <div className="space-y-6">
-            {/* Profile Picture */}
-            <div>
-                <FileUpload
-                    label="Profile Picture"
-                    name="profilePicture"
-                    accept="image/*"
-                    value={formData.profilePicture}
-                    onFileSelect={handlePhotoUpload}
-                    helperText="Upload a professional photo (JPG, PNG - max 5MB)"
-                    maxSize={5}
-                    preview
-                />
-            </div>
-
             {/* Full Name */}
             <Input
                 label="Full Name"
@@ -62,6 +48,20 @@ const PersonalInfoStep = ({ formData, onChange, onFileUpload, errors = {} }) => 
                 maxLength={20}
             />
 
+            {/* Profile Picture */}
+            <div>
+                <FileUpload
+                    label="Profile Picture"
+                    name="profilePicture"
+                    accept="image/*"
+                    value={formData.profilePicture}
+                    onFileSelect={handlePhotoUpload}
+                    helperText="Upload a professional photo (JPG, PNG - max 5MB)"
+                    maxSize={5}
+                    preview
+                />
+            </div>
+
             {/* Professional Bio */}
             <Textarea
                 label="Professional Bio"
@@ -91,28 +91,93 @@ const PersonalInfoStep = ({ formData, onChange, onFileUpload, errors = {} }) => 
                 maxLength={100}
             />
 
-            {/* LinkedIn Profile (Optional) */}
-            <Input
-                label="LinkedIn Profile"
-                name="linkedinProfile"
-                type="url"
-                value={formData.linkedinProfile || ''}
-                onChange={handleChange}
-                placeholder="https://linkedin.com/in/yourprofile"
-                icon={Mail}
-                helperText="Your professional LinkedIn URL"
-            />
+            {/* Social & Professional Links */}
+            <div className="space-y-4 pt-4 border-t border-gray-100">
+                <h3 className="text-lg font-medium text-gray-900">Social & Professional Links</h3>
+                <p className="text-sm text-gray-500">Add links to your online presence (all optional)</p>
 
-            {/* GitHub Profile (Optional) */}
-            <Input
-                label="GitHub Profile"
-                name="githubProfile"
-                type="url"
-                value={formData.githubProfile || ''}
-                onChange={handleChange}
-                placeholder="https://github.com/yourusername"
-                helperText="Showcase your code and projects"
-            />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Input
+                        label="Website / Portfolio"
+                        name="website"
+                        type="url"
+                        value={formData.website || ''}
+                        onChange={handleChange}
+                        placeholder="https://yourwebsite.com"
+                        icon={Globe}
+                    />
+
+                    <Input
+                        label="LinkedIn Profile"
+                        name="linkedinProfile"
+                        type="url"
+                        value={formData.linkedinProfile || ''}
+                        onChange={handleChange}
+                        placeholder="https://linkedin.com/in/profile"
+                        icon={Linkedin}
+                    />
+
+                    <Input
+                        label="GitHub Profile"
+                        name="githubProfile"
+                        type="url"
+                        value={formData.githubProfile || ''}
+                        onChange={handleChange}
+                        placeholder="https://github.com/username"
+                        icon={Github}
+                    />
+
+                    <Input
+                        label="Twitter / X"
+                        name="twitterProfile"
+                        type="url"
+                        value={formData.twitterProfile || ''}
+                        onChange={handleChange}
+                        placeholder="https://twitter.com/username"
+                        icon={Twitter}
+                    />
+
+                    <Input
+                        label="Dribbble"
+                        name="dribbbleProfile"
+                        type="url"
+                        value={formData.dribbbleProfile || ''}
+                        onChange={handleChange}
+                        placeholder="https://dribbble.com/username"
+                        icon={Dribbble}
+                    />
+
+                    <Input
+                        label="Behance"
+                        name="behanceProfile"
+                        type="url"
+                        value={formData.behanceProfile || ''}
+                        onChange={handleChange}
+                        placeholder="https://behance.net/username"
+                        icon={Layout}
+                    />
+
+                    <Input
+                        label="Instagram"
+                        name="instagramProfile"
+                        type="url"
+                        value={formData.instagramProfile || ''}
+                        onChange={handleChange}
+                        placeholder="https://instagram.com/username"
+                        icon={Instagram}
+                    />
+
+                    <Input
+                        label="StackOverflow"
+                        name="stackoverflowProfile"
+                        type="url"
+                        value={formData.stackoverflowProfile || ''}
+                        onChange={handleChange}
+                        placeholder="https://stackoverflow.com/users/..."
+                        icon={Code}
+                    />
+                </div>
+            </div>
         </div>
     );
 };
