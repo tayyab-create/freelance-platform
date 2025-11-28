@@ -3,7 +3,7 @@ import {
     FiDollarSign, FiBriefcase, FiStar, FiCheckCircle,
     FiGithub, FiLinkedin, FiTwitter, FiInstagram,
     FiFileText, FiVideo, FiUploadCloud, FiTrash2,
-    FiGlobe, FiLayers, FiCode, FiDribbble
+    FiGlobe, FiLayers, FiCode, FiDribbble, FiEye
 } from 'react-icons/fi';
 import Input from '../../common/Input';
 import CustomSelect from '../../shared/CustomSelect';
@@ -45,7 +45,22 @@ const OverviewTab = ({
                         </div>
                         <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Rate</span>
                     </div>
-                    <p className="text-2xl font-black text-gray-900">${profile?.hourlyRate || 0}<span className="text-sm text-gray-400 font-medium">/hr</span></p>
+                    {editing ? (
+                        <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
+                            <input
+                                type="number"
+                                name="hourlyRate"
+                                value={basicInfo.hourlyRate}
+                                onChange={handleBasicInfoChange}
+                                className="w-full pl-7 pr-10 py-2 border border-gray-200 rounded-xl font-bold text-gray-900 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all"
+                                placeholder="0"
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">/hr</span>
+                        </div>
+                    ) : (
+                        <p className="text-2xl font-black text-gray-900">${profile?.hourlyRate || 0}<span className="text-sm text-gray-400 font-medium">/hr</span></p>
+                    )}
                 </div>
 
                 <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
@@ -218,30 +233,34 @@ const OverviewTab = ({
                     {editing ? (
                         <div className="grid md:grid-cols-2 gap-6">
                             {/* Resume Upload */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Resume</label>
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-3">Resume / CV</label>
                                 {basicInfo.resume ? (
-                                    <div className="p-4 border border-gray-200 rounded-xl bg-gray-50 flex items-center justify-between group hover:border-primary-200 transition-colors">
+                                    <div className="group relative bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between transition-all duration-200">
                                         <div className="flex items-center gap-4">
-                                            <div className="p-3 bg-white rounded-lg border border-gray-100 text-primary-600 shadow-sm">
+                                            <div className="p-3 bg-red-50 text-red-500 rounded-lg border border-red-100">
                                                 <FiFileText className="h-6 w-6" />
                                             </div>
                                             <div>
-                                                <p className="text-sm font-bold text-gray-900">Resume Uploaded</p>
-                                                <a
-                                                    href={basicInfo.resume}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-xs text-primary-600 hover:text-primary-700 font-medium hover:underline flex items-center gap-1 mt-0.5"
-                                                >
-                                                    View Document
-                                                </a>
+                                                <p className="text-sm font-bold text-gray-900">Resume.pdf</p>
+                                                <div className="flex items-center gap-3 mt-1">
+                                                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">PDF Document</span>
+                                                    <a
+                                                        href={basicInfo.resume}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-xs text-primary-600 hover:text-primary-700 font-medium hover:underline flex items-center gap-1"
+                                                    >
+                                                        <FiEye className="w-3 h-3" />
+                                                        Preview
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
                                         <button
                                             onClick={handleDeleteResume}
                                             type="button"
-                                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                            className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
                                             title="Remove Resume"
                                         >
                                             <FiTrash2 className="h-5 w-5" />
@@ -255,19 +274,27 @@ const OverviewTab = ({
                                         uploadProgress={resumeUploadProgress}
                                         showProgress={true}
                                     >
-                                        <div className="relative h-32 w-full rounded-xl overflow-hidden border-2 border-dashed border-gray-300 cursor-pointer hover:border-primary-500 hover:bg-primary-50 transition-all bg-white flex flex-col items-center justify-center group">
-                                            <div className="flex flex-col items-center text-gray-400 group-hover:text-primary-500 transition-colors">
-                                                <div className="p-3 bg-gray-50 rounded-full mb-2 group-hover:bg-white transition-colors">
-                                                    <FiUploadCloud className="h-6 w-6" />
+                                        <div className="relative h-48 w-full rounded-2xl border-2 border-dashed border-gray-300 cursor-pointer hover:border-primary-500 hover:bg-primary-50/50 transition-all bg-gray-50 flex flex-col items-center justify-center group overflow-hidden">
+                                            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/subtle-dots.png')] opacity-30"></div>
+
+                                            <div className="relative z-10 flex flex-col items-center text-center p-6 transition-transform group-hover:scale-105 duration-200">
+                                                <div className="p-4 bg-white rounded-full shadow-sm mb-4 group-hover:shadow-md transition-all">
+                                                    <FiUploadCloud className="h-8 w-8 text-primary-500" />
                                                 </div>
-                                                <span className="text-sm font-bold text-gray-700 group-hover:text-primary-700">Upload Resume</span>
-                                                <span className="text-xs text-gray-400 mt-1">PDF, DOC up to 5MB</span>
+                                                <h4 className="text-base font-bold text-gray-900 mb-1">Click to upload or drag and drop</h4>
+                                                <p className="text-sm text-gray-500 mb-4 max-w-xs mx-auto">
+                                                    Upload your resume in PDF, DOC, or DOCX format to help companies understand your background.
+                                                </p>
+                                                <span className="px-3 py-1 bg-white border border-gray-200 rounded-full text-xs font-medium text-gray-500 group-hover:border-primary-200 group-hover:text-primary-600 transition-colors">
+                                                    Max file size: 5MB
+                                                </span>
                                             </div>
 
                                             {uploadingResume && (
-                                                <div className="absolute inset-0 bg-white/90 flex flex-col items-center justify-center z-10 backdrop-blur-sm">
-                                                    <Spinner size="md" />
-                                                    <span className="text-xs font-medium text-primary-600 mt-2">Uploading... {resumeUploadProgress}%</span>
+                                                <div className="absolute inset-0 bg-white/95 flex flex-col items-center justify-center z-20 backdrop-blur-sm">
+                                                    <Spinner size="lg" />
+                                                    <span className="text-sm font-bold text-gray-900 mt-4">Uploading Resume...</span>
+                                                    <span className="text-xs text-primary-600 font-medium mt-1">{resumeUploadProgress}% Complete</span>
                                                 </div>
                                             )}
                                         </div>

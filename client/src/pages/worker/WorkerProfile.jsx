@@ -153,12 +153,26 @@ const WorkerProfile = () => {
         setItemToDelete({ type: 'certification', id, name: cert?.title || 'Certification' });
     };
 
-    const handleDeleteConfirm = () => {
+    const handleDeleteConfirm = async () => {
         const item = itemToDelete;
         setItemToDelete(null);
         const previousProfile = { ...profile };
 
-        // Optimistic Updates
+        // Immediate deletion for Resume (to avoid persistence issues)
+        if (item.type === 'resume') {
+            try {
+                setBasicInfo(prev => ({ ...prev, resume: '' }));
+                await workerAPI.updateProfile({ resume: '' });
+                toast.success('Resume deleted');
+                fetchProfile();
+            } catch (error) {
+                toast.error('Failed to delete resume');
+                setBasicInfo(prev => ({ ...prev, resume: previousProfile.resume })); // Revert on error
+            }
+            return;
+        }
+
+        // Optimistic Updates for others
         if (item.type === 'profilePicture') {
             setProfile(prev => ({ ...prev, profilePicture: '' }));
         } else if (item.type === 'experience') {
@@ -171,8 +185,6 @@ const WorkerProfile = () => {
                 ...prev,
                 certifications: prev.certifications.filter(c => c._id !== item.id)
             }));
-        } else if (item.type === 'resume') {
-            setBasicInfo(prev => ({ ...prev, resume: '' }));
         }
 
         executeWithUndo({
@@ -183,8 +195,6 @@ const WorkerProfile = () => {
                     await workerAPI.deleteExperience(item.id);
                 } else if (item.type === 'certification') {
                     await workerAPI.deleteCertification(item.id);
-                } else if (item.type === 'resume') {
-                    await workerAPI.updateProfile({ resume: '' });
                 }
                 // Fetch profile to sync state after actual deletion
                 fetchProfile();
