@@ -152,7 +152,12 @@ exports.updateProfile = async (req, res) => {
             if (behanceProfile !== undefined) profile.behanceProfile = behanceProfile;
             if (instagramProfile !== undefined) profile.instagramProfile = instagramProfile;
             if (stackoverflowProfile !== undefined) profile.stackoverflowProfile = stackoverflowProfile;
-            if (profilePicture !== undefined) profile.profilePicture = profilePicture;
+
+            if (profilePicture !== undefined) {
+                console.log('Updating profilePicture. Old:', profile.profilePicture, 'New:', profilePicture);
+                profile.profilePicture = profilePicture;
+            }
+
             if (resume !== undefined) profile.resume = resume;
             if (preferredJobTypes !== undefined) profile.preferredJobTypes = preferredJobTypes;
             if (willingToRelocate !== undefined) profile.willingToRelocate = willingToRelocate;

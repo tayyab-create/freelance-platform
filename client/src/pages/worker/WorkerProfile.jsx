@@ -158,21 +158,7 @@ const WorkerProfile = () => {
         setItemToDelete(null);
         const previousProfile = { ...profile };
 
-        // Immediate deletion for Resume (to avoid persistence issues)
-        if (item.type === 'resume') {
-            try {
-                setBasicInfo(prev => ({ ...prev, resume: '' }));
-                await workerAPI.updateProfile({ resume: '' });
-                toast.success('Resume deleted');
-                fetchProfile();
-            } catch (error) {
-                toast.error('Failed to delete resume');
-                setBasicInfo(prev => ({ ...prev, resume: previousProfile.resume })); // Revert on error
-            }
-            return;
-        }
-
-        // Optimistic Updates for others
+        // Optimistic Updates (Update UI immediately)
         if (item.type === 'profilePicture') {
             setProfile(prev => ({ ...prev, profilePicture: '' }));
         } else if (item.type === 'experience') {
@@ -187,24 +173,23 @@ const WorkerProfile = () => {
             }));
         }
 
-        executeWithUndo({
-            action: async () => {
-                if (item.type === 'profilePicture') {
-                    await workerAPI.updateProfile({ profilePicture: '' });
-                } else if (item.type === 'experience') {
-                    await workerAPI.deleteExperience(item.id);
-                } else if (item.type === 'certification') {
-                    await workerAPI.deleteCertification(item.id);
-                }
-                // Fetch profile to sync state after actual deletion
-                fetchProfile();
-            },
-            message: `${item.name} deleted`,
-            onUndo: () => {
-                setProfile(previousProfile);
-            },
-            undoMessage: `${item.name} restored`
-        });
+        // Perform actual deletion immediately (No Undo delay)
+        try {
+            if (item.type === 'profilePicture') {
+                await workerAPI.updateProfile({ profilePicture: '' });
+            } else if (item.type === 'experience') {
+                await workerAPI.deleteExperience(item.id);
+            } else if (item.type === 'certification') {
+                await workerAPI.deleteCertification(item.id);
+            }
+
+            toast.success(`${item.name} deleted`);
+            fetchProfile(); // Sync with server
+        } catch (error) {
+            console.error('Delete failed:', error);
+            toast.error(`Failed to delete ${item.name}`);
+            setProfile(previousProfile); // Revert UI on error
+        }
     };
 
     const fetchProfile = async () => {
