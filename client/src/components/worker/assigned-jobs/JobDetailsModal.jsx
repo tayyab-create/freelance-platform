@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiMessageCircle, FiPlay, FiUpload, FiBriefcase, FiClock, FiDollarSign, FiCalendar, FiFile, FiAward, FiCheckCircle, FiAlertCircle, FiPaperclip, FiDownload, FiAlertTriangle, FiStar } from 'react-icons/fi';
-import { Modal, RevisionTimeline, StatusBadge, ReviewCard, ExpandableText } from '../../shared';
+import { Modal, RevisionTimeline, StatusBadge, ReviewCard, ExpandableText, Avatar } from '../../shared';
 import { workerAPI } from '../../../services/api';
 
 const JobDetailsModal = ({
@@ -125,17 +125,14 @@ const JobDetailsModal = ({
                 {/* Header with Company Info */}
                 <div className="flex flex-col md:flex-row gap-6 pb-6 border-b border-gray-100">
                     <div className="flex-shrink-0">
-                        {selectedJob.companyInfo?.logo ? (
-                            <img
-                                src={selectedJob.companyInfo.logo}
-                                alt={selectedJob.companyInfo.companyName}
-                                className="h-20 w-20 rounded-2xl object-cover border border-gray-100 shadow-sm"
-                            />
-                        ) : (
-                            <div className="h-20 w-20 rounded-2xl bg-gray-50 flex items-center justify-center border border-gray-100 text-gray-400">
-                                <FiBriefcase className="h-10 w-10" />
-                            </div>
-                        )}
+                        <Avatar
+                            src={selectedJob.companyInfo?.logo}
+                            name={selectedJob.companyInfo?.companyName || 'Unknown Company'}
+                            type="company"
+                            size="custom"
+                            className="h-20 w-20 !rounded-2xl"
+                            shape="rounded-xl"
+                        />
                     </div>
                     <div className="flex-1">
                         <div className="flex justify-between items-start gap-4">

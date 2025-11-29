@@ -10,6 +10,7 @@ import {
 } from 'react-icons/fi';
 import Spinner from '../../../components/common/Spinner';
 import { formatTime } from './utils';
+import Avatar from '../../../components/shared/Avatar';
 
 const ConversationList = ({
     conversations,
@@ -122,17 +123,14 @@ const ConversationList = ({
                                     >
                                         <div className="flex items-start gap-3">
                                             <div className="flex-shrink-0 relative">
-                                                {conversation.otherUser?.avatar ? (
-                                                    <img
-                                                        src={conversation.otherUser.avatar}
-                                                        alt={conversation.otherUser.name}
-                                                        className="h-12 w-12 rounded-full object-cover border border-gray-200"
-                                                    />
-                                                ) : (
-                                                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center border border-gray-200">
-                                                        <FiUser className="h-6 w-6 text-blue-600" />
-                                                    </div>
-                                                )}
+                                                {/* Avatar */}
+                                                <Avatar
+                                                    src={conversation.otherUser?.avatar}
+                                                    name={conversation.otherUser?.name || 'User'}
+                                                    size="lg"
+                                                    className="!rounded-full"
+                                                    status={otherUserOnline ? 'online' : 'offline'}
+                                                />
 
                                                 {/* Online status indicator */}
                                                 {otherUserOnline && (

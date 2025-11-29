@@ -6,19 +6,13 @@ const JobHeader = ({ job }) => {
     return (
         <div className="p-8 border-b border-gray-100">
             <div className="flex items-start gap-5 mb-6">
-                {job.companyInfo?.logo ? (
-                    <Avatar
-                        src={job.companyInfo.logo}
-                        name={job.companyInfo.companyName}
-                        size="xl"
-                        shape="square"
-                        className="border border-gray-200"
-                    />
-                ) : (
-                    <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center">
-                        <FiBriefcase className="h-8 w-8 text-white" />
-                    </div>
-                )}
+                <Avatar
+                    src={job.companyInfo?.logo}
+                    name={job.companyInfo?.companyName || 'Unknown Company'}
+                    size="xl"
+                    shape="square"
+                    className="border border-gray-200"
+                />
 
                 <div className="flex-1 min-w-0">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2 leading-tight">

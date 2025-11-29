@@ -3,7 +3,7 @@ import { workerAPI, messageAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { FiBriefcase, FiClock, FiCheckCircle, FiX, FiAlertCircle, FiFileText, FiAward, FiDollarSign, FiMessageCircle, FiPaperclip, FiFile } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import { PageHeader, EmptyState, SkeletonLoader, Modal, StatusBadge, ExpandableText } from '../../components/shared';
+import { PageHeader, EmptyState, SkeletonLoader, Modal, StatusBadge, ExpandableText, Avatar } from '../../components/shared';
 import ApplicationCard from '../../components/shared/ApplicationCard';
 import { useNavigate } from 'react-router-dom';
 import AdvancedFilterBar from '../../components/shared/AdvancedFilterBar';
@@ -282,17 +282,13 @@ const MyApplications = () => {
               {/* Header with Company Info */}
               <div className="flex flex-col md:flex-row gap-6 pb-6 border-b border-gray-100">
                 <div className="flex-shrink-0">
-                  {selectedApplication.job?.companyInfo?.logo ? (
-                    <img
-                      src={selectedApplication.job.companyInfo.logo}
-                      alt={selectedApplication.job.companyInfo.companyName}
-                      className="h-20 w-20 rounded-2xl object-cover border border-gray-100 shadow-sm"
-                    />
-                  ) : (
-                    <div className="h-20 w-20 rounded-2xl bg-gray-50 flex items-center justify-center border border-gray-100 text-gray-400">
-                      <FiBriefcase className="h-10 w-10" />
-                    </div>
-                  )}
+                  <Avatar
+                    src={selectedApplication.job?.companyInfo?.logo}
+                    name={selectedApplication.job?.companyInfo?.companyName || 'Unknown Company'}
+                    size="custom"
+                    className="h-20 w-20 !rounded-2xl"
+                    shape="rounded-xl"
+                  />
                 </div>
                 <div className="flex-1">
                   <div className="flex justify-between items-start gap-4">
@@ -313,10 +309,10 @@ const MyApplications = () => {
                     <span>Posted on {new Date(selectedApplication.job?.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                   </div>
                 </div>
-              </div>
+              </div >
 
               {/* Key Stats Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              < div className="grid grid-cols-2 md:grid-cols-5 gap-4" >
                 <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
                   <div className="flex items-center gap-2 text-gray-500 mb-1">
                     <FiDollarSign className="h-4 w-4" />
@@ -362,10 +358,10 @@ const MyApplications = () => {
                     )}
                   </div>
                 </div>
-              </div>
+              </div >
 
               {/* Description */}
-              <div>
+              < div >
                 <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
                   <FiFileText className="h-5 w-5 text-gray-400" />
                   Job Description
@@ -377,65 +373,69 @@ const MyApplications = () => {
                     textClassName="text-gray-600 leading-relaxed"
                   />
                 </div>
-              </div>
+              </div >
 
               {/* Skills & Tags */}
-              {selectedApplication.job?.tags && selectedApplication.job.tags.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-                    <FiAward className="h-5 w-5 text-gray-400" />
-                    Skills & Tags
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedApplication.job.tags.map((tag, index) => (
-                      <span
-                        key={index}
-                        className="px-4 py-2 text-sm font-semibold rounded-xl bg-white text-gray-700 border border-gray-200 shadow-sm"
-                      >
-                        {tag}
-                      </span>
-                    ))}
+              {
+                selectedApplication.job?.tags && selectedApplication.job.tags.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                      <FiAward className="h-5 w-5 text-gray-400" />
+                      Skills & Tags
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedApplication.job.tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className="px-4 py-2 text-sm font-semibold rounded-xl bg-white text-gray-700 border border-gray-200 shadow-sm"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )
+              }
 
               {/* Job Attachments */}
-              {selectedApplication.job?.attachments && selectedApplication.job.attachments.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-                    <FiPaperclip className="h-5 w-5 text-gray-400" />
-                    Job Attachments
-                  </h3>
-                  <div className="space-y-2">
-                    {selectedApplication.job.attachments.map((file, index) => (
-                      <a
-                        key={index}
-                        href={file.fileUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 p-4 bg-white hover:bg-indigo-50 rounded-xl border border-gray-200 hover:border-indigo-300 transition-all group"
-                      >
-                        <div className="p-2.5 bg-indigo-50 rounded-lg text-indigo-600 group-hover:bg-indigo-100 transition-colors">
-                          <FiFile className="w-5 h-5" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate group-hover:text-indigo-600 transition-colors">
-                            {file.fileName}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {file.fileSize ? `${(file.fileSize / 1024 / 1024).toFixed(2)} MB` : 'Download'}
-                          </p>
-                        </div>
-                        <div className="text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                          </svg>
-                        </div>
-                      </a>
-                    ))}
+              {
+                selectedApplication.job?.attachments && selectedApplication.job.attachments.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                      <FiPaperclip className="h-5 w-5 text-gray-400" />
+                      Job Attachments
+                    </h3>
+                    <div className="space-y-2">
+                      {selectedApplication.job.attachments.map((file, index) => (
+                        <a
+                          key={index}
+                          href={file.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 p-4 bg-white hover:bg-indigo-50 rounded-xl border border-gray-200 hover:border-indigo-300 transition-all group"
+                        >
+                          <div className="p-2.5 bg-indigo-50 rounded-lg text-indigo-600 group-hover:bg-indigo-100 transition-colors">
+                            <FiFile className="w-5 h-5" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 truncate group-hover:text-indigo-600 transition-colors">
+                              {file.fileName}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {file.fileSize ? `${(file.fileSize / 1024 / 1024).toFixed(2)} MB` : 'Download'}
+                            </p>
+                          </div>
+                          <div className="text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </div>
+                        </a>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )
+              }
 
               {/* Your Proposal Section */}
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-2xl border border-blue-100">
@@ -487,11 +487,11 @@ const MyApplications = () => {
                   </div>
                 )}
               </div>
-            </div>
+            </div >
           )}
-        </Modal>
-      </div>
-    </DashboardLayout>
+        </Modal >
+      </div >
+    </DashboardLayout >
   );
 };
 

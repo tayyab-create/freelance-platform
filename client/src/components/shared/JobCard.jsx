@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { FiBriefcase, FiDollarSign, FiClock, FiAward, FiCalendar, FiArrowRight } from 'react-icons/fi';
 import StatusBadge from './StatusBadge';
+import Avatar from './Avatar';
 
 const JobCard = ({ job, linkTo }) => {
     return (
@@ -14,43 +15,29 @@ const JobCard = ({ job, linkTo }) => {
                 <div className="flex items-start justify-between mb-4">
                     {/* Company Info */}
                     <div className="flex items-start gap-3 flex-1 min-w-0">
-                        {job.companyInfo ? (
-                            <>
-                                {job.companyInfo.logo ? (
-                                    <img
-                                        src={job.companyInfo.logo}
-                                        alt={job.companyInfo.companyName}
-                                        className="h-12 w-12 rounded-xl object-cover border border-gray-200 flex-shrink-0"
-                                    />
-                                ) : (
-                                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center flex-shrink-0">
-                                        <FiBriefcase className="h-6 w-6 text-white" />
-                                    </div>
-                                )}
-                                <div className="min-w-0 flex-1">
-                                    <p className="font-semibold text-gray-900 text-sm truncate">
-                                        {job.companyInfo.companyName}
-                                    </p>
-                                    <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
-                                        <FiCalendar className="w-3 h-3" />
-                                        {new Date(job.createdAt).toLocaleDateString('en-US', {
-                                            year: 'numeric',
-                                            month: 'short',
-                                            day: 'numeric'
-                                        })}
-                                    </p>
-                                </div>
-                            </>
-                        ) : (
-                            <div className="flex items-center gap-3">
-                                <div className="h-12 w-12 rounded-xl bg-gray-100 flex items-center justify-center">
-                                    <FiBriefcase className="h-6 w-6 text-gray-400" />
-                                </div>
-                                <div>
-                                    <p className="font-semibold text-gray-500 text-sm">Unknown Company</p>
-                                </div>
-                            </div>
-                        )}
+                        <Avatar
+                            src={job.companyInfo?.logo}
+                            name={job.companyInfo?.companyName || 'Unknown Company'}
+                            type="company"
+                            size="lg"
+                            className="!rounded-xl flex-shrink-0"
+                            shape="rounded-xl"
+                        />
+                        <div className="min-w-0 flex-1">
+                            <p className="font-semibold text-gray-900 text-sm truncate">
+                                {job.companyInfo?.companyName || 'Unknown Company'}
+                            </p>
+                            {job.companyInfo && (
+                                <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
+                                    <FiCalendar className="w-3 h-3" />
+                                    {new Date(job.createdAt).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric'
+                                    })}
+                                </p>
+                            )}
+                        </div>
                     </div>
 
                     {/* Status Badge */}

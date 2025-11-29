@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FiStar, FiUser, FiBriefcase, FiChevronDown, FiChevronUp, FiThumbsUp } from 'react-icons/fi';
+import Avatar from './Avatar';
 
 const ReviewCard = ({ review, reviewerType, reviewerName, reviewerLogo, projectTitle }) => {
     const [isExpanded, setIsExpanded] = useState(false);
@@ -62,21 +63,14 @@ const ReviewCard = ({ review, reviewerType, reviewerName, reviewerLogo, projectT
                 <div className="flex items-center gap-4 flex-1 min-w-0">
                     {/* Avatar/Logo */}
                     <div className="flex-shrink-0">
-                        {reviewerLogo ? (
-                            <img
-                                src={reviewerLogo}
-                                alt={reviewerName}
-                                className="h-12 w-12 rounded-xl object-cover border border-white/50 shadow-sm"
-                            />
-                        ) : (
-                            <div className="h-12 w-12 rounded-xl bg-white/50 flex items-center justify-center border border-white/50 shadow-sm">
-                                {reviewerType === 'company' ? (
-                                    <FiBriefcase className={`h-6 w-6 ${theme.headerText}`} />
-                                ) : (
-                                    <FiUser className={`h-6 w-6 ${theme.headerText}`} />
-                                )}
-                            </div>
-                        )}
+                        <Avatar
+                            src={reviewerLogo}
+                            name={reviewerName}
+                            type={reviewerType === 'company' ? 'company' : 'worker'}
+                            size="lg"
+                            className="!rounded-xl"
+                            shape="rounded-xl"
+                        />
                     </div>
 
                     {/* Info */}

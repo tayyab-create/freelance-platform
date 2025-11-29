@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { FiBriefcase, FiDollarSign, FiClock, FiEye, FiCheckCircle } from 'react-icons/fi';
 import StatusBadge from './StatusBadge';
+import Avatar from './Avatar';
 
 const ApplicationCard = ({ application, onViewJob }) => {
     const getStatusColor = (status) => {
@@ -19,17 +20,14 @@ const ApplicationCard = ({ application, onViewJob }) => {
             <div className="flex flex-col md:flex-row gap-6">
                 {/* Left: Company Logo */}
                 <div className="flex-shrink-0">
-                    {application.job?.companyInfo?.logo ? (
-                        <img
-                            src={application.job.companyInfo.logo}
-                            alt={application.job.companyInfo.companyName}
-                            className="h-16 w-16 rounded-xl object-cover border border-gray-100"
-                        />
-                    ) : (
-                        <div className="h-16 w-16 rounded-xl bg-gray-50 flex items-center justify-center border border-gray-100 text-gray-400">
-                            <FiBriefcase className="h-8 w-8" />
-                        </div>
-                    )}
+                    <Avatar
+                        src={application.job?.companyInfo?.logo}
+                        name={application.job?.companyInfo?.companyName || 'Unknown Company'}
+                        type="company"
+                        size="xl"
+                        className="!rounded-xl"
+                        shape="rounded-xl"
+                    />
                 </div>
 
                 {/* Middle: Job Details */}

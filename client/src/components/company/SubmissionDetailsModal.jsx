@@ -238,17 +238,13 @@ const SubmissionDetailsModal = ({
                                     Submitted By
                                 </h3>
                                 <div className="flex items-center gap-4 mb-4">
-                                    {submission.workerInfo?.profilePicture ? (
-                                        <Avatar
-                                            src={submission.workerInfo.profilePicture}
-                                            name={submission.workerInfo.fullName}
-                                            size="lg"
-                                        />
-                                    ) : (
-                                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center text-primary-600 font-bold text-lg">
-                                            {submission.workerInfo?.fullName?.charAt(0) || 'U'}
-                                        </div>
-                                    )}
+                                    <Avatar
+                                        src={submission.workerInfo?.profilePicture}
+                                        name={submission.workerInfo?.fullName || 'Freelancer'}
+                                        size="lg"
+                                        className="!rounded-full"
+                                        shape="circle"
+                                    />
                                     <div className="min-w-0">
                                         <p className="text-base font-bold text-gray-900 truncate">
                                             {submission.workerInfo?.fullName || 'Freelancer'}

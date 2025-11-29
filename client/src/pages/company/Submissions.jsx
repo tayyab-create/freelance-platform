@@ -255,17 +255,13 @@ const Submissions = () => {
 
                                     {/* Worker Info */}
                                     <div className="px-5 py-4 flex items-center gap-3">
-                                        {submission.workerInfo?.profilePicture ? (
-                                            <img
-                                                src={submission.workerInfo.profilePicture}
-                                                alt={submission.workerInfo.fullName}
-                                                className="w-10 h-10 rounded-full object-cover border border-gray-200"
-                                            />
-                                        ) : (
-                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center text-indigo-600 font-bold text-sm">
-                                                {submission.workerInfo?.fullName?.charAt(0) || submission.worker?.email?.charAt(0) || 'U'}
-                                            </div>
-                                        )}
+                                        <Avatar
+                                            src={submission.workerInfo?.profilePicture}
+                                            name={submission.workerInfo?.fullName || submission.worker?.email || 'Freelancer'}
+                                            size="custom"
+                                            className="w-10 h-10 !rounded-full"
+                                            shape="circle"
+                                        />
                                         <div className="flex-1 min-w-0">
                                             <p className="text-sm font-bold text-gray-900 truncate">
                                                 {submission.workerInfo?.fullName || 'Freelancer'}

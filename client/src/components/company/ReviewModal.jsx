@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Button from '../common/Button';
 import { FiStar, FiUser, FiX, FiCheckCircle } from 'react-icons/fi';
+import { Avatar } from '../shared';
 
 const ReviewModal = ({ job, worker, onSubmit, onClose, loading }) => {
   const [formData, setFormData] = useState({
@@ -68,20 +69,13 @@ const ReviewModal = ({ job, worker, onSubmit, onClose, loading }) => {
         {/* Worker & Job Info */}
         <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
           <div className="flex items-center gap-4">
-            {worker?.profilePicture ? (
-              <img
-                src={worker.profilePicture}
-                alt="Worker"
-                className="h-14 w-14 rounded-full object-cover border-2 border-gray-200"
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                }}
-              />
-            ) : (
-              <div className="h-14 w-14 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center flex-shrink-0">
-                <FiUser className="h-7 w-7 text-primary-600" />
-              </div>
-            )}
+            <Avatar
+              src={worker?.profilePicture}
+              name={worker?.fullName || worker?.email || 'Worker'}
+              size="custom"
+              className="h-14 w-14 !rounded-full"
+              shape="circle"
+            />
             <div className="flex-1 min-w-0">
               <p className="text-sm text-gray-500">Reviewing</p>
               <p className="font-semibold text-gray-900 truncate">{worker?.fullName || worker?.email}</p>
@@ -108,11 +102,10 @@ const ReviewModal = ({ job, worker, onSubmit, onClose, loading }) => {
                     className="focus:outline-none transition-transform hover:scale-110"
                   >
                     <FiStar
-                      className={`h-10 w-10 transition-colors ${
-                        star <= (hoveredRating || formData.rating)
-                          ? 'text-yellow-400 fill-yellow-400'
-                          : 'text-gray-300'
-                      }`}
+                      className={`h-10 w-10 transition-colors ${star <= (hoveredRating || formData.rating)
+                        ? 'text-yellow-400 fill-yellow-400'
+                        : 'text-gray-300'
+                        }`}
                     />
                   </button>
                 ))}
@@ -150,9 +143,8 @@ const ReviewModal = ({ job, worker, onSubmit, onClose, loading }) => {
             />
             <div className="flex items-center justify-between mt-2">
               <p className="text-xs text-gray-500">Minimum 10 characters</p>
-              <p className={`text-xs font-medium ${
-                formData.reviewText.length >= 500 ? 'text-red-600' : 'text-gray-500'
-              }`}>
+              <p className={`text-xs font-medium ${formData.reviewText.length >= 500 ? 'text-red-600' : 'text-gray-500'
+                }`}>
                 {formData.reviewText.length} / 500
               </p>
             </div>
@@ -169,11 +161,10 @@ const ReviewModal = ({ job, worker, onSubmit, onClose, loading }) => {
                   key={tag.value}
                   type="button"
                   onClick={() => toggleTag(tag.value)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                    formData.tags.includes(tag.value)
-                      ? 'bg-gray-900 text-white shadow-sm'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
-                  }`}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${formData.tags.includes(tag.value)
+                    ? 'bg-gray-900 text-white shadow-sm'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
+                    }`}
                 >
                   {tag.label}
                 </button>

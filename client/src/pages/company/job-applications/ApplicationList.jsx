@@ -9,7 +9,7 @@ import {
     FiCheckCircle
 } from 'react-icons/fi';
 import Button from '../../../components/common/Button';
-import { StatusBadge, ExpandableText } from '../../../components/shared';
+import { StatusBadge, ExpandableText, Avatar } from '../../../components/shared';
 
 const ApplicationList = ({
     applications,
@@ -48,17 +48,13 @@ const ApplicationList = ({
                         <div className="flex flex-col md:flex-row md:items-start gap-6">
                             {/* Avatar */}
                             <div className="flex-shrink-0">
-                                {application.workerInfo?.profilePicture ? (
-                                    <img
-                                        src={application.workerInfo.profilePicture}
-                                        alt={application.workerInfo.fullName}
-                                        className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md"
-                                    />
-                                ) : (
-                                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center text-primary-600 shadow-inner">
-                                        <FiUser className="w-8 h-8" />
-                                    </div>
-                                )}
+                                <Avatar
+                                    src={application.workerInfo?.profilePicture}
+                                    name={application.workerInfo?.fullName || 'Worker'}
+                                    size="custom"
+                                    className="w-16 h-16 !rounded-full"
+                                    shape="circle"
+                                />
                             </div>
 
                             <div className="flex-1 min-w-0">

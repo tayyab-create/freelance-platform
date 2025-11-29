@@ -13,6 +13,7 @@ import {
     FiX
 } from 'react-icons/fi';
 import { COMMON_EMOJIS, getMessageTime } from './utils';
+import Avatar from '../../../components/shared/Avatar';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -87,17 +88,12 @@ const MessageList = ({
                         <div className={`flex gap-2 ${isOwn ? 'justify-end' : 'justify-start'} group`}>
                             {!isOwn && (
                                 <div className="flex-shrink-0">
-                                    {message.sender?.avatar ? (
-                                        <img
-                                            src={message.sender.avatar}
-                                            alt={message.sender.name}
-                                            className="h-8 w-8 rounded-full object-cover border border-gray-200"
-                                        />
-                                    ) : (
-                                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center border border-gray-200">
-                                            <FiUser className="h-4 w-4 text-blue-600" />
-                                        </div>
-                                    )}
+                                    <Avatar
+                                        src={message.sender?.avatar}
+                                        name={message.sender?.name || 'User'}
+                                        size="sm"
+                                        className="!rounded-full"
+                                    />
                                 </div>
                             )}
 
@@ -244,19 +240,12 @@ const MessageList = ({
 
                             {isOwn && (
                                 <div className="flex-shrink-0">
-                                    {message.sender?.avatar ? (
-                                        <img
-                                            src={message.sender.avatar}
-                                            alt={message.sender.name || 'You'}
-                                            className="h-8 w-8 rounded-full object-cover border border-gray-200"
-                                        />
-                                    ) : (
-                                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-xs border border-gray-200">
-                                            {message.sender?.name?.charAt(0).toUpperCase() ||
-                                                currentUser?.email?.charAt(0).toUpperCase() ||
-                                                'U'}
-                                        </div>
-                                    )}
+                                    <Avatar
+                                        src={message.sender?.avatar}
+                                        name={message.sender?.name || 'You'}
+                                        size="sm"
+                                        className="!rounded-full"
+                                    />
                                 </div>
                             )}
                         </div>

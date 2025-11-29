@@ -9,6 +9,7 @@ import {
     FiMapPin,
     FiArchive
 } from 'react-icons/fi';
+import Avatar from '../../../components/shared/Avatar';
 
 const ChatHeader = ({
     selectedConversation,
@@ -45,17 +46,13 @@ const ChatHeader = ({
                     )}
 
                     <div className="relative">
-                        {selectedConversation.otherUser?.avatar ? (
-                            <img
-                                src={selectedConversation.otherUser.avatar}
-                                alt={selectedConversation.otherUser.name}
-                                className="h-10 w-10 rounded-full object-cover border border-gray-200"
-                            />
-                        ) : (
-                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center border border-gray-200">
-                                <FiUser className="h-5 w-5 text-blue-600" />
-                            </div>
-                        )}
+                        <Avatar
+                            src={selectedConversation.otherUser?.avatar}
+                            name={selectedConversation.otherUser?.name || 'User'}
+                            size="md"
+                            className="!rounded-full"
+                            status={isUserOnline(selectedConversation.otherUser?._id) ? 'online' : 'offline'}
+                        />
                         {isUserOnline(selectedConversation.otherUser?._id) && (
                             <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 rounded-full border-2 border-white"></div>
                         )}
