@@ -50,6 +50,10 @@ const CompanyProfile = () => {
     const [uploadingVideo, setUploadingVideo] = useState(false);
     const [videoUploadProgress, setVideoUploadProgress] = useState(0);
 
+    // Tax Doc Upload State
+    const [uploadingTaxDoc, setUploadingTaxDoc] = useState(false);
+    const [taxDocUploadProgress, setTaxDocUploadProgress] = useState(0);
+
     // Delete Modal State
     const [showDeleteLogoModal, setShowDeleteLogoModal] = useState(false);
     const { executeWithUndo } = useUndo();
@@ -84,7 +88,8 @@ const CompanyProfile = () => {
             phone: '',
         },
         companyVideo: '',
-        benefits: []
+        benefits: [],
+        taxDocuments: []
     });
 
     useEffect(() => {
@@ -127,7 +132,8 @@ const CompanyProfile = () => {
                     phone: '',
                 },
                 companyVideo: profileData.companyVideo || '',
-                benefits: profileData.benefits || []
+                benefits: profileData.benefits || [],
+                taxDocuments: profileData.taxDocuments || []
             });
         } catch (error) {
             toast.error('Failed to load profile');
@@ -185,6 +191,40 @@ const CompanyProfile = () => {
             setUploadingVideo(false);
             setVideoUploadProgress(0);
         }
+    };
+
+    const handleTaxDocUpload = async (file) => {
+        if (!file) return;
+
+        setUploadingTaxDoc(true);
+        setTaxDocUploadProgress(0);
+        try {
+            const response = await uploadAPI.uploadSingle(
+                file,
+                'documents',
+                (progress) => setTaxDocUploadProgress(progress)
+            );
+            const docUrl = `http://localhost:5000${response.data.data.fileUrl}`;
+
+            setFormData(prev => ({
+                ...prev,
+                taxDocuments: [...prev.taxDocuments, docUrl]
+            }));
+            toast.success('Document uploaded! Click Save to apply changes.');
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || 'Failed to upload document';
+            toast.error(errorMessage);
+        } finally {
+            setUploadingTaxDoc(false);
+            setTaxDocUploadProgress(0);
+        }
+    };
+
+    const handleRemoveTaxDoc = (index) => {
+        setFormData(prev => ({
+            ...prev,
+            taxDocuments: prev.taxDocuments.filter((_, i) => i !== index)
+        }));
     };
 
     const handleDeleteLogoClick = () => {
@@ -516,7 +556,7 @@ const CompanyProfile = () => {
                     <div className="lg:col-span-2 space-y-6">
 
                         {/* About Section */}
-                        <div className="bg-gradient-to-br from-blue-50 to-white rounded-2xl p-6 border border-blue-100 shadow-sm">
+                        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
                             <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
                                 <FiBriefcase className="text-blue-600" />
                                 About Company
@@ -595,7 +635,7 @@ const CompanyProfile = () => {
                         </div>
 
                         {/* Video Section */}
-                        <div className="bg-gradient-to-br from-orange-50 to-white rounded-2xl p-6 border border-orange-100 shadow-sm">
+                        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
                             <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
                                 <FiVideo className="text-orange-600" />
                                 Company Video
@@ -663,13 +703,59 @@ const CompanyProfile = () => {
                                 </div>
                             </div>
                         )}
+
+                        {/* Tax Documents Section */}
+                        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                            <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+                                <FiFileText className="text-amber-600" />
+                                Tax Documents
+                            </h2>
+                            {editing ? (
+                                <div className="space-y-4">
+                                    {formData.taxDocuments.length > 0 && (
+                                        <div className="space-y-2">
+                                            {formData.taxDocuments.map((doc, idx) => (
+                                                <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
+                                                    <div className="flex items-center gap-3 overflow-hidden">
+                                                        <FiFileText className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                                                        <span className="text-sm text-slate-600 truncate">
+                                                            {doc.split('/').pop()}
+                                                        </span>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleRemoveTaxDoc(idx)}
+                                                        className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                        title="Remove document"
+                                                    >
+                                                        <FiTrash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    <FileUpload
+                                        name="taxDocuments"
+                                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                        onFileSelect={handleTaxDocUpload}
+                                        helperText="PDF, DOC, Images (max 10MB)"
+                                        maxSize={10}
+                                        isUploading={uploadingTaxDoc}
+                                        uploadProgress={taxDocUploadProgress}
+                                        placeholder="Click to upload tax documents"
+                                    />
+                                </div>
+                            ) : (
+                                <DocumentList documents={profile?.taxDocuments} />
+                            )}
+                        </div>
                     </div>
 
                     {/* RIGHT COLUMN (Sidebar Info) */}
                     <div className="space-y-6">
 
                         {/* Contact Person Card */}
-                        <div className="bg-gradient-to-br from-purple-50 to-white rounded-2xl p-6 border border-purple-100 shadow-sm">
+                        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
                             <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
                                 <FiUsers className="text-purple-600" />
                                 Point of Contact
@@ -683,7 +769,7 @@ const CompanyProfile = () => {
                         </div>
 
                         {/* Location Card */}
-                        <div className="bg-gradient-to-br from-green-50 to-white rounded-2xl p-6 border border-green-100 shadow-sm">
+                        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
                             <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
                                 <FiMapPin className="text-green-600" />
                                 Office Location
@@ -782,14 +868,7 @@ const CompanyProfile = () => {
                             )}
                         </div>
 
-                        {/* Tax Documents */}
-                        <div className="bg-gradient-to-br from-amber-50 to-white rounded-2xl p-6 border border-amber-100 shadow-sm">
-                            <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
-                                <FiFileText className="text-amber-600" />
-                                Tax Documents
-                            </h3>
-                            <DocumentList documents={profile?.taxDocuments} />
-                        </div>
+
 
                     </div>
                 </div>

@@ -44,6 +44,14 @@ exports.updateProfile = async (req, res) => {
             "companySize",
             "address",
             "contactPerson",
+            "taxDocuments",
+            "professionalLinks",
+            "socialMedia",
+            "registrationNumber",
+            "foundedYear",
+            "companyVideo",
+            "companySize",
+            "benefits"
         ];
 
         const updates = {};
