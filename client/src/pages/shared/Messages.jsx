@@ -860,7 +860,7 @@ const MessagesEnhanced = () => {
                 <PageHeader breadcrumbs={getBreadcrumbs(currentUser?.role, 'messages')} />
             </div>
 
-            <div className="h-[calc(100vh-200px)] flex rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
+            <div className="h-[calc(100vh-140px)] flex bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm">
                 {/* Conversations Sidebar */}
                 <ConversationList
                     conversations={filteredConversations}

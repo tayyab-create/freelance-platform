@@ -32,7 +32,7 @@ const ChatHeader = ({
     setSelectedConversation
 }) => {
     return (
-        <div className="bg-white border-b border-gray-200 p-4">
+        <div className="bg-white border-b border-slate-100 p-4">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     {isMobile && (

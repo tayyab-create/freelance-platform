@@ -106,7 +106,7 @@ const Navbar = ({ disableNavigation = false }) => {
       <aside
         id="sidebar-navigation"
         className={`
-          fixed top-0 left-0 h-screen bg-white/90 backdrop-blur-2xl shadow-2xl border-r border-gray-100 z-40
+          fixed top-0 left-0 h-screen bg-white/90 backdrop-blur-2xl border-r border-gray-100 z-40
           transition-all duration-300 ease-in-out
           ${isCollapsed ? 'w-24' : 'w-72'}
           ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}

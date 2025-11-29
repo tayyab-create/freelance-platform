@@ -12,11 +12,11 @@ const DashboardLayout = ({ children, disableNavigation = false }) => {
   };
 
   return (
-    <div className={`min-h-screen flex ${getThemeClass()}`}>
+    <div className={`min-h-screen flex bg-slate-50 ${getThemeClass()}`}>
       <Sidebar disableNavigation={disableNavigation} />
       {/* Main Content Area - shifts based on sidebar width */}
-      <main className="flex-1 lg:ml-64 transition-all duration-300 p-8">
-        <div className="max-w-7xl mx-auto">
+      <main className="flex-1 lg:ml-72 transition-all duration-300 p-8">
+        <div className="max-w-5xl mx-auto">
           {children}
         </div>
       </main>

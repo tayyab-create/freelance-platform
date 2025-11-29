@@ -34,10 +34,10 @@ const ConversationList = ({
     return (
         <div
             className={`${isMobile && !showSidebar ? 'hidden' : 'block'
-                } w-full md:w-96 border-r border-gray-200 bg-white flex flex-col`}
+                } w-full md:w-96 border-r border-slate-100 bg-white flex flex-col`}
         >
             {/* Sidebar Header */}
-            <div className="p-4 border-b border-gray-200">
+            <div className="p-4 border-b border-slate-100">
                 <div className="flex items-center justify-between mb-4">
                     <h1 className="text-xl font-bold text-gray-900">
                         {showArchived ? 'Archived' : 'Messages'}
@@ -68,7 +68,7 @@ const ConversationList = ({
                         placeholder="Search conversations... (Ctrl+K)"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                        className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all text-sm"
                     />
                 </div>
             </div>
@@ -117,7 +117,7 @@ const ConversationList = ({
                                             setSelectedConversation(conversation);
                                             if (isMobile) setShowSidebar(false);
                                         }}
-                                        className={`w-full p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors text-left relative ${selectedConversation?._id === conversation._id ? 'bg-blue-50' : ''
+                                        className={`w-full p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors text-left relative ${selectedConversation?._id === conversation._id ? 'bg-blue-50/50' : ''
                                             }`}
                                     >
                                         <div className="flex items-start gap-3">
