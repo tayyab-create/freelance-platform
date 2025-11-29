@@ -5,7 +5,7 @@ import Textarea from '../../common/Textarea';
 import DatePicker from '../../shared/DatePicker';
 import { Plus, X, Briefcase, Building } from 'lucide-react';
 
-const ExperienceStep = ({ formData, onChange, errors = {} }) => {
+const ExperienceStep = ({ formData, onChange, errors = {}, disabled = false }) => {
     const [showExperienceForm, setShowExperienceForm] = useState(false);
     const [currentExperience, setCurrentExperience] = useState({
         title: '',
@@ -71,7 +71,8 @@ const ExperienceStep = ({ formData, onChange, errors = {} }) => {
                     <button
                         type="button"
                         onClick={() => setShowExperienceForm(!showExperienceForm)}
-                        className="btn-primary px-4 py-2 text-sm flex items-center gap-2"
+                        disabled={disabled}
+                        className="btn-primary px-4 py-2 text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <Plus className="w-4 h-4" />
                         Add Experience
@@ -173,7 +174,8 @@ const ExperienceStep = ({ formData, onChange, errors = {} }) => {
                                 <button
                                     type="button"
                                     onClick={() => handleRemoveExperience(index)}
-                                    className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors p-1 rounded-full hover:bg-red-50"
+                                    disabled={disabled}
+                                    className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors p-1 rounded-full hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <X className="w-5 h-5" />
                                 </button>
@@ -213,7 +215,8 @@ const ExperienceStep = ({ formData, onChange, errors = {} }) => {
                     <button
                         type="button"
                         onClick={handleAddPortfolioLink}
-                        className="btn-secondary px-4 py-2 text-sm flex items-center gap-2"
+                        disabled={disabled}
+                        className="btn-secondary px-4 py-2 text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <Plus className="w-4 h-4" />
                         Add Link
@@ -231,11 +234,13 @@ const ExperienceStep = ({ formData, onChange, errors = {} }) => {
                                     onChange={(e) => handlePortfolioLinkChange(index, e.target.value)}
                                     placeholder="https://your-portfolio.com/project"
                                     className="flex-1 mb-0"
+                                    disabled={disabled}
                                 />
                                 <button
                                     type="button"
                                     onClick={() => handleRemovePortfolioLink(index)}
-                                    className="mt-1 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                    disabled={disabled}
+                                    className="mt-1 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <X className="w-5 h-5" />
                                 </button>

@@ -5,7 +5,7 @@ import Textarea from '../../common/Textarea';
 import FileUpload from '../../common/FileUpload';
 import { User, Mail, Phone, MapPin, Globe, Linkedin, Github, Twitter, Dribbble, Layout, Instagram, Code } from 'lucide-react';
 
-const PersonalInfoStep = ({ formData, onChange, onFileUpload, errors = {} }) => {
+const PersonalInfoStep = ({ formData, onChange, onFileUpload, errors = {}, disabled = false }) => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         onChange({ ...formData, [name]: value });
@@ -28,6 +28,7 @@ const PersonalInfoStep = ({ formData, onChange, onFileUpload, errors = {} }) => 
                     helperText="Upload a professional photo (JPG, PNG - max 5MB)"
                     maxSize={5}
                     preview
+                    disabled={disabled}
                 />
             </div>
 
@@ -45,6 +46,7 @@ const PersonalInfoStep = ({ formData, onChange, onFileUpload, errors = {} }) => 
                 helperText="Your legal name as it appears on official documents"
                 maxLength={100}
                 showCharacterCount
+                disabled={disabled}
             />
 
             {/* Phone Number */}
@@ -60,6 +62,7 @@ const PersonalInfoStep = ({ formData, onChange, onFileUpload, errors = {} }) => 
                 error={errors.phone}
                 helperText="Include country code for international numbers"
                 maxLength={20}
+                disabled={disabled}
             />
 
             {/* Professional Bio */}
@@ -76,6 +79,7 @@ const PersonalInfoStep = ({ formData, onChange, onFileUpload, errors = {} }) => 
                 maxLength={500}
                 showCharacterCount
                 minLength={50}
+                disabled={disabled}
             />
 
             {/* Location (Optional) */}
@@ -89,6 +93,7 @@ const PersonalInfoStep = ({ formData, onChange, onFileUpload, errors = {} }) => 
                 icon={MapPin}
                 helperText="Where are you based? This helps companies find local talent"
                 maxLength={100}
+                disabled={disabled}
             />
 
             {/* Social & Professional Links */}
@@ -105,6 +110,7 @@ const PersonalInfoStep = ({ formData, onChange, onFileUpload, errors = {} }) => 
                         onChange={handleChange}
                         placeholder="https://yourwebsite.com"
                         icon={Globe}
+                        disabled={disabled}
                     />
 
                     <Input
@@ -115,6 +121,7 @@ const PersonalInfoStep = ({ formData, onChange, onFileUpload, errors = {} }) => 
                         onChange={handleChange}
                         placeholder="https://linkedin.com/in/profile"
                         icon={Linkedin}
+                        disabled={disabled}
                     />
 
                     <Input
@@ -125,6 +132,7 @@ const PersonalInfoStep = ({ formData, onChange, onFileUpload, errors = {} }) => 
                         onChange={handleChange}
                         placeholder="https://github.com/username"
                         icon={Github}
+                        disabled={disabled}
                     />
 
                     <Input
@@ -135,6 +143,7 @@ const PersonalInfoStep = ({ formData, onChange, onFileUpload, errors = {} }) => 
                         onChange={handleChange}
                         placeholder="https://twitter.com/username"
                         icon={Twitter}
+                        disabled={disabled}
                     />
 
                     <Input
@@ -145,6 +154,7 @@ const PersonalInfoStep = ({ formData, onChange, onFileUpload, errors = {} }) => 
                         onChange={handleChange}
                         placeholder="https://dribbble.com/username"
                         icon={Dribbble}
+                        disabled={disabled}
                     />
 
                     <Input
@@ -155,6 +165,7 @@ const PersonalInfoStep = ({ formData, onChange, onFileUpload, errors = {} }) => 
                         onChange={handleChange}
                         placeholder="https://behance.net/username"
                         icon={Layout}
+                        disabled={disabled}
                     />
 
                     <Input
@@ -165,6 +176,7 @@ const PersonalInfoStep = ({ formData, onChange, onFileUpload, errors = {} }) => 
                         onChange={handleChange}
                         placeholder="https://instagram.com/username"
                         icon={Instagram}
+                        disabled={disabled}
                     />
 
                     <Input
@@ -175,6 +187,7 @@ const PersonalInfoStep = ({ formData, onChange, onFileUpload, errors = {} }) => 
                         onChange={handleChange}
                         placeholder="https://stackoverflow.com/users/..."
                         icon={Code}
+                        disabled={disabled}
                     />
                 </div>
             </div>

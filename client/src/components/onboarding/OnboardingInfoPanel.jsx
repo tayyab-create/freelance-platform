@@ -1,7 +1,9 @@
 import React from 'react';
-import { FiCheckCircle, FiClock, FiAlertCircle, FiFileText, FiAward } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
+import { FiCheckCircle, FiClock, FiAlertCircle, FiFileText, FiAward, FiArrowRight } from 'react-icons/fi';
 
-const OnboardingInfoPanel = ({ profileCompleteness, status, rejectionReason, approvalHistory }) => {
+const OnboardingInfoPanel = ({ profileCompleteness, status, rejectionReason, approvalHistory, dashboardLink }) => {
+    const navigate = useNavigate();
     const getStatusColor = () => {
         switch (status) {
             case 'approved': return 'bg-green-100 text-green-700 border-green-200';
@@ -61,7 +63,15 @@ const OnboardingInfoPanel = ({ profileCompleteness, status, rejectionReason, app
                 <div className={`p-4 rounded-xl border flex items-start gap-3 ${getStatusColor()}`}>
                     <div className="mt-0.5">{getStatusIcon()}</div>
                     <div>
-                        <p className="font-bold capitalize">{status || 'Not Submitted'}</p>
+                        <div className="flex items-center gap-2">
+                            <p className="font-bold capitalize">{status || 'Not Submitted'}</p>
+                            {status === 'pending' && (
+                                <span className="relative flex h-2.5 w-2.5">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-500"></span>
+                                </span>
+                            )}
+                        </div>
                         <p className="text-sm opacity-90 mt-1">
                             {status === 'pending' && 'Your application is under review. We will notify you once a decision is made.'}
                             {status === 'approved' && 'Congratulations! Your profile has been approved. You can now start applying for jobs.'}
@@ -71,6 +81,17 @@ const OnboardingInfoPanel = ({ profileCompleteness, status, rejectionReason, app
                         </p>
                     </div>
                 </div>
+
+                {/* Move to Dashboard Button */}
+                {status === 'approved' && (
+                    <button
+                        onClick={() => navigate(dashboardLink || '/company/dashboard')}
+                        className="w-full mt-4 py-2.5 px-4 bg-green-600 text-white rounded-xl font-medium hover:bg-green-700 transition-all shadow-lg shadow-green-600/20 hover:shadow-green-600/30 active:scale-95 flex items-center justify-center gap-2"
+                    >
+                        Move to Dashboard
+                        <FiArrowRight className="w-4 h-4" />
+                    </button>
+                )}
 
                 {/* Rejection Reason */}
                 {status === 'rejected' && rejectionReason && (

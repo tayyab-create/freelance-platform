@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { User, Mail, Phone, MapPin, Briefcase, DollarSign, FileText, Check, AlertCircle } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Briefcase, DollarSign, FileText, Check, AlertCircle, Globe, Linkedin, Github, Twitter, Dribbble, Layout, Instagram, Code, Link as LinkIcon } from 'lucide-react';
 
 const ReviewStep = ({ formData, profileCompleteness = 0 }) => {
     const sections = [
@@ -16,12 +16,28 @@ const ReviewStep = ({ formData, profileCompleteness = 0 }) => {
         },
         {
             title: 'Professional Links',
-            icon: Mail,
+            icon: Globe,
             items: [
-                { label: 'LinkedIn', value: formData.linkedinProfile || 'Not provided' },
-                { label: 'GitHub', value: formData.githubProfile || 'Not provided' }
+                { label: 'Website', value: formData.website || 'Not provided', isLink: !!formData.website, icon: Globe },
+                { label: 'LinkedIn', value: formData.linkedinProfile || 'Not provided', isLink: !!formData.linkedinProfile, icon: Linkedin },
+                { label: 'GitHub', value: formData.githubProfile || 'Not provided', isLink: !!formData.githubProfile, icon: Github },
+                { label: 'Twitter / X', value: formData.twitterProfile || 'Not provided', isLink: !!formData.twitterProfile, icon: Twitter },
+                { label: 'Dribbble', value: formData.dribbbleProfile || 'Not provided', isLink: !!formData.dribbbleProfile, icon: Dribbble },
+                { label: 'Behance', value: formData.behanceProfile || 'Not provided', isLink: !!formData.behanceProfile, icon: Layout },
+                { label: 'Instagram', value: formData.instagramProfile || 'Not provided', isLink: !!formData.instagramProfile, icon: Instagram },
+                { label: 'StackOverflow', value: formData.stackoverflowProfile || 'Not provided', isLink: !!formData.stackoverflowProfile, icon: Code }
             ]
         },
+        ...(formData.portfolioLinks && formData.portfolioLinks.length > 0 ? [{
+            title: 'Portfolio Projects',
+            icon: LinkIcon,
+            items: formData.portfolioLinks.map((link, index) => ({
+                label: `Project ${index + 1}`,
+                value: link,
+                isLink: true,
+                icon: LinkIcon
+            }))
+        }] : []),
         {
             title: 'Skills & Expertise',
             icon: Briefcase,
@@ -112,7 +128,10 @@ const ReviewStep = ({ formData, profileCompleteness = 0 }) => {
                         {section.items.map((item, itemIdx) => (
                             <div key={itemIdx} className="flex justify-between items-start py-2 border-b border-gray-100 last:border-0">
                                 <div className="flex-1">
-                                    <p className="text-sm font-semibold text-gray-700">{item.label}</p>
+                                    <div className="flex items-center gap-2">
+                                        {item.icon && <item.icon className="w-4 h-4 text-gray-500" />}
+                                        <p className="text-sm font-semibold text-gray-700">{item.label}</p>
+                                    </div>
                                     {item.subtitle && (
                                         <p className="text-xs text-gray-500 mt-0.5">{item.subtitle}</p>
                                     )}
@@ -120,6 +139,15 @@ const ReviewStep = ({ formData, profileCompleteness = 0 }) => {
                                 <div className="flex-1 text-right">
                                     {item.multiline ? (
                                         <p className="text-sm text-gray-900 text-left ml-4">{item.value}</p>
+                                    ) : item.isLink ? (
+                                        <a
+                                            href={item.value}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-sm text-primary-600 hover:text-primary-700 hover:underline truncate block"
+                                        >
+                                            {item.value}
+                                        </a>
                                     ) : (
                                         <p className={`text-sm ${item.status !== undefined ? (item.status ? 'text-green-600 font-semibold' : 'text-gray-500') : 'text-gray-900'}`}>
                                             {item.value}
@@ -132,25 +160,7 @@ const ReviewStep = ({ formData, profileCompleteness = 0 }) => {
                 </div>
             ))}
 
-            {/* Portfolio Links */}
-            {formData.portfolioLinks && formData.portfolioLinks.length > 0 && (
-                <div className="card-premium">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4">Portfolio Links</h3>
-                    <div className="space-y-2">
-                        {formData.portfolioLinks.map((link, idx) => (
-                            <a
-                                key={idx}
-                                href={link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="block text-sm text-primary-600 hover:text-primary-700 hover:underline"
-                            >
-                                {link}
-                            </a>
-                        ))}
-                    </div>
-                </div>
-            )}
+
 
             {/* Final Instructions */}
             <div className="card bg-gradient-to-r from-primary-50 to-purple-50 border-2 border-primary-200">

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import FileUpload from '../../common/FileUpload';
 import { FileText, Video, Shield } from 'lucide-react';
 
-const VerificationStep = ({ formData, onFileUpload, errors = {} }) => {
+const VerificationStep = ({ formData, onFileUpload, errors = {}, disabled = false }) => {
     return (
         <div className="space-y-6">
             {/* Resume Upload */}
@@ -26,6 +26,7 @@ const VerificationStep = ({ formData, onFileUpload, errors = {} }) => {
                     onFileSelect={(file) => onFileUpload('resume', file)}
                     helperText="Upload your latest resume or CV in PDF or DOC format"
                     maxSize={10}
+                    disabled={disabled}
                 />
                 {errors.resume && (
                     <p className="mt-2 text-sm text-red-600">{errors.resume}</p>

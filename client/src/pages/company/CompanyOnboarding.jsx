@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
+import { getMe } from '../../redux/slices/authSlice';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import OnboardingInfoPanel from '../../components/onboarding/OnboardingInfoPanel';
 import CompanyInfoStep from '../../components/onboarding/steps/company/CompanyInfoStep';
@@ -9,6 +10,8 @@ import CompanyDetailsStep from '../../components/onboarding/steps/company/Compan
 import CompanyDocumentsStep from '../../components/onboarding/steps/company/CompanyDocumentsStep';
 import CompanyReviewStep from '../../components/onboarding/steps/company/CompanyReviewStep';
 import api, { uploadAPI } from '../../services/api';
+import { useSocket } from '../../context/SocketContext';
+import { FiInfo, FiCheckCircle, FiClock } from 'react-icons/fi';
 
 import { calculateCompanyProfileCompleteness } from '../../utils/profileCompleteness';
 
@@ -23,7 +26,9 @@ const STEPS = [
 
 const CompanyOnboarding = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const { user } = useSelector(state => state.auth);
+    const { socket } = useSocket();
 
     const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState({
@@ -74,41 +79,67 @@ const CompanyOnboarding = () => {
     const [rejectionReason, setRejectionReason] = useState(null);
     const [approvalHistory, setApprovalHistory] = useState([]);
 
+    const isReadOnly = status === 'pending' || status === 'approved';
+
+    const loadProgress = async () => {
+        try {
+            const response = await api.get('/auth/onboarding/status');
+            if (response.data.onboardingStep) {
+                setCurrentStep(response.data.onboardingStep + 1);
+            }
+            // Use backend value initially, but we'll update it locally
+            setProfileCompleteness(response.data.profileCompleteness || 0);
+            setStatus(response.data.status);
+            setRejectionReason(response.data.rejectionReason);
+            setApprovalHistory(response.data.approvalHistory || []);
+
+            // Sync Redux state with latest status only if changed
+            if (user?.status !== response.data.status) {
+                dispatch(getMe());
+            }
+
+            // Load profile data
+            const profileResponse = await api.get('/auth/me');
+            if (profileResponse.data.profile) {
+                // Merge saved profile data
+                setFormData(prev => {
+                    const newData = {
+                        ...prev,
+                        ...profileResponse.data.profile
+                    };
+                    // Calculate completeness immediately after loading data
+                    setProfileCompleteness(calculateCompanyProfileCompleteness(newData));
+                    return newData;
+                });
+            }
+        } catch (error) {
+            console.error('Error loading onboarding progress:', error);
+        }
+    };
+
     // Load saved progress
     useEffect(() => {
-        const loadProgress = async () => {
-            try {
-                const response = await api.get('/auth/onboarding/status');
-                if (response.data.onboardingStep) {
-                    setCurrentStep(response.data.onboardingStep + 1);
-                }
-                // Use backend value initially, but we'll update it locally
-                setProfileCompleteness(response.data.profileCompleteness || 0);
-                setStatus(response.data.status);
-                setRejectionReason(response.data.rejectionReason);
-                setApprovalHistory(response.data.approvalHistory || []);
-
-                // Load profile data
-                const profileResponse = await api.get('/auth/me');
-                if (profileResponse.data.profile) {
-                    // Merge saved profile data
-                    setFormData(prev => {
-                        const newData = {
-                            ...prev,
-                            ...profileResponse.data.profile
-                        };
-                        // Calculate completeness immediately after loading data
-                        setProfileCompleteness(calculateCompanyProfileCompleteness(newData));
-                        return newData;
-                    });
-                }
-            } catch (error) {
-                console.error('Error loading onboarding progress:', error);
-            }
-        };
-
         loadProgress();
     }, []);
+
+    // Listen for real-time status updates
+    useEffect(() => {
+        if (socket) {
+            const handleNotification = (data) => {
+                if (data.notification && (data.notification.type === 'system' || data.notification.type === 'application')) {
+                    // Refresh status if we receive a relevant notification
+                    // We can check metadata if available, or just refresh for any system notification
+                    loadProgress();
+                }
+            };
+
+            socket.on('new_notification', handleNotification);
+
+            return () => {
+                socket.off('new_notification', handleNotification);
+            };
+        }
+    }, [socket]);
 
 
 
@@ -258,6 +289,12 @@ const CompanyOnboarding = () => {
 
         // Save current step data before moving to next step
         if (currentStep < STEPS.length) {
+            // Skip saving if read-only
+            if (isReadOnly) {
+                setCurrentStep(prev => prev + 1);
+                return;
+            }
+
             setIsSaving(true);
             try {
                 const savePayload = {
@@ -319,6 +356,7 @@ const CompanyOnboarding = () => {
                         formData={formData}
                         onChange={handleFormChange}
                         errors={errors}
+                        disabled={isReadOnly}
                     />
                 );
             case 2:
@@ -327,6 +365,7 @@ const CompanyOnboarding = () => {
                         formData={formData}
                         onChange={handleFormChange}
                         errors={errors}
+                        disabled={isReadOnly}
                     />
                 );
             case 3:
@@ -338,6 +377,7 @@ const CompanyOnboarding = () => {
                         errors={errors}
                         isUploading={isUploading}
                         uploadProgress={uploadProgress}
+                        disabled={isReadOnly}
                     />
                 );
             case 4:
@@ -375,6 +415,39 @@ const CompanyOnboarding = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Main Content - Steps (2 Columns) */}
                 <div className="lg:col-span-2 space-y-6">
+                    {/* Status Banner */}
+                    {isReadOnly && (
+                        <div className={`rounded-2xl p-6 border ${status === 'approved'
+                            ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-100'
+                            : 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-100'
+                            }`}>
+                            <div className="flex items-start gap-4">
+                                <div className={`p-3 rounded-xl ${status === 'approved' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'
+                                    }`}>
+                                    {status === 'approved' ? <FiCheckCircle className="w-6 h-6" /> : <FiClock className="w-6 h-6" />}
+                                </div>
+                                <div>
+                                    <h3 className={`text-lg font-bold mb-1 ${status === 'approved' ? 'text-green-900' : 'text-blue-900'
+                                        } flex items-center gap-2`}>
+                                        {status === 'approved' ? 'Profile Approved!' : 'Application Under Review'}
+                                        {status !== 'approved' && (
+                                            <span className="relative flex h-3 w-3">
+                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                                <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+                                            </span>
+                                        )}
+                                    </h3>
+                                    <p className={`${status === 'approved' ? 'text-green-700' : 'text-blue-700'
+                                        } leading-relaxed`}>
+                                        {status === 'approved'
+                                            ? "Congratulations! Your profile has been approved. You can now access your dashboard. Editing is disabled to maintain your verified status."
+                                            : "Thanks for submitting your profile! Our team is currently reviewing your application. You'll be notified once the review is complete. Editing is temporarily disabled."}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
                         {/* Step Header */}
                         <div className="mb-8">
@@ -416,7 +489,7 @@ const CompanyOnboarding = () => {
                             </button>
                             <button
                                 onClick={handleNext}
-                                disabled={isSaving || isUploading}
+                                disabled={isSaving || isUploading || (currentStep === STEPS.length && isReadOnly)}
                                 className="px-8 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-600/20 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                             >
                                 {isSaving ? 'Saving...' : currentStep === STEPS.length ? 'Submit Profile' : 'Next Step'}
@@ -433,6 +506,7 @@ const CompanyOnboarding = () => {
                             status={status}
                             rejectionReason={rejectionReason}
                             approvalHistory={approvalHistory}
+                            dashboardLink="/company/dashboard"
                         />
                     </div>
                 </div>

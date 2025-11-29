@@ -2,7 +2,7 @@ import React from 'react';
 import { FiEdit2, FiSave, FiX, FiUser, FiTrash2, FiPhone, FiMail, FiMapPin, FiDollarSign } from 'react-icons/fi';
 import FileUpload from '../../common/FileUpload';
 import Spinner from '../../common/Spinner';
-import { ExpandableText } from '../../shared';
+import { ExpandableText, Avatar } from '../../shared';
 import Textarea from '../../common/Textarea';
 import Input from '../../common/Input';
 import Checkbox from '../../common/Checkbox';
@@ -91,17 +91,13 @@ const ProfileHeader = ({
                                         showProgress={true}
                                     >
                                         <div className="relative w-48 h-48 md:w-full md:h-auto md:aspect-square rounded-xl overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-gray-300 transition-all bg-gray-50 flex items-center justify-center group mx-auto md:mx-0">
-                                            {profile?.profilePicture ? (
-                                                <img
-                                                    src={profile.profilePicture}
-                                                    alt="Profile"
-                                                    className="h-full w-full object-contain"
-                                                />
-                                            ) : (
-                                                <div className="text-gray-300">
-                                                    <FiUser className="h-16 w-16" />
-                                                </div>
-                                            )}
+                                            <Avatar
+                                                src={profile?.profilePicture}
+                                                name={profile?.fullName}
+                                                className="!w-full !h-full !rounded-none !border-0 !shadow-none"
+                                                size="custom"
+                                                shape="square"
+                                            />
                                             <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <div className="text-white flex flex-col items-center gap-1">
                                                     <FiEdit2 className="h-5 w-5" />
@@ -128,17 +124,13 @@ const ProfileHeader = ({
                                 </div>
                             ) : (
                                 <div className="relative w-48 h-48 md:w-full md:h-auto md:aspect-square rounded-xl overflow-hidden border-2 border-gray-200 bg-gray-50 flex items-center justify-center mx-auto md:mx-0">
-                                    {profile?.profilePicture ? (
-                                        <img
-                                            src={profile.profilePicture}
-                                            alt="Profile"
-                                            className="h-full w-full object-contain"
-                                        />
-                                    ) : (
-                                        <div className="text-gray-300">
-                                            <FiUser className="h-16 w-16" />
-                                        </div>
-                                    )}
+                                    <Avatar
+                                        src={profile?.profilePicture}
+                                        name={profile?.fullName}
+                                        className="!w-full !h-full !rounded-none !border-0 !shadow-none"
+                                        size="custom"
+                                        shape="square"
+                                    />
                                 </div>
                             )}
 

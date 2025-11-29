@@ -3,9 +3,10 @@ import React from 'react';
 const Avatar = ({
     src,
     name,
-    size = 'md', // 'xs', 'sm', 'md', 'lg', 'xl', '2xl'
+    size = 'md', // 'xs', 'sm', 'md', 'lg', 'xl', '2xl', 'custom'
     status, // 'online', 'offline', 'busy', 'away'
-    shape = 'circle', // 'circle', 'square'
+    shape = 'circle', // 'circle', 'square', 'rounded-xl'
+    type = 'worker', // 'worker', 'company'
     className = '',
     onClick
 }) => {
@@ -15,12 +16,14 @@ const Avatar = ({
         md: 'w-10 h-10 text-base',
         lg: 'w-12 h-12 text-lg',
         xl: 'w-16 h-16 text-xl',
-        '2xl': 'w-20 h-20 text-2xl'
+        '2xl': 'w-20 h-20 text-2xl',
+        custom: ''
     };
 
     const shapeClasses = {
         circle: 'rounded-full',
-        square: 'rounded-lg'
+        square: 'rounded-lg',
+        'rounded-xl': 'rounded-xl'
     };
 
     const statusColors = {
@@ -36,46 +39,25 @@ const Avatar = ({
         md: 'w-2.5 h-2.5',
         lg: 'w-3 h-3',
         xl: 'w-3.5 h-3.5',
-        '2xl': 'w-4 h-4'
+        '2xl': 'w-4 h-4',
+        custom: 'w-3 h-3' // Default status size for custom
     };
 
-    const getInitials = (name) => {
-        if (!name) return '?';
-        const parts = name.trim().split(' ');
-        if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-        return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    const getDefaultAvatar = (name, type) => {
+        const encodedName = encodeURIComponent(name || 'User');
+        const style = type === 'worker' ? 'miniavs' : 'shapes';
+        return `https://api.dicebear.com/7.x/${style}/svg?seed=${encodedName}`;
     };
 
-    const gradients = [
-        'from-blue-500 to-cyan-500',
-        'from-purple-500 to-pink-500',
-        'from-green-500 to-emerald-500',
-        'from-orange-500 to-red-500',
-        'from-indigo-500 to-purple-500',
-        'from-pink-500 to-rose-500'
-    ];
-
-    const getGradient = (name) => {
-        if (!name) return gradients[0];
-        const index = name.charCodeAt(0) % gradients.length;
-        return gradients[index];
-    };
+    const avatarSrc = src || getDefaultAvatar(name, type);
 
     return (
         <div className={`relative inline-block ${onClick ? 'cursor-pointer' : ''}`} onClick={onClick}>
-            {src ? (
-                <img
-                    src={src}
-                    alt={name || 'User avatar'}
-                    className={`${sizeClasses[size]} ${shapeClasses[shape]} object-cover border-2 border-white shadow-md ${className}`}
-                />
-            ) : (
-                <div
-                    className={`${sizeClasses[size]} ${shapeClasses[shape]} bg-gradient-to-br ${getGradient(name)} flex items-center justify-center text-white font-bold border-2 border-white shadow-md ${className}`}
-                >
-                    {getInitials(name)}
-                </div>
-            )}
+            <img
+                src={avatarSrc}
+                alt={name || 'User avatar'}
+                className={`${sizeClasses[size]} ${shapeClasses[shape]} object-cover border-2 border-white shadow-md bg-white ${className}`}
+            />
 
             {status && (
                 <span

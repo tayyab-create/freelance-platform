@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import Input from '../../../common/Input';
 import { User, Mail, Phone, MapPin, Linkedin, Facebook, Twitter, Instagram } from 'lucide-react';
 
-const CompanyDetailsStep = ({ formData, onChange, errors = {} }) => {
+const CompanyDetailsStep = ({ formData, onChange, errors = {}, disabled = false }) => {
     const handleChange = (e) => {
         const { name, value } = e.target;
 
@@ -56,6 +56,7 @@ const CompanyDetailsStep = ({ formData, onChange, errors = {} }) => {
                         placeholder="Jane Smith"
                         required
                         error={errors['contactPerson.name']}
+                        disabled={disabled}
                     />
                     <Input
                         label="Position / Title"
@@ -65,6 +66,7 @@ const CompanyDetailsStep = ({ formData, onChange, errors = {} }) => {
                         placeholder="HR Manager"
                         required
                         error={errors['contactPerson.position']}
+                        disabled={disabled}
                     />
                     <Input
                         label="Email"
@@ -76,6 +78,7 @@ const CompanyDetailsStep = ({ formData, onChange, errors = {} }) => {
                         required
                         icon={Mail}
                         error={errors['contactPerson.email']}
+                        disabled={disabled}
                     />
                     <Input
                         label="Phone"
@@ -85,6 +88,7 @@ const CompanyDetailsStep = ({ formData, onChange, errors = {} }) => {
                         onChange={handleChange}
                         placeholder="+1 (555) 987-6543"
                         icon={Phone}
+                        disabled={disabled}
                     />
                 </div>
             </div>
@@ -103,6 +107,7 @@ const CompanyDetailsStep = ({ formData, onChange, errors = {} }) => {
                     value={formData.address?.street || ''}
                     onChange={handleChange}
                     placeholder="123 Business Blvd"
+                    disabled={disabled}
                 />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input
@@ -113,6 +118,7 @@ const CompanyDetailsStep = ({ formData, onChange, errors = {} }) => {
                         placeholder="New York"
                         required
                         error={errors['address.city']}
+                        disabled={disabled}
                     />
                     <Input
                         label="State / Province"
@@ -120,6 +126,7 @@ const CompanyDetailsStep = ({ formData, onChange, errors = {} }) => {
                         value={formData.address?.state || ''}
                         onChange={handleChange}
                         placeholder="NY"
+                        disabled={disabled}
                     />
                     <Input
                         label="Country"
@@ -129,6 +136,7 @@ const CompanyDetailsStep = ({ formData, onChange, errors = {} }) => {
                         placeholder="USA"
                         required
                         error={errors['address.country']}
+                        disabled={disabled}
                     />
                     <Input
                         label="Zip / Postal Code"
@@ -136,6 +144,7 @@ const CompanyDetailsStep = ({ formData, onChange, errors = {} }) => {
                         value={formData.address?.zipCode || ''}
                         onChange={handleChange}
                         placeholder="10001"
+                        disabled={disabled}
                     />
                 </div>
             </div>
@@ -153,6 +162,7 @@ const CompanyDetailsStep = ({ formData, onChange, errors = {} }) => {
                         onChange={handleChange}
                         placeholder="linkedin.com/company/acme"
                         icon={Linkedin}
+                        disabled={disabled}
                     />
                     <Input
                         label="Twitter"
@@ -161,6 +171,7 @@ const CompanyDetailsStep = ({ formData, onChange, errors = {} }) => {
                         onChange={handleChange}
                         placeholder="twitter.com/acme"
                         icon={Twitter}
+                        disabled={disabled}
                     />
                     <Input
                         label="Facebook"
@@ -169,6 +180,7 @@ const CompanyDetailsStep = ({ formData, onChange, errors = {} }) => {
                         onChange={handleChange}
                         placeholder="facebook.com/acme"
                         icon={Facebook}
+                        disabled={disabled}
                     />
                     <Input
                         label="Instagram"
@@ -177,6 +189,7 @@ const CompanyDetailsStep = ({ formData, onChange, errors = {} }) => {
                         onChange={handleChange}
                         placeholder="instagram.com/acme"
                         icon={Instagram}
+                        disabled={disabled}
                     />
                 </div>
             </div>
@@ -198,7 +211,8 @@ const CompanyDetailsStep = ({ formData, onChange, errors = {} }) => {
                                     onChange({ ...formData, professionalLinks: newLinks });
                                 }}
                                 placeholder="https://crunchbase.com/organization/your-company"
-                                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                                className={`flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none ${disabled ? 'bg-gray-100 cursor-not-allowed opacity-60' : ''}`}
+                                disabled={disabled}
                             />
                             <button
                                 type="button"
@@ -206,7 +220,8 @@ const CompanyDetailsStep = ({ formData, onChange, errors = {} }) => {
                                     const newLinks = (formData.professionalLinks || []).filter((_, i) => i !== index);
                                     onChange({ ...formData, professionalLinks: newLinks });
                                 }}
-                                className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100"
+                                className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={disabled}
                             >
                                 Remove
                             </button>
@@ -221,13 +236,14 @@ const CompanyDetailsStep = ({ formData, onChange, errors = {} }) => {
                                 professionalLinks: [...(formData.professionalLinks || []), '']
                             });
                         }}
-                        className="px-4 py-2 bg-primary-50 text-primary-600 rounded-lg hover:bg-primary-100"
+                        className="px-4 py-2 bg-primary-50 text-primary-600 rounded-lg hover:bg-primary-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={disabled}
                     >
                         + Add Professional Link
                     </button>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import { FiX, FiCheck, FiUser, FiBriefcase, FiGlobe, FiMail, FiDownload, FiExternalLink, FiChevronDown, FiVideo, FiPhone, FiMapPin, FiCalendar, FiFileText, FiUsers, FiTrendingUp, FiHash } from 'react-icons/fi';
+import { FiX, FiCheck, FiUser, FiBriefcase, FiGlobe, FiMail, FiDownload, FiExternalLink, FiChevronDown, FiVideo, FiPhone, FiMapPin, FiCalendar, FiFileText, FiUsers, FiTrendingUp, FiHash, FiClock } from 'react-icons/fi';
 import { FaLinkedin, FaTwitter, FaFacebook, FaInstagram, FaGithub, FaBehance, FaDribbble, FaCodepen, FaMedium, FaYoutube, FaStackOverflow } from 'react-icons/fa';
 import { SiCrunchbase, SiGlassdoor } from 'react-icons/si';
 import Button from '../common/Button';
 import Textarea from '../common/Textarea';
 import ExpandableText from '../shared/ExpandableText';
+import Avatar from '../shared/Avatar';
 
 const UserApprovalModal = ({ isOpen, onClose, user, profile, onApprove, onReject }) => {
     const [rejectionReason, setRejectionReason] = useState('');
@@ -38,6 +39,7 @@ const UserApprovalModal = ({ isOpen, onClose, user, profile, onApprove, onReject
     const [showRejectForm, setShowRejectForm] = useState(false);
     const [showMoreLinks, setShowMoreLinks] = useState(false);
     const [showAllDocs, setShowAllDocs] = useState(false);
+    const [showHistory, setShowHistory] = useState(false);
 
     if (!user || !profile) return null;
 
@@ -135,31 +137,14 @@ const UserApprovalModal = ({ isOpen, onClose, user, profile, onApprove, onReject
                                 {/* Header */}
                                 <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 z-10">
                                     <div className="flex items-center gap-4">
-                                        {isWorker ? (
-                                            profile.profilePicture ? (
-                                                <img
-                                                    src={profile.profilePicture}
-                                                    alt="Profile"
-                                                    className="h-12 w-12 rounded-xl object-cover"
-                                                />
-                                            ) : (
-                                                <div className="h-12 w-12 rounded-xl flex items-center justify-center text-xl font-bold bg-purple-100 text-purple-600">
-                                                    <FiUser />
-                                                </div>
-                                            )
-                                        ) : (
-                                            profile.logo ? (
-                                                <img
-                                                    src={profile.logo}
-                                                    alt="Company Logo"
-                                                    className="h-12 w-12 rounded-xl object-cover bg-white border border-gray-200"
-                                                />
-                                            ) : (
-                                                <div className="h-12 w-12 rounded-xl flex items-center justify-center text-xl font-bold bg-blue-100 text-blue-600">
-                                                    <FiBriefcase />
-                                                </div>
-                                            )
-                                        )}
+                                        <Avatar
+                                            src={isWorker ? profile.profilePicture : profile.logo}
+                                            name={isWorker ? profile.fullName : profile.companyName}
+                                            type={isWorker ? 'worker' : 'company'}
+                                            size="lg"
+                                            shape="rounded-xl"
+                                            className="border-gray-200"
+                                        />
                                         <div>
                                             <Dialog.Title as="h3" className="text-lg font-bold text-gray-900">
                                                 {isWorker ? profile.fullName : profile.companyName}
@@ -177,27 +162,121 @@ const UserApprovalModal = ({ isOpen, onClose, user, profile, onApprove, onReject
 
                                 {/* Content */}
                                 <div className="px-6 py-6 max-h-[70vh] overflow-y-auto">
+                                    {/* Status & History Card */}
+                                    <div className="mb-8 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                                        <div className="p-4 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`p-2 rounded-lg ${user.status === 'approved' ? 'bg-green-100 text-green-600' :
+                                                        user.status === 'rejected' ? 'bg-red-100 text-red-600' :
+                                                            'bg-yellow-100 text-yellow-600'
+                                                    }`}>
+                                                    {user.status === 'approved' ? <FiCheck className="w-5 h-5" /> :
+                                                        user.status === 'rejected' ? <FiX className="w-5 h-5" /> :
+                                                            <FiClock className="w-5 h-5" />}
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-0.5">Application Status</h4>
+                                                    <p className="text-sm font-bold capitalize text-gray-900">{user.status}</p>
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={() => setShowHistory(!showHistory)}
+                                                className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg border border-gray-200 hover:border-primary-200 transition-all shadow-sm"
+                                            >
+                                                {showHistory ? 'Hide History' : 'View History'}
+                                                <FiChevronDown className={`w-4 h-4 transition-transform ${showHistory ? 'rotate-180' : ''}`} />
+                                            </button>
+                                        </div>
+
+                                        {showHistory && (
+                                            <div className="p-4 bg-white animate-fade-in border-t border-gray-100">
+                                                <div className="space-y-6 pl-2">
+                                                    {user.approvalHistory && user.approvalHistory.length > 0 ? (
+                                                        user.approvalHistory.map((item, index) => (
+                                                            <div key={item._id || index} className="relative flex gap-4">
+                                                                {/* Timeline Line */}
+                                                                {index !== user.approvalHistory.length - 1 && (
+                                                                    <div className="absolute left-[11px] top-8 bottom-[-24px] w-0.5 bg-gray-100"></div>
+                                                                )}
+
+                                                                {/* Timeline Dot */}
+                                                                <div className={`relative z-10 w-6 h-6 rounded-full flex items-center justify-center border-2 border-white shadow-sm ${item.action === 'approved' ? 'bg-green-100 text-green-600' :
+                                                                        item.action === 'rejected' ? 'bg-red-100 text-red-600' :
+                                                                            'bg-blue-100 text-blue-600'
+                                                                    }`}>
+                                                                    <div className={`w-2 h-2 rounded-full ${item.action === 'approved' ? 'bg-green-600' :
+                                                                            item.action === 'rejected' ? 'bg-red-600' :
+                                                                                'bg-blue-600'
+                                                                        }`}></div>
+                                                                </div>
+
+                                                                <div className="flex-1 pt-0.5">
+                                                                    <div className="flex justify-between items-start mb-1">
+                                                                        <p className="text-sm font-bold text-gray-900 capitalize">
+                                                                            {item.action === 'resubmitted' ? 'Resubmitted for Review' :
+                                                                                item.action === 'submitted' ? 'Application Submitted' :
+                                                                                    item.action}
+                                                                        </p>
+                                                                        <span className="text-xs text-gray-400 font-medium">
+                                                                            {new Date(item.timestamp).toLocaleString(undefined, {
+                                                                                dateStyle: 'medium',
+                                                                                timeStyle: 'short'
+                                                                            })}
+                                                                        </span>
+                                                                    </div>
+
+                                                                    {item.performedBy && (
+                                                                        <p className="text-xs text-gray-500 mb-2 flex items-center gap-1">
+                                                                            <FiUser className="w-3 h-3" />
+                                                                            {item.performedBy.email || 'Admin'}
+                                                                        </p>
+                                                                    )}
+
+                                                                    {item.reason && (
+                                                                        <div className="mt-2 p-3 bg-gray-50 rounded-lg text-xs text-gray-600 border border-gray-100">
+                                                                            <span className="font-semibold text-gray-800 block mb-1">Note:</span>
+                                                                            {item.reason}
+                                                                        </div>
+                                                                    )}
+
+                                                                    {item.metadata?.changes && item.metadata.changes.length > 0 && (
+                                                                        <div className="mt-2">
+                                                                            <p className="text-xs font-medium text-gray-500 mb-1.5">Updated Fields:</p>
+                                                                            <div className="flex flex-wrap gap-1.5">
+                                                                                {item.metadata.changes.map((field, i) => (
+                                                                                    <span key={i} className="px-2 py-0.5 bg-yellow-50 text-yellow-700 border border-yellow-100 rounded text-[10px] font-medium uppercase tracking-wide">
+                                                                                        {field}
+                                                                                    </span>
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        <div className="text-center py-6 text-gray-500 text-sm italic">
+                                                            No history available.
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
                                     {/* Basic Info */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                         <Section title="Contact Info" icon={FiMail}>
-                                            {profile.profilePicture && (
-                                                <div className="mb-4 flex justify-center md:justify-start">
-                                                    <img
-                                                        src={profile.profilePicture}
-                                                        alt="Profile"
-                                                        className="h-20 w-20 rounded-xl object-cover border border-gray-100 shadow-sm"
-                                                    />
-                                                </div>
-                                            )}
-                                            {!isWorker && profile.logo && (
-                                                <div className="mb-4 flex justify-center md:justify-start">
-                                                    <img
-                                                        src={profile.logo}
-                                                        alt="Company Logo"
-                                                        className="h-20 w-20 rounded-xl object-cover bg-white border border-gray-200 shadow-sm"
-                                                    />
-                                                </div>
-                                            )}
+                                            <div className="mb-4 flex justify-center md:justify-start">
+                                                <Avatar
+                                                    src={isWorker ? profile.profilePicture : profile.logo}
+                                                    name={isWorker ? profile.fullName : profile.companyName}
+                                                    type={isWorker ? 'worker' : 'company'}
+                                                    size="2xl"
+                                                    shape="rounded-xl"
+                                                    className="border-gray-100 shadow-sm"
+                                                />
+                                            </div>
                                             <Field label="Email" value={user.email} />
                                             <Field label="Phone" value={isWorker ? profile.phone : profile.contactPerson?.phone} />
                                             {isWorker && <Field label="Location" value={profile.location} />}
@@ -708,6 +787,7 @@ const UserApprovalModal = ({ isOpen, onClose, user, profile, onApprove, onReject
                                             </div>
                                         </Section>
                                     )}
+
                                 </div>
 
                                 {/* Footer Actions */}

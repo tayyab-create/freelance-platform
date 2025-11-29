@@ -4,7 +4,7 @@ import Input from '../../../common/Input';
 import Textarea from '../../../common/Textarea';
 import { Building, Globe, Briefcase, Users } from 'lucide-react';
 
-const CompanyInfoStep = ({ formData, onChange, errors = {} }) => {
+const CompanyInfoStep = ({ formData, onChange, errors = {}, disabled = false }) => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         onChange({ ...formData, [name]: value });
@@ -28,6 +28,7 @@ const CompanyInfoStep = ({ formData, onChange, errors = {} }) => {
                 icon={Building}
                 error={errors.companyName}
                 maxLength={100}
+                disabled={disabled}
             />
 
             {/* Tagline */}
@@ -40,6 +41,7 @@ const CompanyInfoStep = ({ formData, onChange, errors = {} }) => {
                 placeholder="Innovation for the future"
                 helperText="A short catchphrase that represents your brand"
                 maxLength={100}
+                disabled={disabled}
             />
 
             {/* Website */}
@@ -53,6 +55,7 @@ const CompanyInfoStep = ({ formData, onChange, errors = {} }) => {
                 required
                 icon={Globe}
                 error={errors.website}
+                disabled={disabled}
             />
 
             {/* Industry */}
@@ -66,6 +69,7 @@ const CompanyInfoStep = ({ formData, onChange, errors = {} }) => {
                 required
                 icon={Briefcase}
                 error={errors.industry}
+                disabled={disabled}
             />
 
             {/* Company Size */}
@@ -79,8 +83,10 @@ const CompanyInfoStep = ({ formData, onChange, errors = {} }) => {
                             key={size}
                             type="button"
                             onClick={() => onChange({ ...formData, companySize: size })}
+                            disabled={disabled}
                             className={`
                 p-3 rounded-lg border transition-colors duration-200 font-medium text-sm
+                ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
                 ${formData.companySize === size
                                     ? 'border-primary-500 bg-primary-50 text-primary-700'
                                     : 'border-gray-200 bg-white hover:border-gray-300 text-gray-600'
@@ -113,6 +119,7 @@ const CompanyInfoStep = ({ formData, onChange, errors = {} }) => {
                 maxLength={1000}
                 showCharacterCount
                 minLength={100}
+                disabled={disabled}
             />
 
             {/* Founded Year */}
@@ -125,6 +132,7 @@ const CompanyInfoStep = ({ formData, onChange, errors = {} }) => {
                 placeholder="2020"
                 min="1800"
                 max={new Date().getFullYear()}
+                disabled={disabled}
             />
         </div>
     );

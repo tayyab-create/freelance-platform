@@ -1,6 +1,6 @@
 const { User, WorkerProfile, CompanyProfile, Job, Application } = require('../models');
 const notificationService = require('../services/notificationService');
-const { logApproval, logRejection } = require('../middleware/approvalHistory');
+const { logApproval, logRejection, getApprovalHistory } = require('../middleware/approvalHistory');
 
 // @desc    Get admin dashboard statistics
 // @route   GET /api/admin/dashboard
@@ -116,7 +116,7 @@ exports.getPendingUsers = async (req, res) => {
       .select('-password')
       .sort('-createdAt');
 
-    // Get profiles for each user
+    // Get profiles and history for each user
     const usersWithProfiles = await Promise.all(
       pendingUsers.map(async (user) => {
         let profile = null;
@@ -125,8 +125,11 @@ exports.getPendingUsers = async (req, res) => {
         } else if (user.role === 'company') {
           profile = await CompanyProfile.findOne({ user: user._id });
         }
+
+        const approvalHistory = await getApprovalHistory(user._id);
+
         return {
-          user,
+          user: { ...user.toObject(), approvalHistory },
           profile
         };
       })
@@ -198,10 +201,12 @@ exports.getUserDetails = async (req, res) => {
       profile = await CompanyProfile.findOne({ user: user._id });
     }
 
+    const approvalHistory = await getApprovalHistory(user._id);
+
     res.status(200).json({
       success: true,
       data: {
-        user,
+        user: { ...user.toObject(), approvalHistory },
         profile
       }
     });

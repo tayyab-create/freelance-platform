@@ -1,5 +1,5 @@
 import DashboardLayout from '../../components/layout/DashboardLayout'
-import { PageHeader, StatCard, SkeletonLoader } from '../../components/shared';
+import { PageHeader, StatCard, SkeletonLoader, Avatar } from '../../components/shared';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useState } from 'react';
@@ -63,9 +63,14 @@ const AdminDashboard = () => {
           <div className="absolute bottom-0 right-20 w-40 h-40 bg-white opacity-5 rounded-full"></div>
           <div className="relative z-10 flex items-center justify-between">
             <div className="flex items-center gap-6">
-              <div className="h-24 w-24 rounded-2xl bg-white/20 flex items-center justify-center text-white text-4xl font-bold shadow-2xl backdrop-blur-sm border-2 border-white/30">
-                {user?.name?.[0]?.toUpperCase() || 'A'}
-              </div>
+              <Avatar
+                src={user?.profilePicture || user?.logo}
+                name={user?.name || 'Admin'}
+                type="worker"
+                size="2xl"
+                className="h-24 w-24 text-4xl shadow-2xl backdrop-blur-sm border-2 border-white/30 bg-white/20"
+                shape="rounded-xl"
+              />
               <div>
                 <h1 className="text-4xl font-black mb-2 tracking-tight">
                   Welcome back, {user?.name || 'Admin'}! 👋

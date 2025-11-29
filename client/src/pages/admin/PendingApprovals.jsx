@@ -3,7 +3,7 @@ import { adminAPI } from '../../services/api';
 import { toast } from '../../utils/toast';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { FiCheck, FiX, FiUser, FiBriefcase, FiClock, FiSearch, FiEye } from 'react-icons/fi';
-import { SkeletonLoader, Select } from '../../components/shared';
+import { SkeletonLoader, Select, Avatar } from '../../components/shared';
 import UserApprovalModal from '../../components/admin/UserApprovalModal';
 
 const PendingApprovals = () => {
@@ -131,28 +131,18 @@ const PendingApprovals = () => {
               {filteredUsers.map((item) => {
                 const { user, profile } = item;
                 return (
-                  <div key={user._id} className="p-6 hover:bg-gray-50 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div key={user._id} className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
                     <div className="flex items-center gap-4">
-                      {/* Avatar/Icon */}
-                      {(profile?.profilePicture || profile?.logo) ? (
-                        <img
-                          src={profile?.profilePicture || profile?.logo}
-                          alt={user.role === 'worker' ? 'Profile' : 'Company Logo'}
-                          className="h-12 w-12 rounded-xl object-cover border border-gray-100"
-                        />
-                      ) : (
-                        <div className={`h-12 w-12 rounded-xl flex items-center justify-center text-xl font-bold ${user.role === 'worker'
-                          ? 'bg-purple-100 text-purple-600'
-                          : 'bg-blue-100 text-blue-600'
-                          }`}>
-                          {user.role === 'worker' ? <FiUser /> : <FiBriefcase />}
-                        </div>
-                      )}
-
-                      {/* Info */}
+                      <Avatar
+                        src={profile?.profilePicture || profile?.logo}
+                        name={profile?.fullName || profile?.companyName}
+                        type={user.role === 'worker' ? 'worker' : 'company'}
+                        size="lg"
+                        shape="rounded-xl"
+                      />
                       <div>
-                        <h3 className="font-bold text-gray-900 text-lg">
-                          {profile?.fullName || profile?.companyName || 'Unknown Name'}
+                        <h3 className="font-bold text-gray-900">
+                          {profile?.fullName || profile?.companyName || 'No Name'}
                         </h3>
                         <div className="flex items-center gap-3 text-sm text-gray-500">
                           <span>{user.email}</span>
@@ -167,7 +157,6 @@ const PendingApprovals = () => {
                       </div>
                     </div>
 
-                    {/* Actions */}
                     <div className="flex items-center gap-3">
                       <button
                         onClick={() => setSelectedUser(item)}

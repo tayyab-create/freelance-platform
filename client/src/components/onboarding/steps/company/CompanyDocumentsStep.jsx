@@ -4,7 +4,7 @@ import FileUpload from '../../../common/FileUpload';
 import Input from '../../../common/Input';
 import { FileText, Image, Video, ShieldCheck } from 'lucide-react';
 
-const CompanyDocumentsStep = ({ formData, onChange, onFileUpload, errors = {}, isUploading = false, uploadProgress = 0 }) => {
+const CompanyDocumentsStep = ({ formData, onChange, onFileUpload, errors = {}, isUploading = false, uploadProgress = 0, disabled = false }) => {
     const handleRegistrationNumberChange = (e) => {
         onChange({ ...formData, registrationNumber: e.target.value });
     };
@@ -34,6 +34,7 @@ const CompanyDocumentsStep = ({ formData, onChange, onFileUpload, errors = {}, i
                     preview
                     isUploading={isUploading}
                     uploadProgress={uploadProgress}
+                    disabled={disabled}
                 />
                 {errors.logo && (
                     <p className="mt-2 text-sm text-red-600">{errors.logo}</p>
@@ -63,6 +64,7 @@ const CompanyDocumentsStep = ({ formData, onChange, onFileUpload, errors = {}, i
                         placeholder="e.g. 123456789"
                         icon={ShieldCheck}
                         helperText="Your official business registration or tax ID"
+                        disabled={disabled}
                     />
 
                     <FileUpload
@@ -76,6 +78,7 @@ const CompanyDocumentsStep = ({ formData, onChange, onFileUpload, errors = {}, i
                         maxSize={10}
                         isUploading={isUploading}
                         uploadProgress={uploadProgress}
+                        disabled={disabled}
                     />
                 </div>
             </div>
@@ -109,6 +112,7 @@ const CompanyDocumentsStep = ({ formData, onChange, onFileUpload, errors = {}, i
                     maxSize={50}
                     isUploading={isUploading}
                     uploadProgress={uploadProgress}
+                    disabled={disabled}
                 />
             </div>
         </div>

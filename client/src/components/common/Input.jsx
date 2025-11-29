@@ -22,6 +22,7 @@ const Input = ({
   className = '',
   inputClassName = '',
   iconClassName = '',
+  ...props
 }) => {
   const hasError = Boolean(error);
   const hasSuccess = Boolean(success) && !hasError;
@@ -73,6 +74,7 @@ const Input = ({
           className={`input-field ${Icon ? 'pl-10' : ''} ${StatusIcon ? 'pr-10' : ''
             } ${getBorderColor()} ${disabled ? 'bg-gray-100 cursor-not-allowed opacity-60' : ''
             } ${inputClassName}`}
+          {...props}
         />
         {StatusIcon && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">

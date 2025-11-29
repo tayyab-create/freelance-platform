@@ -4,7 +4,7 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
 import { FiUser, FiBriefcase, FiFilter, FiCheckCircle, FiXCircle, FiAlertCircle, FiEye, FiX, FiGlobe, FiMapPin, FiPhone, FiCalendar } from 'react-icons/fi';
 import { toast } from '../../utils/toast';
-import { PageHeader, ResponsiveTable, StatusBadge, SkeletonLoader, Modal, Select } from '../../components/shared';
+import { PageHeader, ResponsiveTable, StatusBadge, SkeletonLoader, Modal, Select, Avatar } from '../../components/shared';
 
 const AllUsers = () => {
   const [users, setUsers] = useState([]);
@@ -99,11 +99,13 @@ const AllUsers = () => {
       primary: true,
       render: (value, row) => (
         <div className="flex items-center gap-3">
-          <div className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold ${row.role === 'worker' ? 'bg-purple-100 text-purple-600' :
-            row.role === 'company' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'
-            }`}>
-            {row.role === 'worker' ? 'W' : row.role === 'company' ? 'C' : 'A'}
-          </div>
+          <Avatar
+            src={null}
+            name={row.email}
+            type={row.role === 'worker' ? 'worker' : 'company'}
+            size="md"
+            shape="circle"
+          />
           <div>
             <div className="font-medium text-gray-900 truncate max-w-[150px]" title={row.email}>{row.email}</div>
             <div className="text-xs text-gray-500">ID: {row._id.slice(-6)}</div>
@@ -246,18 +248,14 @@ const AllUsers = () => {
               {/* Header Info */}
               <div className={`p-6 rounded-xl border border-gray-100 flex items-start justify-between ${selectedUser.user.role === 'worker' ? 'bg-purple-50/50' : 'bg-blue-50/50'}`}>
                 <div className="flex items-center gap-4">
-                  {selectedUser.profile?.profilePicture || selectedUser.profile?.logo ? (
-                    <img
-                      src={selectedUser.profile?.profilePicture || selectedUser.profile?.logo}
-                      alt="Profile"
-                      className="h-16 w-16 rounded-xl object-cover shadow-sm bg-white"
-                    />
-                  ) : (
-                    <div className={`h-16 w-16 rounded-xl flex items-center justify-center text-2xl font-bold shadow-sm ${selectedUser.user.role === 'worker' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'
-                      }`}>
-                      {selectedUser.user.role === 'worker' ? 'W' : 'C'}
-                    </div>
-                  )}
+                  <Avatar
+                    src={selectedUser.profile?.profilePicture || selectedUser.profile?.logo}
+                    name={selectedUser.profile?.fullName || selectedUser.profile?.companyName}
+                    type={selectedUser.user.role === 'worker' ? 'worker' : 'company'}
+                    size="xl"
+                    shape="rounded-xl"
+                    className="shadow-sm border-gray-100"
+                  />
                   <div>
                     <h2 className="text-xl font-bold text-gray-900 truncate max-w-[300px]" title={selectedUser.profile?.fullName || selectedUser.profile?.companyName}>
                       {selectedUser.profile?.fullName || selectedUser.profile?.companyName || 'No Name'}

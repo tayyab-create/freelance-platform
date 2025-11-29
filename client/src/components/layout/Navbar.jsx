@@ -10,6 +10,7 @@ import {
 } from 'react-icons/fi';
 import GlobalSearch from '../shared/GlobalSearch';
 import NotificationBell from './NotificationBell';
+import { Avatar } from '../shared';
 
 const Navbar = ({ disableNavigation = false }) => {
   const dispatch = useDispatch();
@@ -224,17 +225,14 @@ const Navbar = ({ disableNavigation = false }) => {
                 ${isCollapsed ? 'justify-center' : 'bg-gradient-to-r from-gray-50 to-white border border-gray-100 hover:border-primary-100 hover:shadow-md'}
               `}>
                 <div className="relative flex-shrink-0">
-                  {user.profilePhoto ? (
-                    <img
-                      src={user.profilePhoto}
-                      alt={user.name}
-                      className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-md ring-2 ring-gray-50"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center text-white font-bold shadow-md ring-2 ring-gray-50">
-                      {user.name?.[0]?.toUpperCase() || 'U'}
-                    </div>
-                  )}
+                  <Avatar
+                    src={user.profilePhoto || user.profilePicture || user.logo}
+                    name={user.name || user.companyName || 'User'}
+                    type={user.role === 'company' ? 'company' : 'worker'}
+                    size="md"
+                    className="border-2 border-white shadow-md ring-2 ring-gray-50"
+                    shape="circle"
+                  />
                   <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full shadow-sm"></div>
                 </div>
 
