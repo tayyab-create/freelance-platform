@@ -769,18 +769,25 @@ const UserApprovalModal = ({ isOpen, onClose, user, profile, onApprove, onReject
                                         )}
                                     </Section>
 
-                                    {/* Company Video (Company Only) */}
-                                    {!isWorker && profile.companyVideo && (
-                                        <Section title="Company Video" icon={FiGlobe}>
+                                    {/* Video Section (Worker & Company) */}
+                                    {(profile.videoIntroduction || profile.companyVideo) && (
+                                        <Section title={profile.videoIntroduction ? "Video Introduction" : "Company Video"} icon={FiVideo}>
                                             <div className="space-y-2">
                                                 <div className="bg-white border border-gray-200 rounded-lg p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
                                                     <div className="flex items-center gap-3">
                                                         <div className="h-10 w-10 bg-primary-50 rounded-lg flex items-center justify-center">
                                                             <FiVideo className="h-5 w-5 text-primary-600" />
                                                         </div>
-                                                        <p className="text-sm font-medium text-gray-900">Company Video</p>
+                                                        <p className="text-sm font-medium text-gray-900">
+                                                            {profile.videoIntroduction ? "Introduction Video" : "Company Video"}
+                                                        </p>
                                                     </div>
-                                                    <a href={profile.companyVideo} target="_blank" rel="noreferrer" className="text-sm text-primary-600 font-medium hover:underline">
+                                                    <a
+                                                        href={profile.videoIntroduction || profile.companyVideo}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="text-sm text-primary-600 font-medium hover:underline"
+                                                    >
                                                         View
                                                     </a>
                                                 </div>

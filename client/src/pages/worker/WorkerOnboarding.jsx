@@ -52,7 +52,8 @@ const WorkerOnboarding = () => {
         portfolioLinks: [],
 
         // Verification
-        resume: null
+        resume: null,
+        videoIntroduction: null
     });
 
     const [errors, setErrors] = useState({});
@@ -149,6 +150,7 @@ const WorkerOnboarding = () => {
             // Verification (2 fields)
             if (formData.resume) completedFields++;
             if (formData.experience && formData.experience.length > 0) completedFields++; // Alternative to resume
+            if (formData.videoIntroduction) completedFields++; // Bonus for video
 
             const percentage = Math.round((completedFields / totalFields) * 100);
             setProfileCompleteness(percentage);
@@ -177,7 +179,8 @@ const WorkerOnboarding = () => {
         setIsUploading(true);
         try {
             // Upload file immediately
-            const uploadType = fieldName === 'profilePicture' ? 'profile-picture' : 'documents';
+            const uploadType = fieldName === 'profilePicture' ? 'profile-picture' :
+                fieldName === 'videoIntroduction' ? 'worker-video' : 'documents';
             const response = await uploadAPI.uploadSingle(file, uploadType);
 
             const newFormData = {

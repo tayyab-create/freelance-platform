@@ -8,7 +8,16 @@ const { upload } = require('../middleware/upload');
 // @route   POST /api/upload/single
 // @access  Private
 router.post('/single', protect, (req, res) => {
-  const uploadSingle = upload.single('file');
+  const type = req.query.type || req.body.type || 'general';
+
+  // Set limit based on type
+  let uploadMiddleware = upload;
+  if (type === 'worker-video' || type === 'company-video') {
+    const { createUploadMiddleware } = require('../middleware/upload');
+    uploadMiddleware = createUploadMiddleware({ maxSize: 50 * 1024 * 1024 }); // 50MB for videos
+  }
+
+  const uploadSingle = uploadMiddleware.single('file');
 
   uploadSingle(req, res, (err) => {
     // Handle multer errors
@@ -16,7 +25,7 @@ router.post('/single', protect, (req, res) => {
       if (err.code === 'LIMIT_FILE_SIZE') {
         return res.status(400).json({
           success: false,
-          message: 'File size exceeds the 10MB limit'
+          message: `File size exceeds the limit (${type.includes('video') ? '50MB' : '10MB'})`
         });
       }
       return res.status(400).json({
@@ -64,7 +73,16 @@ router.post('/single', protect, (req, res) => {
 // @route   POST /api/upload/multiple
 // @access  Private
 router.post('/multiple', protect, (req, res) => {
-  const uploadMultiple = upload.array('files', 10);
+  const type = req.query.type || req.body.type || 'general';
+
+  // Set limit based on type
+  let uploadMiddleware = upload;
+  if (type === 'worker-video' || type === 'company-video') {
+    const { createUploadMiddleware } = require('../middleware/upload');
+    uploadMiddleware = createUploadMiddleware({ maxSize: 50 * 1024 * 1024 }); // 50MB for videos
+  }
+
+  const uploadMultiple = uploadMiddleware.array('files', 10);
 
   uploadMultiple(req, res, (err) => {
     // Handle multer errors
@@ -72,7 +90,7 @@ router.post('/multiple', protect, (req, res) => {
       if (err.code === 'LIMIT_FILE_SIZE') {
         return res.status(400).json({
           success: false,
-          message: 'One or more files exceed the 10MB limit'
+          message: `One or more files exceed the limit (${type.includes('video') ? '50MB' : '10MB'})`
         });
       }
       if (err.code === 'LIMIT_FILE_COUNT') {

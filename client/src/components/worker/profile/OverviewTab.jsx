@@ -21,7 +21,11 @@ const OverviewTab = ({
     handleResumeUpload,
     uploadingResume,
     resumeUploadProgress,
-    handleDeleteResume
+    handleDeleteResume,
+    handleVideoUpload,
+    uploadingVideo,
+    videoUploadProgress,
+    handleDeleteVideo
 }) => {
     const socialInputs = [
         { name: 'website', label: 'Website', icon: FiGlobe, placeholder: 'https://yourwebsite.com' },
@@ -295,6 +299,76 @@ const OverviewTab = ({
                                                     <Spinner size="lg" />
                                                     <span className="text-sm font-bold text-gray-900 mt-4">Uploading Resume...</span>
                                                     <span className="text-xs text-primary-600 font-medium mt-1">{resumeUploadProgress}% Complete</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </FileUpload>
+                                )}
+                            </div>
+
+                            {/* Video Introduction Upload */}
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-3">Video Introduction (Optional)</label>
+                                {basicInfo.videoIntroduction ? (
+                                    <div className="group relative bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between transition-all duration-200">
+                                        <div className="flex items-center gap-4">
+                                            <div className="p-3 bg-blue-50 text-blue-500 rounded-lg border border-blue-100">
+                                                <FiVideo className="h-6 w-6" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-bold text-gray-900">Introduction Video</p>
+                                                <div className="flex items-center gap-3 mt-1">
+                                                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">Video File</span>
+                                                    <a
+                                                        href={basicInfo.videoIntroduction}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-xs text-primary-600 hover:text-primary-700 font-medium hover:underline flex items-center gap-1"
+                                                    >
+                                                        <FiEye className="w-3 h-3" />
+                                                        Watch
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={handleDeleteVideo}
+                                            type="button"
+                                            className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                                            title="Remove Video"
+                                        >
+                                            <FiTrash2 className="h-5 w-5" />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <FileUpload
+                                        onFileSelect={handleVideoUpload}
+                                        accept="video/*"
+                                        isUploading={uploadingVideo}
+                                        uploadProgress={videoUploadProgress}
+                                        showProgress={true}
+                                    >
+                                        <div className="relative h-48 w-full rounded-2xl border-2 border-dashed border-gray-300 cursor-pointer hover:border-primary-500 hover:bg-primary-50/50 transition-all bg-gray-50 flex flex-col items-center justify-center group overflow-hidden">
+                                            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/subtle-dots.png')] opacity-30"></div>
+
+                                            <div className="relative z-10 flex flex-col items-center text-center p-6 transition-transform group-hover:scale-105 duration-200">
+                                                <div className="p-4 bg-white rounded-full shadow-sm mb-4 group-hover:shadow-md transition-all">
+                                                    <FiVideo className="h-8 w-8 text-primary-500" />
+                                                </div>
+                                                <h4 className="text-base font-bold text-gray-900 mb-1">Upload Video Introduction</h4>
+                                                <p className="text-sm text-gray-500 mb-4 max-w-xs mx-auto">
+                                                    Share a short video introducing yourself to potential clients.
+                                                </p>
+                                                <span className="px-3 py-1 bg-white border border-gray-200 rounded-full text-xs font-medium text-gray-500 group-hover:border-primary-200 group-hover:text-primary-600 transition-colors">
+                                                    Max file size: 50MB
+                                                </span>
+                                            </div>
+
+                                            {uploadingVideo && (
+                                                <div className="absolute inset-0 bg-white/95 flex flex-col items-center justify-center z-20 backdrop-blur-sm">
+                                                    <Spinner size="lg" />
+                                                    <span className="text-sm font-bold text-gray-900 mt-4">Uploading Video...</span>
+                                                    <span className="text-xs text-primary-600 font-medium mt-1">{videoUploadProgress}% Complete</span>
                                                 </div>
                                             )}
                                         </div>

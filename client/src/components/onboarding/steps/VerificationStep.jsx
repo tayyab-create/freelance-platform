@@ -33,6 +33,30 @@ const VerificationStep = ({ formData, onFileUpload, errors = {}, disabled = fals
                 )}
             </div>
 
+            {/* Video Introduction (Optional) */}
+            <div>
+                <div className="flex items-center gap-3 mb-3">
+                    <div className="icon-container">
+                        <Video className="w-6 h-6" />
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-gray-900">Video Introduction (Optional)</h3>
+                        <p className="text-sm text-gray-600">Introduce yourself to potential clients (max 50MB)</p>
+                    </div>
+                </div>
+
+                <FileUpload
+                    label="Video Introduction"
+                    name="videoIntroduction"
+                    accept="video/*"
+                    value={formData.videoIntroduction}
+                    onFileSelect={(file) => onFileUpload('videoIntroduction', file)}
+                    helperText="Upload a short video (MP4, WebM, MOV)"
+                    maxSize={50}
+                    disabled={disabled}
+                />
+            </div>
+
 
 
             {/* Verification Badge */}

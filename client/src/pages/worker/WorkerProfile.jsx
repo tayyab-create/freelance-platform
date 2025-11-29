@@ -44,6 +44,7 @@ const WorkerProfile = () => {
         expectedSalaryCurrency: 'USD',
         preferredJobTypes: [],
         resume: '',
+        videoIntroduction: '',
         portfolioLinks: [],
     });
 
@@ -54,6 +55,8 @@ const WorkerProfile = () => {
     const [uploadProgress, setUploadProgress] = useState(0);
     const [uploadingResume, setUploadingResume] = useState(false);
     const [resumeUploadProgress, setResumeUploadProgress] = useState(0);
+    const [uploadingVideo, setUploadingVideo] = useState(false);
+    const [videoUploadProgress, setVideoUploadProgress] = useState(0);
 
     const [experienceForm, setExperienceForm] = useState({
         title: '',
@@ -135,12 +138,41 @@ const WorkerProfile = () => {
         }
     };
 
+    const handleVideoUpload = async (file) => {
+        if (!file) return;
+
+        setUploadingVideo(true);
+        setVideoUploadProgress(0);
+        try {
+            const response = await uploadAPI.uploadSingle(
+                file,
+                'worker-video',
+                (progress) => setVideoUploadProgress(progress)
+            );
+            const fileUrl = `http://localhost:5000${response.data.data.fileUrl}`;
+
+            // Update basic info state immediately
+            setBasicInfo(prev => ({ ...prev, videoIntroduction: fileUrl }));
+            toast.success('Video introduction uploaded!');
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || 'Failed to upload video';
+            toast.error(errorMessage);
+        } finally {
+            setUploadingVideo(false);
+            setVideoUploadProgress(0);
+        }
+    };
+
     const handleDeleteProfilePicture = () => {
         setItemToDelete({ type: 'profilePicture', name: 'Profile Picture' });
     };
 
     const handleDeleteResume = () => {
         setItemToDelete({ type: 'resume', name: 'Resume' });
+    };
+
+    const handleDeleteVideo = () => {
+        setItemToDelete({ type: 'videoIntroduction', name: 'Video Introduction' });
     };
 
     const handleDeleteExperience = (id) => {
@@ -161,6 +193,8 @@ const WorkerProfile = () => {
         // Optimistic Updates (Update UI immediately)
         if (item.type === 'profilePicture') {
             setProfile(prev => ({ ...prev, profilePicture: '' }));
+        } else if (item.type === 'videoIntroduction') {
+            setProfile(prev => ({ ...prev, videoIntroduction: '' }));
         } else if (item.type === 'experience') {
             setProfile(prev => ({
                 ...prev,
@@ -177,6 +211,8 @@ const WorkerProfile = () => {
         try {
             if (item.type === 'profilePicture') {
                 await workerAPI.updateProfile({ profilePicture: '' });
+            } else if (item.type === 'videoIntroduction') {
+                await workerAPI.updateProfile({ videoIntroduction: '' });
             } else if (item.type === 'experience') {
                 await workerAPI.deleteExperience(item.id);
             } else if (item.type === 'certification') {
@@ -220,6 +256,7 @@ const WorkerProfile = () => {
                 expectedSalaryCurrency: profileData.expectedSalary?.currency || 'USD',
                 preferredJobTypes: profileData.preferredJobTypes || [],
                 resume: profileData.resume || '',
+                videoIntroduction: profileData.videoIntroduction || '',
                 portfolioLinks: profileData.portfolioLinks || [],
             });
             setSkills(profileData.skills || []);
@@ -400,6 +437,10 @@ const WorkerProfile = () => {
                             uploadingResume={uploadingResume}
                             resumeUploadProgress={resumeUploadProgress}
                             handleDeleteResume={handleDeleteResume}
+                            handleVideoUpload={handleVideoUpload}
+                            uploadingVideo={uploadingVideo}
+                            videoUploadProgress={videoUploadProgress}
+                            handleDeleteVideo={handleDeleteVideo}
                         />
                     )}
 
@@ -452,7 +493,8 @@ const WorkerProfile = () => {
                     itemType={
                         itemToDelete?.type === 'profilePicture' ? 'image' :
                             itemToDelete?.type === 'resume' ? 'document' :
-                                itemToDelete?.type
+                                itemToDelete?.type === 'videoIntroduction' ? 'video' :
+                                    itemToDelete?.type
                     }
                 />
             </div>
