@@ -7,8 +7,9 @@ import Input from '../../components/common/Input';
 import {
     FiEdit2, FiSave, FiX, FiTrash2, FiBriefcase, FiCheckCircle, FiStar,
     FiMapPin, FiGlobe, FiLinkedin, FiUsers, FiMail, FiPhone,
-    FiCalendar, FiShield, FiVideo, FiFacebook, FiInstagram, FiTwitter, FiLink
+    FiCalendar, FiShield, FiVideo, FiFacebook, FiInstagram, FiTwitter, FiLink, FiAward
 } from 'react-icons/fi';
+import { SiGithub, SiCrunchbase, SiMedium, SiBehance, SiDribbble, SiProducthunt } from 'react-icons/si';
 import { FaBuilding } from 'react-icons/fa'
 import { toast } from '../../utils/toast';
 import FileUpload from '../../components/common/FileUpload';
@@ -583,30 +584,70 @@ const CompanyProfile = () => {
                                             />
 
                                             <div className="divider text-xs text-gray-400 uppercase tracking-wider font-bold my-2">Professional Links</div>
-                                            <div className="space-y-2">
-                                                {formData.professionalLinks.map((link, index) => (
-                                                    <div key={index} className="flex gap-2">
-                                                        <input
-                                                            type="url"
-                                                            value={link}
-                                                            onChange={(e) => handleProfessionalLinkChange(index, e.target.value)}
-                                                            placeholder="https://..."
-                                                            className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
-                                                        />
-                                                        <button
-                                                            onClick={() => handleRemoveProfessionalLink(index)}
-                                                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
-                                                        >
-                                                            <FiTrash2 className="h-4 w-4" />
-                                                        </button>
-                                                    </div>
-                                                ))}
-                                                <button
-                                                    onClick={handleAddProfessionalLink}
-                                                    className="text-sm text-primary-600 font-medium hover:text-primary-700 flex items-center gap-1"
-                                                >
-                                                    + Add Link
-                                                </button>
+                                            <div className="pt-6 mt-6 border-t border-gray-100">
+                                                <div className="flex items-center justify-between mb-5">
+                                                    <h4 className="text-sm font-bold text-gray-700 uppercase tracking-wider">Professional Links</h4>
+                                                    <button
+                                                        onClick={handleAddProfessionalLink}
+                                                        className="flex items-center gap-2 text-xs font-semibold text-primary-600 hover:text-primary-700 px-3 py-1.5 rounded-lg hover:bg-primary-50 transition-all"
+                                                    >
+                                                        <span className="flex items-center justify-center w-4 h-4 rounded-full bg-primary-100 text-primary-600 text-xs">+</span>
+                                                        Add Link
+                                                    </button>
+                                                </div>
+
+                                                <div className="space-y-3">
+                                                    {formData.professionalLinks.map((link, index) => {
+                                                        // Detect platform from URL
+                                                        const getPlatformInfo = (url) => {
+                                                            if (!url) return { icon: FiLink, color: 'gray', name: 'Link' };
+                                                            const lowerUrl = url.toLowerCase();
+                                                            if (lowerUrl.includes('github.com')) return { icon: SiGithub, color: 'purple', name: 'GitHub' };
+                                                            if (lowerUrl.includes('crunchbase.com')) return { icon: SiCrunchbase, color: 'blue', name: 'Crunchbase' };
+                                                            if (lowerUrl.includes('glassdoor.com')) return { icon: FiAward, color: 'green', name: 'Glassdoor' };
+                                                            if (lowerUrl.includes('medium.com')) return { icon: SiMedium, color: 'gray', name: 'Medium' };
+                                                            if (lowerUrl.includes('producthunt.com')) return { icon: SiProducthunt, color: 'orange', name: 'Product Hunt' };
+                                                            if (lowerUrl.includes('behance.net')) return { icon: SiBehance, color: 'blue', name: 'Behance' };
+                                                            if (lowerUrl.includes('dribbble.com')) return { icon: SiDribbble, color: 'pink', name: 'Dribbble' };
+                                                            return { icon: FiGlobe, color: 'gray', name: 'Website' };
+                                                        };
+
+                                                        const platform = getPlatformInfo(link);
+                                                        const Icon = platform.icon;
+
+                                                        return (
+                                                            <div key={index} className="group relative bg-gray-50 rounded-xl border border-gray-200 hover:border-gray-300 transition-all">
+                                                                <div className="flex items-center gap-3 p-1">
+                                                                    <div className={`flex-shrink-0 ml-1 p-2.5 bg-${platform.color}-50 text-${platform.color}-600 rounded-lg`}>
+                                                                        <Icon className="h-4 w-4" />
+                                                                    </div>
+                                                                    <input
+                                                                        type="url"
+                                                                        value={link}
+                                                                        onChange={(e) => handleProfessionalLinkChange(index, e.target.value)}
+                                                                        placeholder="https://crunchbase.com/organization/your-company"
+                                                                        className="flex-1 bg-transparent border-none focus:outline-none focus:ring-0 text-sm text-gray-700 placeholder:text-gray-400 py-2"
+                                                                    />
+                                                                    <button
+                                                                        onClick={() => handleRemoveProfessionalLink(index)}
+                                                                        className="flex-shrink-0 mr-1 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                                                        title="Remove link"
+                                                                    >
+                                                                        <FiTrash2 className="h-4 w-4" />
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+
+                                                    {formData.professionalLinks.length === 0 && (
+                                                        <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-xl">
+                                                            <FiLink className="mx-auto h-8 w-8 text-gray-300 mb-2" />
+                                                            <p className="text-sm text-gray-500">No professional links added yet</p>
+                                                            <p className="text-xs text-gray-400 mt-1">Add links to Crunchbase, GitHub, Medium, etc.</p>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     ) : (
@@ -672,21 +713,59 @@ const CompanyProfile = () => {
                                             )}
 
                                             {profile?.professionalLinks?.length > 0 && (
-                                                <div className="pt-2 border-t border-gray-100 mt-2">
-                                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Other Links</p>
-                                                    <div className="space-y-2">
-                                                        {profile.professionalLinks.map((link, idx) => (
-                                                            <a
-                                                                key={idx}
-                                                                href={link}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary-600 truncate"
-                                                            >
-                                                                <FiLink className="h-3 w-3 flex-shrink-0" />
-                                                                <span className="truncate">{link}</span>
-                                                            </a>
-                                                        ))}
+                                                <div className="pt-6 border-t border-gray-100 mt-6">
+                                                    <h4 className="text-sm font-bold text-gray-700 uppercase tracking-wider mb-4">Professional Links</h4>
+                                                    <div className="space-y-2.5">
+                                                        {profile.professionalLinks.map((link, idx) => {
+                                                            const getDomainInfo = (url) => {
+                                                                try {
+                                                                    const urlObj = new URL(url);
+                                                                    const hostname = urlObj.hostname.replace('www.', '');
+                                                                    const domain = hostname.split('.')[0];
+
+                                                                    const platforms = {
+                                                                        'github': { color: 'purple', icon: SiGithub, label: 'GitHub' },
+                                                                        'crunchbase': { color: 'blue', icon: SiCrunchbase, label: 'Crunchbase' },
+                                                                        'glassdoor': { color: 'green', icon: FiAward, label: 'Glassdoor' },
+                                                                        'medium': { color: 'gray', icon: SiMedium, label: 'Medium' },
+                                                                        'producthunt': { color: 'orange', icon: SiProducthunt, label: 'Product Hunt' },
+                                                                        'behance': { color: 'blue', icon: SiBehance, label: 'Behance' },
+                                                                        'dribbble': { color: 'pink', icon: SiDribbble, label: 'Dribbble' },
+                                                                    };
+
+                                                                    const platform = platforms[domain] || { color: 'gray', icon: FiGlobe, label: domain.charAt(0).toUpperCase() + domain.slice(1) };
+                                                                    return { ...platform, url: urlObj.href, hostname };
+                                                                } catch {
+                                                                    return { color: 'gray', icon: FiLink, label: 'Link', url: link, hostname: link };
+                                                                }
+                                                            };
+
+                                                            const info = getDomainInfo(link);
+                                                            const IconComponent = info.icon;
+
+                                                            return (
+                                                                <a
+                                                                    key={idx}
+                                                                    href={info.url}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className={`group flex items-center gap-3 p-3.5 rounded-xl bg-${info.color}-50 hover:bg-${info.color}-100 border border-${info.color}-100 hover:border-${info.color}-200 transition-all`}
+                                                                >
+                                                                    <div className={`flex-shrink-0 text-${info.color}-600`}>
+                                                                        <IconComponent className="h-5 w-5" />
+                                                                    </div>
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <p className={`font-semibold text-sm text-${info.color}-900 mb-0.5`}>{info.label}</p>
+                                                                        <p className={`text-xs text-${info.color}-600 truncate`}>{info.hostname}</p>
+                                                                    </div>
+                                                                    <div className={`flex-shrink-0 text-${info.color}-400 group-hover:text-${info.color}-600 group-hover:translate-x-0.5 transition-all`}>
+                                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                                        </svg>
+                                                                    </div>
+                                                                </a>
+                                                            );
+                                                        })}
                                                     </div>
                                                 </div>
                                             )}
