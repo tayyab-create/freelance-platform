@@ -1,6 +1,6 @@
 import React from 'react';
 import { FiBriefcase, FiCalendar, FiDollarSign, FiAlertCircle, FiMessageCircle, FiPlay, FiUpload, FiCheckCircle, FiClock, FiStar, FiArrowRight, FiInfo } from 'react-icons/fi';
-import { StatusBadge } from '../../shared';
+import { StatusBadge, Avatar } from '../../shared';
 
 const JobCard = ({
     job,
@@ -130,17 +130,14 @@ const JobCard = ({
                 <div className="flex items-start justify-between mb-2">
                     {/* Company Info */}
                     <div className="flex items-start gap-3 flex-1 min-w-0">
-                        {job.companyInfo?.logo ? (
-                            <img
-                                src={job.companyInfo.logo}
-                                alt={job.companyInfo.companyName}
-                                className="h-12 w-12 rounded-xl object-cover border border-gray-200 flex-shrink-0"
-                            />
-                        ) : (
-                            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center flex-shrink-0">
-                                <FiBriefcase className="h-6 w-6 text-white" />
-                            </div>
-                        )}
+                        <Avatar
+                            src={job.companyInfo?.logo}
+                            name={job.companyInfo?.companyName || 'Confidential Client'}
+                            size="custom"
+                            className="h-12 w-12 !rounded-xl"
+                            shape="square"
+                            type="company"
+                        />
                         <div className="min-w-0 flex-1">
                             <p className="font-semibold text-gray-900 text-sm truncate">
                                 {job.companyInfo?.companyName || 'Confidential Client'}
