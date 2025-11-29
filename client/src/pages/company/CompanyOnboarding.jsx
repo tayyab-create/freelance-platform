@@ -10,6 +10,8 @@ import CompanyDocumentsStep from '../../components/onboarding/steps/company/Comp
 import CompanyReviewStep from '../../components/onboarding/steps/company/CompanyReviewStep';
 import api, { uploadAPI } from '../../services/api';
 
+import { calculateCompanyProfileCompleteness } from '../../utils/profileCompleteness';
+
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const STEPS = [
@@ -59,7 +61,8 @@ const CompanyOnboarding = () => {
         logo: null,
         registrationNumber: '',
         taxDocuments: [],
-        companyVideo: null
+        companyVideo: null,
+        professionalLinks: []
     });
 
     const [errors, setErrors] = useState({});
@@ -79,6 +82,7 @@ const CompanyOnboarding = () => {
                 if (response.data.onboardingStep) {
                     setCurrentStep(response.data.onboardingStep + 1);
                 }
+                // Use backend value initially, but we'll update it locally
                 setProfileCompleteness(response.data.profileCompleteness || 0);
                 setStatus(response.data.status);
                 setRejectionReason(response.data.rejectionReason);
@@ -88,10 +92,15 @@ const CompanyOnboarding = () => {
                 const profileResponse = await api.get('/auth/me');
                 if (profileResponse.data.profile) {
                     // Merge saved profile data
-                    setFormData(prev => ({
-                        ...prev,
-                        ...profileResponse.data.profile
-                    }));
+                    setFormData(prev => {
+                        const newData = {
+                            ...prev,
+                            ...profileResponse.data.profile
+                        };
+                        // Calculate completeness immediately after loading data
+                        setProfileCompleteness(calculateCompanyProfileCompleteness(newData));
+                        return newData;
+                    });
                 }
             } catch (error) {
                 console.error('Error loading onboarding progress:', error);
@@ -108,10 +117,36 @@ const CompanyOnboarding = () => {
     const handleFormChange = (newData) => {
         setFormData(newData);
         setErrors({});
+        // Calculate completeness in real-time
+        setProfileCompleteness(calculateCompanyProfileCompleteness(newData));
     };
 
     const handleFileUpload = async (fieldName, file) => {
         if (!file) return;
+
+        // Handle removal of tax documents (when file objects are passed instead of File objects)
+        if (fieldName === 'taxDocuments' && Array.isArray(file)) {
+            // Check if any item in the array is an actual File object (new upload)
+            const hasNewFiles = file.some(f => f instanceof File);
+
+            if (!hasNewFiles && file.length >= 0) {
+                // This is a removal/update operation, extract URLs from file objects
+                const urls = file.map(f => {
+                    // If it's already a string (URL), return it
+                    if (typeof f === 'string') return f;
+                    // If it's an object with url property, extract it
+                    if (f && typeof f === 'object' && f.url) return f.url;
+                    // Otherwise return as is
+                    return f;
+                }).filter(url => typeof url === 'string'); // Only keep valid URL strings
+
+                setFormData(prev => ({
+                    ...prev,
+                    taxDocuments: urls
+                }));
+                return; // Exit early, don't upload
+            }
+        }
 
         setIsUploading(true);
         setUploadProgress(0);
@@ -121,15 +156,21 @@ const CompanyOnboarding = () => {
                 // Handle multiple tax documents
                 const uploadType = 'tax-documents';
 
-                // Convert FileList to Array if needed
-                const filesArray = Array.isArray(file) ? file : Array.from(file);
+                // Convert FileList to Array if needed and filter only File objects
+                const filesArray = Array.isArray(file) ? file.filter(f => f instanceof File) : Array.from(file);
+
+                // If no actual files to upload after filtering, just return
+                if (filesArray.length === 0) {
+                    setIsUploading(false);
+                    return;
+                }
 
                 const response = await uploadAPI.uploadMultiple(filesArray, uploadType, (progress) => {
                     setUploadProgress(progress);
                 });
 
-                // Fix: Access correct response structure
-                const files = response.data.data?.files || response.data.files || [];
+                // Fix: Access correct response structure - server returns data as array directly
+                const files = response.data.data || response.data.files || [];
                 const urls = files.map(f => `${API_URL}${f.fileUrl}`);
 
                 setFormData(prev => ({

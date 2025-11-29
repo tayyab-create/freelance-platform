@@ -180,6 +180,53 @@ const CompanyDetailsStep = ({ formData, onChange, errors = {} }) => {
                     />
                 </div>
             </div>
+
+            {/* Professional Links Section */}
+            <div className="space-y-4">
+                <h3 className="text-lg font-bold text-gray-900">Professional Links (Optional)</h3>
+                <p className="text-sm text-gray-500">Add links to business platforms (Crunchbase, Glassdoor, GitHub organization, etc.)</p>
+
+                <div className="space-y-3">
+                    {(formData.professionalLinks || []).map((link, index) => (
+                        <div key={index} className="flex gap-2">
+                            <input
+                                type="url"
+                                value={link}
+                                onChange={(e) => {
+                                    const newLinks = [...(formData.professionalLinks || [])];
+                                    newLinks[index] = e.target.value;
+                                    onChange({ ...formData, professionalLinks: newLinks });
+                                }}
+                                placeholder="https://crunchbase.com/organization/your-company"
+                                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const newLinks = (formData.professionalLinks || []).filter((_, i) => i !== index);
+                                    onChange({ ...formData, professionalLinks: newLinks });
+                                }}
+                                className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100"
+                            >
+                                Remove
+                            </button>
+                        </div>
+                    ))}
+
+                    <button
+                        type="button"
+                        onClick={() => {
+                            onChange({
+                                ...formData,
+                                professionalLinks: [...(formData.professionalLinks || []), '']
+                            });
+                        }}
+                        className="px-4 py-2 bg-primary-50 text-primary-600 rounded-lg hover:bg-primary-100"
+                    >
+                        + Add Professional Link
+                    </button>
+                </div>
+            </div>
         </div>
     );
 };

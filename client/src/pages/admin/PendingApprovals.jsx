@@ -134,10 +134,10 @@ const PendingApprovals = () => {
                   <div key={user._id} className="p-6 hover:bg-gray-50 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                       {/* Avatar/Icon */}
-                      {profile?.profilePicture ? (
+                      {(profile?.profilePicture || profile?.logo) ? (
                         <img
-                          src={profile.profilePicture}
-                          alt="Profile"
+                          src={profile?.profilePicture || profile?.logo}
+                          alt={user.role === 'worker' ? 'Profile' : 'Company Logo'}
                           className="h-12 w-12 rounded-xl object-cover border border-gray-100"
                         />
                       ) : (

@@ -57,6 +57,9 @@ const companyProfileSchema = new mongoose.Schema({
   taxDocuments: [{
     type: String // File URLs
   }],
+  professionalLinks: [{
+    type: String // URLs to Crunchbase, Glassdoor, GitHub org, etc.
+  }],
   totalJobsPosted: {
     type: Number,
     default: 0

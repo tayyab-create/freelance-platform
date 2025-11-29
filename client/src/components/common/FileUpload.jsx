@@ -31,6 +31,13 @@ const FileUpload = ({
   useEffect(() => {
     if (currentImage) {
       setPreviewUrl(currentImage);
+    } else if (Array.isArray(value) && value.length > 0 && multiple) {
+      // Handle array of URLs for multiple files
+      const files = value.map(url => {
+        const fileName = typeof url === 'string' ? url.split('/').pop() : 'Uploaded File';
+        return { name: fileName, size: -1, isUploaded: true, url };
+      });
+      setSelectedFiles(files);
     } else if (typeof value === 'string' && value.length > 0) {
       if (preview) {
         setPreviewUrl(value);
@@ -40,7 +47,7 @@ const FileUpload = ({
         setSelectedFile({ name: fileName, size: -1, isUploaded: true }); // -1 indicates already uploaded file
       }
     }
-  }, [currentImage, value, preview]);
+  }, [currentImage, value, preview, multiple]);
 
   const validateFile = (file) => {
     if (file.size > maxSize * 1024 * 1024) {

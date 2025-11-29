@@ -61,7 +61,13 @@ const Register = () => {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      if (user.status === 'pending') {
+      if (user.status === 'incomplete') {
+        if (user.role === 'worker') {
+          navigate('/worker/onboarding');
+        } else if (user.role === 'company') {
+          navigate('/company/onboarding');
+        }
+      } else if (user.status === 'pending') {
         // If onboarding is not complete, redirect to onboarding flow
         if (!user.onboardingCompleted) {
           if (user.role === 'worker') {

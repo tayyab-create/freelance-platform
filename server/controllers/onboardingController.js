@@ -47,10 +47,13 @@ exports.saveOnboardingProgress = async (req, res) => {
                 ? calculateWorkerProfileCompleteness({ ...profile.toObject(), ...profileData })
                 : calculateCompanyProfileCompleteness({ ...profile.toObject(), ...profileData });
 
+            // Remove immutable fields from profileData to prevent MongoDB errors
+            const { _id, user: userId, createdAt, updatedAt, __v, ...cleanProfileData } = profileData;
+
             // Use findOneAndUpdate to avoid version conflicts
             // This bypasses Mongoose's optimistic concurrency control
             const updateData = {
-                ...profileData,
+                ...cleanProfileData,
                 profileCompleteness: completeness
             };
 

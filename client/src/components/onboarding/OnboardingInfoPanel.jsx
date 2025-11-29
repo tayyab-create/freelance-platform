@@ -7,6 +7,7 @@ const OnboardingInfoPanel = ({ profileCompleteness, status, rejectionReason, app
             case 'approved': return 'bg-green-100 text-green-700 border-green-200';
             case 'rejected': return 'bg-red-100 text-red-700 border-red-200';
             case 'pending': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+            case 'incomplete': return 'bg-blue-100 text-blue-700 border-blue-200';
             default: return 'bg-gray-100 text-gray-700 border-gray-200';
         }
     };
@@ -16,6 +17,7 @@ const OnboardingInfoPanel = ({ profileCompleteness, status, rejectionReason, app
             case 'approved': return <FiCheckCircle className="h-5 w-5" />;
             case 'rejected': return <FiAlertCircle className="h-5 w-5" />;
             case 'pending': return <FiClock className="h-5 w-5" />;
+            case 'incomplete': return <FiFileText className="h-5 w-5" />;
             default: return <FiFileText className="h-5 w-5" />;
         }
     };
@@ -64,6 +66,7 @@ const OnboardingInfoPanel = ({ profileCompleteness, status, rejectionReason, app
                             {status === 'pending' && 'Your application is under review. We will notify you once a decision is made.'}
                             {status === 'approved' && 'Congratulations! Your profile has been approved. You can now start applying for jobs.'}
                             {status === 'rejected' && 'Unfortunately, your application was not approved. Please review the feedback below.'}
+                            {status === 'incomplete' && 'Please complete all steps and submit your profile for review.'}
                             {!status && 'Please complete all steps and submit your profile for review.'}
                         </p>
                     </div>

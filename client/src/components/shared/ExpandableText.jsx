@@ -15,7 +15,7 @@ const ExpandableText = ({ text, limit = 200, className = '', textClassName = '' 
                     {isExpanded || !shouldTruncate ? text : `${text.slice(0, limit)}...`}
                 </p>
                 {!isExpanded && shouldTruncate && (
-                    <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+                    <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white/80 to-transparent pointer-events-none"></div>
                 )}
             </div>
             {shouldTruncate && (

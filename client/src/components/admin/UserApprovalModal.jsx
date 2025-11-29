@@ -2,14 +2,42 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import { FiX, FiCheck, FiUser, FiBriefcase, FiGlobe, FiMail, FiDownload, FiExternalLink, FiChevronDown } from 'react-icons/fi';
+import { FiX, FiCheck, FiUser, FiBriefcase, FiGlobe, FiMail, FiDownload, FiExternalLink, FiChevronDown, FiVideo, FiPhone, FiMapPin, FiCalendar, FiFileText, FiUsers, FiTrendingUp, FiHash } from 'react-icons/fi';
+import { FaLinkedin, FaTwitter, FaFacebook, FaInstagram, FaGithub, FaBehance, FaDribbble, FaCodepen, FaMedium, FaYoutube, FaStackOverflow } from 'react-icons/fa';
+import { SiCrunchbase, SiGlassdoor } from 'react-icons/si';
 import Button from '../common/Button';
 import Textarea from '../common/Textarea';
+import ExpandableText from '../shared/ExpandableText';
 
 const UserApprovalModal = ({ isOpen, onClose, user, profile, onApprove, onReject }) => {
     const [rejectionReason, setRejectionReason] = useState('');
+
+    // Helper function to get icon and color for portfolio links
+    const getPortfolioIcon = (url) => {
+        const lowerUrl = url.toLowerCase();
+        if (lowerUrl.includes('github.com')) return { icon: FaGithub, color: 'text-gray-800' };
+        if (lowerUrl.includes('behance.net')) return { icon: FaBehance, color: 'text-blue-500' };
+        if (lowerUrl.includes('dribbble.com')) return { icon: FaDribbble, color: 'text-pink-500' };
+        if (lowerUrl.includes('codepen.io')) return { icon: FaCodepen, color: 'text-gray-700' };
+        if (lowerUrl.includes('linkedin.com')) return { icon: FaLinkedin, color: 'text-blue-600' };
+        return { icon: FiExternalLink, color: 'text-primary-600' };
+    };
+
+    // Helper function to get icon for professional links
+    const getProfessionalIcon = (url) => {
+        const lower = url.toLowerCase();
+        if (lower.includes('crunchbase.com')) return { icon: SiCrunchbase, color: 'text-blue-600', bgColor: 'bg-blue-50', label: 'Crunchbase' };
+        if (lower.includes('glassdoor.com')) return { icon: SiGlassdoor, color: 'text-green-600', bgColor: 'bg-green-50', label: 'Glassdoor' };
+        if (lower.includes('github.com')) return { icon: FaGithub, color: 'text-gray-700', bgColor: 'bg-gray-100', label: 'GitHub' };
+        if (lower.includes('medium.com')) return { icon: FaMedium, color: 'text-gray-800', bgColor: 'bg-gray-100', label: 'Medium' };
+        if (lower.includes('youtube.com')) return { icon: FaYoutube, color: 'text-red-600', bgColor: 'bg-red-50', label: 'YouTube' };
+        if (lower.includes('behance.net')) return { icon: FaBehance, color: 'text-blue-600', bgColor: 'bg-blue-50', label: 'Behance' };
+        if (lower.includes('dribbble.com')) return { icon: FaDribbble, color: 'text-pink-600', bgColor: 'bg-pink-50', label: 'Dribbble' };
+        return { icon: FiExternalLink, color: 'text-gray-600', bgColor: 'bg-gray-50', label: 'Website' };
+    };
     const [showRejectForm, setShowRejectForm] = useState(false);
     const [showMoreLinks, setShowMoreLinks] = useState(false);
+    const [showAllDocs, setShowAllDocs] = useState(false);
 
     if (!user || !profile) return null;
 
@@ -56,9 +84,12 @@ const UserApprovalModal = ({ isOpen, onClose, user, profile, onApprove, onReject
         );
     };
 
-    const Field = ({ label, value, href }) => (
+    const Field = ({ label, value, href, icon: Icon }) => (
         <div className="mb-3 last:mb-0">
-            <p className="text-xs text-gray-500 font-medium mb-0.5">{label}</p>
+            <p className="text-xs text-gray-500 font-medium mb-0.5 flex items-center gap-1">
+                {Icon && <Icon className="w-3 h-3" />}
+                {label}
+            </p>
             {href ? (
                 <a
                     href={href}
@@ -104,17 +135,30 @@ const UserApprovalModal = ({ isOpen, onClose, user, profile, onApprove, onReject
                                 {/* Header */}
                                 <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 z-10">
                                     <div className="flex items-center gap-4">
-                                        {profile.profilePicture ? (
-                                            <img
-                                                src={profile.profilePicture}
-                                                alt="Profile"
-                                                className="h-12 w-12 rounded-xl object-cover"
-                                            />
+                                        {isWorker ? (
+                                            profile.profilePicture ? (
+                                                <img
+                                                    src={profile.profilePicture}
+                                                    alt="Profile"
+                                                    className="h-12 w-12 rounded-xl object-cover"
+                                                />
+                                            ) : (
+                                                <div className="h-12 w-12 rounded-xl flex items-center justify-center text-xl font-bold bg-purple-100 text-purple-600">
+                                                    <FiUser />
+                                                </div>
+                                            )
                                         ) : (
-                                            <div className={`h-12 w-12 rounded-xl flex items-center justify-center text-xl font-bold ${isWorker ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'
-                                                }`}>
-                                                {isWorker ? <FiUser /> : <FiBriefcase />}
-                                            </div>
+                                            profile.logo ? (
+                                                <img
+                                                    src={profile.logo}
+                                                    alt="Company Logo"
+                                                    className="h-12 w-12 rounded-xl object-cover bg-white border border-gray-200"
+                                                />
+                                            ) : (
+                                                <div className="h-12 w-12 rounded-xl flex items-center justify-center text-xl font-bold bg-blue-100 text-blue-600">
+                                                    <FiBriefcase />
+                                                </div>
+                                            )
                                         )}
                                         <div>
                                             <Dialog.Title as="h3" className="text-lg font-bold text-gray-900">
@@ -145,6 +189,15 @@ const UserApprovalModal = ({ isOpen, onClose, user, profile, onApprove, onReject
                                                     />
                                                 </div>
                                             )}
+                                            {!isWorker && profile.logo && (
+                                                <div className="mb-4 flex justify-center md:justify-start">
+                                                    <img
+                                                        src={profile.logo}
+                                                        alt="Company Logo"
+                                                        className="h-20 w-20 rounded-xl object-cover bg-white border border-gray-200 shadow-sm"
+                                                    />
+                                                </div>
+                                            )}
                                             <Field label="Email" value={user.email} />
                                             <Field label="Phone" value={isWorker ? profile.phone : profile.contactPerson?.phone} />
                                             {isWorker && <Field label="Location" value={profile.location} />}
@@ -157,30 +210,184 @@ const UserApprovalModal = ({ isOpen, onClose, user, profile, onApprove, onReject
                                         </Section>
 
                                         <Section title="Professional Links" icon={FiGlobe}>
-                                            <Field label="LinkedIn" value={profile.linkedinProfile} href={profile.linkedinProfile} />
-                                            {isWorker && <Field label="GitHub" value={profile.githubProfile} href={profile.githubProfile} />}
-                                            {isWorker && <Field label="Twitter / X" value={profile.twitterProfile} href={profile.twitterProfile} />}
-
-                                            {isWorker && (
-                                                <div className="mt-3 pt-3 border-t border-gray-100">
-                                                    <button
-                                                        onClick={() => setShowMoreLinks(!showMoreLinks)}
-                                                        className="flex items-center gap-2 text-xs font-medium text-primary-600 hover:text-primary-700 transition-colors"
+                                            <div className="space-y-2">
+                                                {/* Website */}
+                                                {profile.website && (
+                                                    <a
+                                                        href={profile.website}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center gap-3 text-sm text-gray-700 hover:text-gray-900 bg-white p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all group"
                                                     >
-                                                        {showMoreLinks ? 'Show Less' : 'Show More Links'}
-                                                        <FiChevronDown className={`w-3 h-3 transition-transform ${showMoreLinks ? 'rotate-180' : ''}`} />
-                                                    </button>
-
-                                                    {showMoreLinks && (
-                                                        <div className="mt-3 space-y-3 animate-fade-in">
-                                                            <Field label="Dribbble" value={profile.dribbbleProfile} href={profile.dribbbleProfile} />
-                                                            <Field label="Behance" value={profile.behanceProfile} href={profile.behanceProfile} />
-                                                            <Field label="Instagram" value={profile.instagramProfile} href={profile.instagramProfile} />
-                                                            <Field label="StackOverflow" value={profile.stackoverflowProfile} href={profile.stackoverflowProfile} />
+                                                        <div className="p-1.5 rounded-md bg-gray-100">
+                                                            <FiGlobe className="w-3.5 h-3.5 text-gray-600" />
                                                         </div>
-                                                    )}
-                                                </div>
-                                            )}
+                                                        <span className="truncate font-medium">Website / Portfolio</span>
+                                                    </a>
+                                                )}
+
+                                                {/* LinkedIn */}
+                                                {profile.linkedinProfile && (
+                                                    <a
+                                                        href={profile.linkedinProfile}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center gap-3 text-sm text-gray-700 hover:text-gray-900 bg-white p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all group"
+                                                    >
+                                                        <div className="p-1.5 rounded-md bg-blue-50">
+                                                            <FaLinkedin className="w-3.5 h-3.5 text-blue-600" />
+                                                        </div>
+                                                        <span className="truncate font-medium">LinkedIn</span>
+                                                    </a>
+                                                )}
+
+                                                {/* Additional Professional Links (Company) */}
+                                                {/* Additional Professional Links (Company) */}
+                                                {profile.professionalLinks && profile.professionalLinks.length > 0 && (
+                                                    <>
+                                                        {profile.professionalLinks.slice(0, showMoreLinks ? undefined : 3).map((link, i) => {
+                                                            const { icon: Icon, color, bgColor, label } = getProfessionalIcon(link);
+                                                            return (
+                                                                <a
+                                                                    key={i}
+                                                                    href={link}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="flex items-center gap-3 text-sm text-gray-700 hover:text-gray-900 bg-white p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all group"
+                                                                >
+                                                                    <div className={`p-1.5 rounded-md ${bgColor}`}>
+                                                                        <Icon className={`w-3.5 h-3.5 ${color}`} />
+                                                                    </div>
+                                                                    <span className="truncate font-medium">{label}</span>
+                                                                </a>
+                                                            );
+                                                        })}
+
+                                                        {profile.professionalLinks.length > 3 && (
+                                                            <button
+                                                                onClick={() => setShowMoreLinks(!showMoreLinks)}
+                                                                className="w-full py-2 text-sm text-primary-600 font-medium hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-colors flex items-center justify-center gap-1"
+                                                            >
+                                                                {showMoreLinks ? 'Show Less' : 'Show More Links'}
+                                                                <FiChevronDown className={`w-4 h-4 transition-transform ${showMoreLinks ? 'rotate-180' : ''}`} />
+                                                            </button>
+                                                        )}
+                                                    </>
+                                                )}
+
+                                                {/* GitHub */}
+                                                {profile.githubProfile && (
+                                                    <a
+                                                        href={profile.githubProfile}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center gap-3 text-sm text-gray-700 hover:text-gray-900 bg-white p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all group"
+                                                    >
+                                                        <div className="p-1.5 rounded-md bg-gray-100">
+                                                            <FaGithub className="w-3.5 h-3.5 text-gray-700" />
+                                                        </div>
+                                                        <span className="truncate font-medium">GitHub</span>
+                                                    </a>
+                                                )}
+
+                                                {/* Twitter / X */}
+                                                {profile.twitterProfile && (
+                                                    <a
+                                                        href={profile.twitterProfile}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center gap-3 text-sm text-gray-700 hover:text-gray-900 bg-white p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all group"
+                                                    >
+                                                        <div className="p-1.5 rounded-md bg-sky-50">
+                                                            <FaTwitter className="w-3.5 h-3.5 text-sky-500" />
+                                                        </div>
+                                                        <span className="truncate font-medium">Twitter / X</span>
+                                                    </a>
+                                                )}
+
+                                                {/* Show More/Less for additional links */}
+                                                {(profile.dribbbleProfile || profile.behanceProfile || profile.instagramProfile || profile.stackoverflowProfile) && (
+                                                    <>
+                                                        {showMoreLinks && (
+                                                            <>
+                                                                {/* Dribbble */}
+                                                                {profile.dribbbleProfile && (
+                                                                    <a
+                                                                        href={profile.dribbbleProfile}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="flex items-center gap-3 text-sm text-gray-700 hover:text-gray-900 bg-white p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all group"
+                                                                    >
+                                                                        <div className="p-1.5 rounded-md bg-pink-50">
+                                                                            <FaDribbble className="w-3.5 h-3.5 text-pink-500" />
+                                                                        </div>
+                                                                        <span className="truncate font-medium">Dribbble</span>
+                                                                    </a>
+                                                                )}
+
+                                                                {/* Behance */}
+                                                                {profile.behanceProfile && (
+                                                                    <a
+                                                                        href={profile.behanceProfile}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="flex items-center gap-3 text-sm text-gray-700 hover:text-gray-900 bg-white p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all group"
+                                                                    >
+                                                                        <div className="p-1.5 rounded-md bg-blue-50">
+                                                                            <FaBehance className="w-3.5 h-3.5 text-blue-500" />
+                                                                        </div>
+                                                                        <span className="truncate font-medium">Behance</span>
+                                                                    </a>
+                                                                )}
+
+                                                                {/* Instagram */}
+                                                                {profile.instagramProfile && (
+                                                                    <a
+                                                                        href={profile.instagramProfile}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="flex items-center gap-3 text-sm text-gray-700 hover:text-gray-900 bg-white p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all group"
+                                                                    >
+                                                                        <div className="p-1.5 rounded-md bg-pink-50">
+                                                                            <FaInstagram className="w-3.5 h-3.5 text-pink-600" />
+                                                                        </div>
+                                                                        <span className="truncate font-medium">Instagram</span>
+                                                                    </a>
+                                                                )}
+
+                                                                {/* StackOverflow */}
+                                                                {profile.stackoverflowProfile && (
+                                                                    <a
+                                                                        href={profile.stackoverflowProfile}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="flex items-center gap-3 text-sm text-gray-700 hover:text-gray-900 bg-white p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all group"
+                                                                    >
+                                                                        <div className="p-1.5 rounded-md bg-orange-50">
+                                                                            <FaStackOverflow className="w-3.5 h-3.5 text-orange-500" />
+                                                                        </div>
+                                                                        <span className="truncate font-medium">StackOverflow</span>
+                                                                    </a>
+                                                                )}
+                                                            </>
+                                                        )}
+
+                                                        {/* Toggle Button */}
+                                                        <button
+                                                            onClick={() => setShowMoreLinks(!showMoreLinks)}
+                                                            className="w-full py-2 text-sm text-primary-600 font-medium hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-colors flex items-center justify-center gap-1"
+                                                        >
+                                                            {showMoreLinks ? 'Show Less' : 'Show More Links'}
+                                                            <FiChevronDown className={`w-4 h-4 transition-transform ${showMoreLinks ? 'rotate-180' : ''}`} />
+                                                        </button>
+                                                    </>
+                                                )}
+
+                                                {/* No links message */}
+                                                {!profile.website && !profile.linkedinProfile && !profile.githubProfile && !profile.twitterProfile && !profile.dribbbleProfile && !profile.behanceProfile && !profile.instagramProfile && !profile.stackoverflowProfile && (
+                                                    <p className="text-sm text-gray-500 italic">No professional links provided</p>
+                                                )}
+                                            </div>
                                         </Section>
                                     </div>
 
@@ -188,7 +395,11 @@ const UserApprovalModal = ({ isOpen, onClose, user, profile, onApprove, onReject
                                     <Section title={isWorker ? "Bio & Skills" : "Company Details"} icon={FiBriefcase}>
                                         <div className="mb-4">
                                             <p className="text-xs text-gray-500 font-medium mb-1">Description/Bio</p>
-                                            <p className="text-sm text-gray-700 whitespace-pre-wrap">{profile.bio || profile.description}</p>
+                                            <ExpandableText
+                                                text={profile.bio || profile.description}
+                                                limit={500}
+                                                textClassName="text-sm text-gray-700"
+                                            />
                                         </div>
 
                                         {isWorker && profile.skills && (
@@ -220,7 +431,12 @@ const UserApprovalModal = ({ isOpen, onClose, user, profile, onApprove, onReject
                                                                 </span>
                                                             </div>
                                                             {exp.description && (
-                                                                <p className="text-xs text-gray-500 mt-2">{exp.description}</p>
+                                                                <ExpandableText
+                                                                    text={exp.description}
+                                                                    limit={250}
+                                                                    className="mt-2"
+                                                                    textClassName="text-xs text-gray-500"
+                                                                />
                                                             )}
                                                         </div>
                                                     ))}
@@ -237,6 +453,97 @@ const UserApprovalModal = ({ isOpen, onClose, user, profile, onApprove, onReject
                                             </div>
                                         )}
                                     </Section>
+
+                                    {/* Contact Person (Company Only) */}
+                                    {!isWorker && (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                            <Section title="Primary Contact Person" icon={FiUser}>
+                                                <div className="space-y-3">
+                                                    <Field label="Name" value={profile.contactPerson?.name} />
+                                                    <Field label="Position" value={profile.contactPerson?.position} />
+                                                    <Field label="Email" value={profile.contactPerson?.email} />
+                                                    <Field label="Phone" value={profile.contactPerson?.phone} />
+                                                </div>
+                                            </Section>
+
+                                            {/* Social Media (Company Only) */}
+                                            <Section title="Social Media" icon={FiGlobe}>
+                                                {(profile.linkedinProfile || profile.socialMedia?.linkedin || profile.socialMedia?.twitter || profile.socialMedia?.facebook || profile.socialMedia?.instagram) ? (
+                                                    <div className="space-y-2">
+                                                        {profile.linkedinProfile && (
+                                                            <a
+                                                                href={profile.linkedinProfile}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="flex items-center gap-3 text-sm text-gray-700 hover:text-gray-900 bg-white p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all group"
+                                                            >
+                                                                <div className="p-1.5 rounded-md bg-blue-50">
+                                                                    <FaLinkedin className="w-3.5 h-3.5 text-blue-600" />
+                                                                </div>
+                                                                <span className="truncate font-medium">LinkedIn</span>
+                                                            </a>
+                                                        )}
+                                                        {profile.socialMedia?.linkedin && (
+                                                            <a
+                                                                href={profile.socialMedia.linkedin}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="flex items-center gap-3 text-sm text-gray-700 hover:text-gray-900 bg-white p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all group"
+                                                            >
+                                                                <div className="p-1.5 rounded-md bg-blue-50">
+                                                                    <FaLinkedin className="w-3.5 h-3.5 text-blue-600" />
+                                                                </div>
+                                                                <span className="truncate font-medium">LinkedIn</span>
+                                                            </a>
+                                                        )}
+                                                        {profile.socialMedia?.twitter && (
+                                                            <a
+                                                                href={profile.socialMedia.twitter}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="flex items-center gap-3 text-sm text-gray-700 hover:text-gray-900 bg-white p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all group"
+                                                            >
+                                                                <div className="p-1.5 rounded-md bg-sky-50">
+                                                                    <FaTwitter className="w-3.5 h-3.5 text-sky-500" />
+                                                                </div>
+                                                                <span className="truncate font-medium">Twitter</span>
+                                                            </a>
+                                                        )}
+                                                        {profile.socialMedia?.facebook && (
+                                                            <a
+                                                                href={profile.socialMedia.facebook}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="flex items-center gap-3 text-sm text-gray-700 hover:text-gray-900 bg-white p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all group"
+                                                            >
+                                                                <div className="p-1.5 rounded-md bg-blue-50">
+                                                                    <FaFacebook className="w-3.5 h-3.5 text-blue-600" />
+                                                                </div>
+                                                                <span className="truncate font-medium">Facebook</span>
+                                                            </a>
+                                                        )}
+                                                        {profile.socialMedia?.instagram && (
+                                                            <a
+                                                                href={profile.socialMedia.instagram}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="flex items-center gap-3 text-sm text-gray-700 hover:text-gray-900 bg-white p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all group"
+                                                            >
+                                                                <div className="p-1.5 rounded-md bg-pink-50">
+                                                                    <FaInstagram className="w-3.5 h-3.5 text-pink-600" />
+                                                                </div>
+                                                                <span className="truncate font-medium">Instagram</span>
+                                                            </a>
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-sm text-gray-500 italic">No social media links provided</p>
+                                                )}
+                                            </Section>
+
+
+                                        </div>
+                                    )}
 
                                     {/* Preferences & Portfolio (Worker Only) */}
                                     {isWorker && (
@@ -266,18 +573,33 @@ const UserApprovalModal = ({ isOpen, onClose, user, profile, onApprove, onReject
                                             <Section title="Portfolio" icon={FiGlobe}>
                                                 {profile.portfolioLinks && profile.portfolioLinks.length > 0 ? (
                                                     <div className="space-y-2">
-                                                        {profile.portfolioLinks.map((link, i) => (
-                                                            <a
-                                                                key={i}
-                                                                href={link}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="flex items-center gap-2 text-sm text-primary-600 hover:underline bg-white p-2 rounded border border-gray-100"
-                                                            >
-                                                                <FiExternalLink className="w-3 h-3" />
-                                                                <span className="truncate">{link}</span>
-                                                            </a>
-                                                        ))}
+                                                        {profile.portfolioLinks.map((link, i) => {
+                                                            const { icon: Icon, color } = getPortfolioIcon(link);
+                                                            // Map color to background color
+                                                            const bgColorMap = {
+                                                                'text-gray-800': 'bg-gray-100',
+                                                                'text-blue-500': 'bg-blue-50',
+                                                                'text-pink-500': 'bg-pink-50',
+                                                                'text-gray-700': 'bg-gray-100',
+                                                                'text-blue-600': 'bg-blue-50',
+                                                                'text-primary-600': 'bg-gray-50'
+                                                            };
+                                                            const bgColor = bgColorMap[color] || 'bg-gray-50';
+                                                            return (
+                                                                <a
+                                                                    key={i}
+                                                                    href={link}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="flex items-center gap-3 text-sm text-gray-700 hover:text-gray-900 bg-white p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all group"
+                                                                >
+                                                                    <div className={`p-1.5 rounded-md ${bgColor}`}>
+                                                                        <Icon className={`w-3.5 h-3.5 ${color}`} />
+                                                                    </div>
+                                                                    <span className="truncate font-medium">{link}</span>
+                                                                </a>
+                                                            );
+                                                        })}
                                                     </div>
                                                 ) : (
                                                     <p className="text-sm text-gray-500 italic">No portfolio links provided</p>
@@ -286,8 +608,8 @@ const UserApprovalModal = ({ isOpen, onClose, user, profile, onApprove, onReject
                                         </div>
                                     )}
 
-                                    {/* Documents */}
-                                    <Section title="Documents" icon={FiDownload}>
+                                    {/* Tax Documents */}
+                                    <Section title={isWorker ? "Documents" : "Tax Documents"} icon={FiDownload}>
                                         {isWorker ? (
                                             <div className="space-y-2">
                                                 <div className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg">
@@ -309,22 +631,83 @@ const UserApprovalModal = ({ isOpen, onClose, user, profile, onApprove, onReject
                                             </div>
                                         ) : (
                                             <div className="space-y-2">
-                                                {profile.taxDocuments?.map((doc, i) => (
-                                                    <div key={i} className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="p-2 bg-blue-50 text-blue-600 rounded">
-                                                                <FiDownload className="w-4 h-4" />
+                                                {profile.taxDocuments?.slice(0, showAllDocs ? undefined : 3).map((doc, i) => {
+                                                    // Extract filename from URL
+                                                    const getFileName = (url) => {
+                                                        try {
+                                                            const urlParts = url.split('/');
+                                                            const fileName = urlParts[urlParts.length - 1];
+                                                            // Decode URL encoding
+                                                            const decoded = decodeURIComponent(fileName);
+                                                            // Remove timestamp prefix if exists (e.g., "1234567890-document.pdf" -> "document.pdf")
+                                                            const withoutTimestamp = decoded.replace(/^\d+-/, '');
+                                                            return withoutTimestamp;
+                                                        } catch (e) {
+                                                            return `Tax Document ${i + 1}`;
+                                                        }
+                                                    };
+
+                                                    const fileName = getFileName(doc);
+                                                    const trimmedName = fileName.length > 30 ? fileName.substring(0, 27) + '...' : fileName;
+
+                                                    return (
+                                                        <div key={i} className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
+                                                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                                <div className="p-2 bg-blue-50 text-blue-600 rounded">
+                                                                    <FiDownload className="w-4 h-4" />
+                                                                </div>
+                                                                <p className="text-sm font-medium text-gray-900 truncate" title={fileName}>
+                                                                    {trimmedName}
+                                                                </p>
                                                             </div>
-                                                            <p className="text-sm font-medium text-gray-900">Tax Document {i + 1}</p>
+                                                            <a href={doc} target="_blank" rel="noreferrer" className="text-sm text-primary-600 font-medium hover:underline flex-shrink-0 ml-2">
+                                                                View
+                                                            </a>
                                                         </div>
-                                                        <a href={doc} target="_blank" rel="noreferrer" className="text-sm text-primary-600 font-medium hover:underline">
-                                                            View
-                                                        </a>
-                                                    </div>
-                                                ))}
+                                                    );
+                                                })}
+
+                                                {/* Show More/Less Button */}
+                                                {profile.taxDocuments?.length > 3 && (
+                                                    <button
+                                                        onClick={() => setShowAllDocs(!showAllDocs)}
+                                                        className="w-full py-2 text-sm text-primary-600 font-medium hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-colors flex items-center justify-center gap-1"
+                                                    >
+                                                        {showAllDocs ? (
+                                                            <>
+                                                                Show Less
+                                                                <FiChevronDown className="w-4 h-4 rotate-180 transition-transform" />
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                Show {profile.taxDocuments.length - 3} More
+                                                                <FiChevronDown className="w-4 h-4 transition-transform" />
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                )}
                                             </div>
                                         )}
                                     </Section>
+
+                                    {/* Company Video (Company Only) */}
+                                    {!isWorker && profile.companyVideo && (
+                                        <Section title="Company Video" icon={FiGlobe}>
+                                            <div className="space-y-2">
+                                                <div className="bg-white border border-gray-200 rounded-lg p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="h-10 w-10 bg-primary-50 rounded-lg flex items-center justify-center">
+                                                            <FiVideo className="h-5 w-5 text-primary-600" />
+                                                        </div>
+                                                        <p className="text-sm font-medium text-gray-900">Company Video</p>
+                                                    </div>
+                                                    <a href={profile.companyVideo} target="_blank" rel="noreferrer" className="text-sm text-primary-600 font-medium hover:underline">
+                                                        View
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </Section>
+                                    )}
                                 </div>
 
                                 {/* Footer Actions */}
@@ -382,10 +765,10 @@ const UserApprovalModal = ({ isOpen, onClose, user, profile, onApprove, onReject
                                 </div>
                             </Dialog.Panel>
                         </Transition.Child>
-                    </div>
-                </div>
-            </Dialog>
-        </Transition>
+                    </div >
+                </div >
+            </Dialog >
+        </Transition >
     );
 };
 

@@ -45,7 +45,7 @@ exports.register = async (req, res) => {
       email,
       password,
       role,
-      status: 'pending' // Requires admin approval
+      status: 'incomplete' // Requires onboarding completion
     });
 
     // Create profile based on role
@@ -94,7 +94,7 @@ exports.register = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'Registration successful. Your account is pending admin approval.',
+      message: 'Registration successful. Please complete your profile.',
       token,
       user: {
         id: user._id,
