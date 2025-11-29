@@ -22,7 +22,20 @@ import InfoCard from '../../components/company/InfoCard';
 import ContactCard from '../../components/company/ContactCard';
 import LocationCard from '../../components/company/LocationCard';
 import DocumentList from '../../components/company/DocumentList';
-import BenefitsSection from '../../components/company/BenefitsSection';
+
+// Helper function to get platform icon from URL
+const getPlatformIcon = (url) => {
+    if (!url) return FiLink;
+    const lowerUrl = url.toLowerCase();
+    if (lowerUrl.includes('crunchbase')) return SiCrunchbase;
+    if (lowerUrl.includes('github')) return SiGithub;
+    if (lowerUrl.includes('medium')) return SiMedium;
+    if (lowerUrl.includes('behance')) return SiBehance;
+    if (lowerUrl.includes('dribbble')) return SiDribbble;
+    if (lowerUrl.includes('producthunt')) return SiProducthunt;
+    if (lowerUrl.includes('youtube')) return FiPlayCircle;
+    return FiLink;
+};
 
 const CompanyProfile = () => {
     const [profile, setProfile] = useState(null);
@@ -305,15 +318,18 @@ const CompanyProfile = () => {
                                     uploadProgress={uploadProgress}
                                     showProgress={true}
                                 >
-                                    <div className="w-24 h-24 rounded-2xl bg-white border border-slate-200 p-1 shrink-0 cursor-pointer hover:border-slate-300 transition-all">
-                                        <Avatar
-                                            src={profile?.logo}
-                                            name={profile?.companyName}
-                                            type="company"
-                                            size="custom"
-                                            className="w-full h-full rounded-xl object-cover"
-                                            shape="square"
-                                        />
+                                    <div className="w-24 h-24 rounded-2xl bg-slate-100 border border-slate-200 p-2 shrink-0 cursor-pointer hover:border-slate-300 transition-all flex items-center justify-center overflow-hidden">
+                                        {profile?.logo ? (
+                                            <img
+                                                src={profile.logo}
+                                                alt={profile.companyName}
+                                                className="max-w-full max-h-full rounded-xl object-contain"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold">
+                                                {profile?.companyName?.charAt(0) || 'C'}
+                                            </div>
+                                        )}
                                         <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl">
                                             <div className="text-center text-white">
                                                 <FiEdit2 className="h-5 w-5 mx-auto mb-1" />
@@ -323,15 +339,18 @@ const CompanyProfile = () => {
                                     </div>
                                 </FileUpload>
                             ) : (
-                                <div className="w-24 h-24 rounded-2xl bg-white border border-slate-200 p-1 shrink-0">
-                                    <Avatar
-                                        src={profile?.logo}
-                                        name={profile?.companyName}
-                                        type="company"
-                                        size="custom"
-                                        className="w-full h-full rounded-xl object-cover"
-                                        shape="square"
-                                    />
+                                <div className="w-24 h-24 rounded-2xl bg-slate-100 border border-slate-200 p-2 shrink-0 flex items-center justify-center overflow-hidden">
+                                    {profile?.logo ? (
+                                        <img
+                                            src={profile.logo}
+                                            alt={profile.companyName}
+                                            className="max-w-full max-h-full rounded-xl object-contain"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold">
+                                            {profile?.companyName?.charAt(0) || 'C'}
+                                        </div>
+                                    )}
                                 </div>
                             )}
                             {editing && profile?.logo && (
@@ -575,16 +594,6 @@ const CompanyProfile = () => {
                             </div>
                         </div>
 
-                        {/* Benefits Section */}
-                        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-                            <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">Benefits & Perks</h2>
-                            <BenefitsSection
-                                benefits={editing ? formData.benefits : profile?.benefits}
-                                editing={editing}
-                                onChange={(benefits) => setFormData({ ...formData, benefits })}
-                            />
-                        </div>
-
                         {/* Video Section */}
                         <div className="bg-gradient-to-br from-orange-50 to-white rounded-2xl p-6 border border-orange-100 shadow-sm">
                             <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
@@ -739,6 +748,8 @@ const CompanyProfile = () => {
                                                 }
                                             };
 
+                                            const PlatformIcon = getPlatformIcon(link);
+
                                             return (
                                                 <a
                                                     key={idx}
@@ -747,7 +758,10 @@ const CompanyProfile = () => {
                                                     rel="noopener noreferrer"
                                                     className="flex items-center justify-between text-sm text-slate-600 hover:text-blue-600 p-2 hover:bg-slate-50 rounded-lg border border-slate-100 transition-all group"
                                                 >
-                                                    {getDomainName(link)}
+                                                    <div className="flex items-center gap-2">
+                                                        <PlatformIcon className="w-4 h-4 text-slate-400 group-hover:text-blue-600" />
+                                                        <span>{getDomainName(link)}</span>
+                                                    </div>
                                                     <FiExternalLink className="w-3 h-3 text-slate-400 group-hover:text-blue-600" />
                                                 </a>
                                             );
