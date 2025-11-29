@@ -69,10 +69,9 @@ const useUndo = (undoWindow = 5000) => {
             message,
             async () => {
                 // Undo was clicked
-                const pendingAction = pendingActions.get(actionId);
-                if (pendingAction?.onUndo) {
+                if (onUndo) {
                     try {
-                        await pendingAction.onUndo();
+                        await onUndo();
                         toast.success(undoMessage);
                     } catch (error) {
                         console.error('Undo failed:', error);
@@ -100,12 +99,11 @@ const useUndo = (undoWindow = 5000) => {
 
         // Set timeout to execute action
         const timeoutId = setTimeout(async () => {
-            const pendingAction = pendingActions.get(actionId);
-            if (pendingAction?.action) {
+            if (action) {
                 try {
-                    await pendingAction.action();
-                    if (pendingAction.onComplete) {
-                        pendingAction.onComplete();
+                    await action();
+                    if (onComplete) {
+                        onComplete();
                     }
                 } catch (error) {
                     console.error('Action execution failed:', error);

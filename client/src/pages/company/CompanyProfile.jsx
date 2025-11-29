@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { companyAPI, uploadAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
@@ -38,6 +39,7 @@ const getPlatformIcon = (url) => {
 };
 
 const CompanyProfile = () => {
+    const { user } = useSelector((state) => state.auth);
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [editing, setEditing] = useState(false);
@@ -359,17 +361,14 @@ const CompanyProfile = () => {
                                     showProgress={true}
                                 >
                                     <div className="w-24 h-24 rounded-2xl bg-slate-100 border border-slate-200 p-2 shrink-0 cursor-pointer hover:border-slate-300 transition-all flex items-center justify-center overflow-hidden">
-                                        {profile?.logo ? (
-                                            <img
-                                                src={profile.logo}
-                                                alt={profile.companyName}
-                                                className="max-w-full max-h-full rounded-xl object-contain"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold">
-                                                {profile?.companyName?.charAt(0) || 'C'}
-                                            </div>
-                                        )}
+                                        <Avatar
+                                            src={profile?.logo || user?.avatar}
+                                            name={profile?.companyName || user?.name}
+                                            type="company"
+                                            size="custom"
+                                            className="w-full h-full rounded-xl !border-0 !shadow-none !bg-transparent"
+                                            shape="rounded-xl"
+                                        />
                                         <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl">
                                             <div className="text-center text-white">
                                                 <FiEdit2 className="h-5 w-5 mx-auto mb-1" />
@@ -380,17 +379,14 @@ const CompanyProfile = () => {
                                 </FileUpload>
                             ) : (
                                 <div className="w-24 h-24 rounded-2xl bg-slate-100 border border-slate-200 p-2 shrink-0 flex items-center justify-center overflow-hidden">
-                                    {profile?.logo ? (
-                                        <img
-                                            src={profile.logo}
-                                            alt={profile.companyName}
-                                            className="max-w-full max-h-full rounded-xl object-contain"
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold">
-                                            {profile?.companyName?.charAt(0) || 'C'}
-                                        </div>
-                                    )}
+                                    <Avatar
+                                        src={profile?.logo || user?.avatar}
+                                        name={profile?.companyName || user?.name}
+                                        type="company"
+                                        size="custom"
+                                        className="w-full h-full rounded-xl !border-0 !shadow-none !bg-transparent"
+                                        shape="rounded-xl"
+                                    />
                                 </div>
                             )}
                             {editing && profile?.logo && (
