@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FiChevronDown, FiCheck } from 'react-icons/fi';
 
 const CustomSelect = ({
+  label,
   value,
   onChange,
   options = [],
@@ -52,6 +53,11 @@ const CustomSelect = ({
 
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
+      {label && (
+        <label className="block text-sm font-medium text-gray-700 mb-1.5 pl-1">
+          {label} {required && <span className="text-red-500">*</span>}
+        </label>
+      )}
       {/* Hidden select for form compatibility */}
       <select
         name={name}
@@ -74,6 +80,7 @@ const CustomSelect = ({
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         className={`
+          relative
           w-full
           ${Icon ? 'pl-11' : 'pl-4'}
           pr-10

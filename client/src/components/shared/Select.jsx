@@ -2,6 +2,7 @@ import React from 'react';
 import { FiChevronDown } from 'react-icons/fi';
 
 const Select = ({
+  label,
   value,
   onChange,
   options = [],
@@ -9,23 +10,30 @@ const Select = ({
   className = '',
   disabled = false,
   icon: Icon = null,
+  required = false,
   ...props
 }) => {
   return (
-    <div className="relative">
-      {Icon && (
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10">
-          <Icon className="w-4 h-4 text-gray-400" />
-        </div>
+    <div className="w-full">
+      {label && (
+        <label className="block text-sm font-medium text-gray-700 mb-1.5 pl-1">
+          {label} {required && <span className="text-red-500">*</span>}
+        </label>
       )}
-      <select
-        value={value}
-        onChange={onChange}
-        disabled={disabled}
-        style={{
-          backgroundImage: 'none', // Remove default arrow
-        }}
-        className={`
+      <div className="relative">
+        {Icon && (
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+            <Icon className="w-4 h-4 text-gray-400" />
+          </div>
+        )}
+        <select
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          style={{
+            backgroundImage: 'none', // Remove default arrow
+          }}
+          className={`
           w-full
           ${Icon ? 'pl-11' : 'pl-4'}
           pr-10
@@ -59,25 +67,26 @@ const Select = ({
           [&>option:checked]:font-bold
           ${className}
         `}
-        {...props}
-      >
-        {placeholder && (
-          <option value="" disabled className="text-gray-400">
-            {placeholder}
-          </option>
-        )}
-        {options.map((option) => (
-          <option
-            key={option.value}
-            value={option.value}
-            className="py-3 px-4"
-          >
-            {option.label}
-          </option>
-        ))}
-      </select>
-      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-        <FiChevronDown className="w-5 h-5 text-gray-400 transition-transform duration-200" />
+          {...props}
+        >
+          {placeholder && (
+            <option value="" disabled className="text-gray-400">
+              {placeholder}
+            </option>
+          )}
+          {options.map((option) => (
+            <option
+              key={option.value}
+              value={option.value}
+              className="py-3 px-4"
+            >
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+          <FiChevronDown className="w-5 h-5 text-gray-400 transition-transform duration-200" />
+        </div>
       </div>
     </div>
   );

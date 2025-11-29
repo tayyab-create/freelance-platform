@@ -685,6 +685,7 @@ const CompanyProfile = () => {
                                         value={formData.socialMedia.twitter}
                                         onChange={handleSocialChange}
                                         placeholder="https://twitter.com/..."
+                                        icon={FiTwitter}
                                     />
                                     <Input
                                         label="Facebook"
@@ -692,6 +693,7 @@ const CompanyProfile = () => {
                                         value={formData.socialMedia.facebook}
                                         onChange={handleSocialChange}
                                         placeholder="https://facebook.com/..."
+                                        icon={FiFacebook}
                                     />
                                     <Input
                                         label="Instagram"
@@ -699,6 +701,7 @@ const CompanyProfile = () => {
                                         value={formData.socialMedia.instagram}
                                         onChange={handleSocialChange}
                                         placeholder="https://instagram.com/..."
+                                        icon={FiInstagram}
                                     />
                                 </div>
                             </div>
