@@ -3,6 +3,7 @@ import { companyAPI, uploadAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
 import Button from '../../components/common/Button';
+import Textarea from '../../components/common/Textarea';
 import Input from '../../components/common/Input';
 import {
     FiEdit2, FiSave, FiX, FiTrash2, FiBriefcase, FiCheckCircle, FiStar,
@@ -420,38 +421,15 @@ const CompanyProfile = () => {
                         </div>
 
                         {/* Buttons */}
-                        <div className="flex gap-3 w-full md:w-auto mt-4 md:mt-0">
-                            {!editing ? (
-                                <button
-                                    onClick={() => setEditing(true)}
-                                    className="flex-1 md:flex-none px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
-                                >
-                                    <FiEdit2 className="w-4 h-4" />
-                                    <span>Edit Profile</span>
-                                </button>
-                            ) : (
-                                <>
-                                    <button
-                                        onClick={handleSave}
-                                        disabled={saving}
-                                        className="flex-1 md:flex-none px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                                    >
-                                        <FiSave className="w-4 h-4" />
-                                        <span>{saving ? 'Saving...' : 'Save'}</span>
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setEditing(false);
-                                            fetchProfile();
-                                        }}
-                                        className="flex-1 md:flex-none px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
-                                    >
-                                        <FiX className="w-4 h-4" />
-                                        <span>Cancel</span>
-                                    </button>
-                                </>
-                            )}
-                        </div>
+                        {!editing && (
+                            <button
+                                onClick={() => setEditing(true)}
+                                className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors flex items-center gap-2"
+                            >
+                                <FiEdit2 className="w-4 h-4" />
+                                <span>Edit Profile</span>
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -519,16 +497,20 @@ const CompanyProfile = () => {
                     <div className="lg:col-span-2 space-y-6">
 
                         {/* About Section */}
-                        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-                            <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">About Company</h2>
+                        <div className="bg-gradient-to-br from-blue-50 to-white rounded-2xl p-6 border border-blue-100 shadow-sm">
+                            <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+                                <FiBriefcase className="text-blue-600" />
+                                About Company
+                            </h2>
                             {editing ? (
-                                <textarea
+                                <Textarea
+                                    label="Company Description"
                                     name="description"
                                     value={formData.description}
                                     onChange={handleChange}
-                                    rows="6"
-                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all mb-6 text-sm"
-                                    placeholder="We are a forward-thinking technology company..."
+                                    rows={6}
+                                    placeholder="Tell the world about your company, mission, values, and what makes you unique..."
+                                    helperText="This will be displayed publicly on your company profile"
                                 />
                             ) : (
                                 <p className="text-slate-600 text-sm leading-relaxed mb-6">
@@ -604,8 +586,11 @@ const CompanyProfile = () => {
                         </div>
 
                         {/* Video Section */}
-                        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-                            <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">Company Video</h2>
+                        <div className="bg-gradient-to-br from-orange-50 to-white rounded-2xl p-6 border border-orange-100 shadow-sm">
+                            <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+                                <FiVideo className="text-orange-600" />
+                                Company Video
+                            </h2>
                             {editing ? (
                                 <FileUpload
                                     name="companyVideo"
@@ -642,8 +627,11 @@ const CompanyProfile = () => {
                     <div className="space-y-6">
 
                         {/* Contact Person Card */}
-                        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-                            <h3 className="text-base font-bold text-slate-900 mb-4">Point of Contact</h3>
+                        <div className="bg-gradient-to-br from-purple-50 to-white rounded-2xl p-6 border border-purple-100 shadow-sm">
+                            <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                <FiUsers className="text-purple-600" />
+                                Point of Contact
+                            </h3>
                             <ContactCard
                                 contactPerson={editing ? formData.contactPerson : profile?.contactPerson}
                                 editing={editing}
@@ -653,8 +641,11 @@ const CompanyProfile = () => {
                         </div>
 
                         {/* Location Card */}
-                        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-                            <h3 className="text-base font-bold text-slate-900 mb-4">Office Location</h3>
+                        <div className="bg-gradient-to-br from-green-50 to-white rounded-2xl p-6 border border-green-100 shadow-sm">
+                            <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                <FiMapPin className="text-green-600" />
+                                Office Location
+                            </h3>
                             <LocationCard
                                 address={editing ? formData.address : profile?.address}
                                 editing={editing}
@@ -769,8 +760,11 @@ const CompanyProfile = () => {
                         </div>
 
                         {/* Tax Documents */}
-                        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-                            <h3 className="text-base font-bold text-slate-900 mb-4">Tax Documents</h3>
+                        <div className="bg-gradient-to-br from-amber-50 to-white rounded-2xl p-6 border border-amber-100 shadow-sm">
+                            <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                <FiFileText className="text-amber-600" />
+                                Tax Documents
+                            </h3>
                             <DocumentList documents={profile?.taxDocuments} />
                         </div>
 
@@ -778,6 +772,34 @@ const CompanyProfile = () => {
                 </div>
 
             </div>
+
+            {/* Sticky Save/Cancel Bar - Only visible when editing */}
+            {editing && (
+                <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-lg z-40">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => {
+                                    setEditing(false);
+                                    fetchProfile();
+                                }}
+                                className="px-6 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors flex items-center gap-2"
+                            >
+                                <FiX className="w-4 h-4" />
+                                <span>Cancel</span>
+                            </button>
+                            <button
+                                onClick={handleSave}
+                                disabled={saving}
+                                className="px-6 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                            >
+                                <FiSave className="w-4 h-4" />
+                                <span>{saving ? 'Saving Changes...' : 'Save Changes'}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Delete Confirmation Modal */}
             <DeleteConfirmationModal
