@@ -11,6 +11,8 @@ import FileUpload from '../../common/FileUpload';
 import Spinner from '../../common/Spinner';
 import TagInput from '../../common/TagInput';
 
+import CustomVideoPlayer from '../../shared/CustomVideoPlayer';
+
 const OverviewTab = ({
     profile,
     editing,
@@ -310,35 +312,34 @@ const OverviewTab = ({
                             <div className="md:col-span-2">
                                 <label className="block text-sm font-medium text-gray-700 mb-3">Video Introduction (Optional)</label>
                                 {basicInfo.videoIntroduction ? (
-                                    <div className="group relative bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between transition-all duration-200">
-                                        <div className="flex items-center gap-4">
-                                            <div className="p-3 bg-blue-50 text-blue-500 rounded-lg border border-blue-100">
-                                                <FiVideo className="h-6 w-6" />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-bold text-gray-900">Introduction Video</p>
-                                                <div className="flex items-center gap-3 mt-1">
-                                                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">Video File</span>
-                                                    <a
-                                                        href={basicInfo.videoIntroduction}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-xs text-primary-600 hover:text-primary-700 font-medium hover:underline flex items-center gap-1"
-                                                    >
-                                                        <FiEye className="w-3 h-3" />
-                                                        Watch
-                                                    </a>
+                                    <div className="space-y-4">
+                                        <div className="group relative bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between transition-all duration-200">
+                                            <div className="flex items-center gap-4">
+                                                <div className="p-3 bg-blue-50 text-blue-500 rounded-lg border border-blue-100">
+                                                    <FiVideo className="h-6 w-6" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-bold text-gray-900">Introduction Video</p>
+                                                    <div className="flex items-center gap-3 mt-1">
+                                                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">Video File</span>
+                                                        <span className="text-xs text-green-600 font-medium">Uploaded</span>
+                                                    </div>
                                                 </div>
                                             </div>
+                                            <button
+                                                onClick={handleDeleteVideo}
+                                                type="button"
+                                                className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                                                title="Remove Video"
+                                            >
+                                                <FiTrash2 className="h-5 w-5" />
+                                            </button>
                                         </div>
-                                        <button
-                                            onClick={handleDeleteVideo}
-                                            type="button"
-                                            className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
-                                            title="Remove Video"
-                                        >
-                                            <FiTrash2 className="h-5 w-5" />
-                                        </button>
+
+                                        {/* Video Preview in Edit Mode */}
+                                        <div className="rounded-xl overflow-hidden border border-gray-200">
+                                            <CustomVideoPlayer src={basicInfo.videoIntroduction} className="h-64 w-full" />
+                                        </div>
                                     </div>
                                 ) : (
                                     <FileUpload
@@ -377,21 +378,30 @@ const OverviewTab = ({
                             </div>
                         </div>
                     ) : (
-                        <div className="flex gap-4">
-                            {profile?.resume && (
-                                <a href={profile.resume} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 bg-primary-50 text-primary-700 rounded-lg font-medium hover:bg-primary-100 transition-colors">
-                                    <FiFileText className="h-4 w-4" />
-                                    View Resume
-                                </a>
-                            )}
+                        <div className="space-y-6">
+                            <div className="flex gap-4">
+                                {profile?.resume && (
+                                    <a href={profile.resume} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 bg-primary-50 text-primary-700 rounded-lg font-medium hover:bg-primary-100 transition-colors">
+                                        <FiFileText className="h-4 w-4" />
+                                        View Resume
+                                    </a>
+                                )}
+                                {!profile?.resume && !profile?.videoIntroduction && (
+                                    <p className="text-gray-400 text-sm">No documents or media added.</p>
+                                )}
+                            </div>
+
+                            {/* Video Player in View Mode */}
                             {profile?.videoIntroduction && (
-                                <a href={profile.videoIntroduction} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-700 rounded-lg font-medium hover:bg-gray-100 transition-colors">
-                                    <FiVideo className="h-4 w-4" />
-                                    Watch Video Intro
-                                </a>
-                            )}
-                            {!profile?.resume && !profile?.videoIntroduction && (
-                                <p className="text-gray-400 text-sm">No documents or media added.</p>
+                                <div className="mt-4">
+                                    <h4 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                                        <FiVideo className="text-primary-500" />
+                                        Video Introduction
+                                    </h4>
+                                    <div className="rounded-2xl overflow-hidden shadow-sm border border-gray-100 max-w-2xl">
+                                        <CustomVideoPlayer src={profile.videoIntroduction} className="w-full aspect-video" />
+                                    </div>
+                                </div>
                             )}
                         </div>
                     )}
