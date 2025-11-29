@@ -1,0 +1,4 @@
+Invoice
+Invoice #001
+Amount: $500
+Status: Pending

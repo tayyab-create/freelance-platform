@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { companyAPI } from '../../services/api';
+import { companyAPI, uploadAPI } from '../../services/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Spinner from '../../components/common/Spinner';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
-import { FiEdit2, FiSave, FiX, FiTrash2, FiBriefcase, FiCheckCircle, FiStar, FiMapPin, FiGlobe, FiLinkedin, FiUsers, FiMail, FiPhone } from 'react-icons/fi';
+import {
+    FiEdit2, FiSave, FiX, FiTrash2, FiBriefcase, FiCheckCircle, FiStar,
+    FiMapPin, FiGlobe, FiLinkedin, FiUsers, FiMail, FiPhone,
+    FiCalendar, FiShield, FiVideo, FiFacebook, FiInstagram, FiTwitter, FiLink
+} from 'react-icons/fi';
 import { FaBuilding } from 'react-icons/fa'
 import { toast } from '../../utils/toast';
 import FileUpload from '../../components/common/FileUpload';
-import { uploadAPI } from '../../services/api';
-import { SkeletonLoader, PageHeader, DeleteConfirmationModal, Select } from '../../components/shared';
+import { PageHeader, DeleteConfirmationModal, Select, Avatar } from '../../components/shared';
 import { getCompanyBreadcrumbs } from '../../utils/breadcrumbUtils';
 import useUndo from '../../hooks/useUndo';
 
@@ -23,6 +26,10 @@ const CompanyProfile = () => {
     const [uploadKey, setUploadKey] = useState(0);
     const [activeTab, setActiveTab] = useState('overview');
 
+    // Video Upload State
+    const [uploadingVideo, setUploadingVideo] = useState(false);
+    const [videoUploadProgress, setVideoUploadProgress] = useState(0);
+
     // Delete Modal State
     const [showDeleteLogoModal, setShowDeleteLogoModal] = useState(false);
     const { executeWithUndo } = useUndo();
@@ -33,6 +40,14 @@ const CompanyProfile = () => {
         description: '',
         website: '',
         linkedinProfile: '',
+        socialMedia: {
+            twitter: '',
+            facebook: '',
+            instagram: ''
+        },
+        professionalLinks: [],
+        foundedYear: '',
+        registrationNumber: '',
         industry: '',
         companySize: '1-10',
         address: {
@@ -48,6 +63,7 @@ const CompanyProfile = () => {
             email: '',
             phone: '',
         },
+        companyVideo: ''
     });
 
     useEffect(() => {
@@ -66,6 +82,14 @@ const CompanyProfile = () => {
                 description: profileData.description || '',
                 website: profileData.website || '',
                 linkedinProfile: profileData.linkedinProfile || '',
+                socialMedia: profileData.socialMedia || {
+                    twitter: '',
+                    facebook: '',
+                    instagram: ''
+                },
+                professionalLinks: profileData.professionalLinks || [],
+                foundedYear: profileData.foundedYear || '',
+                registrationNumber: profileData.registrationNumber || '',
                 industry: profileData.industry || '',
                 companySize: profileData.companySize || '1-10',
                 address: profileData.address || {
@@ -81,6 +105,7 @@ const CompanyProfile = () => {
                     email: '',
                     phone: '',
                 },
+                companyVideo: profileData.companyVideo || ''
             });
         } catch (error) {
             toast.error('Failed to load profile');
@@ -115,6 +140,31 @@ const CompanyProfile = () => {
         }
     };
 
+    const handleVideoUpload = async (file) => {
+        if (!file) return;
+
+        setUploadingVideo(true);
+        setVideoUploadProgress(0);
+        try {
+            const response = await uploadAPI.uploadSingle(
+                file,
+                'videos',
+                (progress) => setVideoUploadProgress(progress)
+            );
+            const videoUrl = `http://localhost:5000${response.data.data.fileUrl}`;
+
+            // Update form data directly
+            setFormData(prev => ({ ...prev, companyVideo: videoUrl }));
+            toast.success('Video uploaded! Click Save to apply changes.');
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || 'Failed to upload video';
+            toast.error(errorMessage);
+        } finally {
+            setUploadingVideo(false);
+            setVideoUploadProgress(0);
+        }
+    };
+
     const handleDeleteLogoClick = () => {
         setShowDeleteLogoModal(true);
     };
@@ -146,6 +196,16 @@ const CompanyProfile = () => {
         });
     };
 
+    const handleSocialChange = (e) => {
+        setFormData({
+            ...formData,
+            socialMedia: {
+                ...formData.socialMedia,
+                [e.target.name]: e.target.value
+            }
+        });
+    };
+
     const handleAddressChange = (e) => {
         setFormData({
             ...formData,
@@ -163,6 +223,30 @@ const CompanyProfile = () => {
                 ...formData.contactPerson,
                 [e.target.name]: e.target.value,
             },
+        });
+    };
+
+    const handleAddProfessionalLink = () => {
+        setFormData({
+            ...formData,
+            professionalLinks: [...formData.professionalLinks, '']
+        });
+    };
+
+    const handleProfessionalLinkChange = (index, value) => {
+        const newLinks = [...formData.professionalLinks];
+        newLinks[index] = value;
+        setFormData({
+            ...formData,
+            professionalLinks: newLinks
+        });
+    };
+
+    const handleRemoveProfessionalLink = (index) => {
+        const newLinks = formData.professionalLinks.filter((_, i) => i !== index);
+        setFormData({
+            ...formData,
+            professionalLinks: newLinks
         });
     };
 
@@ -223,7 +307,10 @@ const CompanyProfile = () => {
                                         {saving ? 'Saving...' : 'Save'}
                                     </button>
                                     <button
-                                        onClick={() => setEditing(false)}
+                                        onClick={() => {
+                                            setEditing(false);
+                                            fetchProfile(); // Reset form data
+                                        }}
                                         className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
                                     >
                                         <FiX className="h-4 w-4" />
@@ -250,15 +337,14 @@ const CompanyProfile = () => {
                                             showProgress={true}
                                         >
                                             <div className="relative h-32 w-32 rounded-xl overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-gray-300 transition-all bg-white flex items-center justify-center group">
-                                                {profile?.logo ? (
-                                                    <img
-                                                        src={profile.logo}
-                                                        alt="Logo"
-                                                        className="h-full w-full object-cover"
-                                                    />
-                                                ) : (
-                                                    <FaBuilding className="h-12 w-12 text-gray-300" />
-                                                )}
+                                                <Avatar
+                                                    src={profile?.logo}
+                                                    name={profile?.companyName}
+                                                    type="company"
+                                                    size="custom"
+                                                    className="h-full w-full object-cover"
+                                                    shape="square"
+                                                />
 
                                                 <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <div className="text-white flex flex-col items-center gap-1">
@@ -275,15 +361,14 @@ const CompanyProfile = () => {
                                         </FileUpload>
                                     ) : (
                                         <div className="relative h-32 w-32 rounded-xl overflow-hidden border-2 border-gray-200 bg-white flex items-center justify-center">
-                                            {profile?.logo ? (
-                                                <img
-                                                    src={profile.logo}
-                                                    alt="Logo"
-                                                    className="h-full w-full object-cover"
-                                                />
-                                            ) : (
-                                                <FaBuilding className="h-12 w-12 text-gray-300" />
-                                            )}
+                                            <Avatar
+                                                src={profile?.logo}
+                                                name={profile?.companyName}
+                                                type="company"
+                                                size="custom"
+                                                className="h-full w-full object-cover"
+                                                shape="square"
+                                            />
                                         </div>
                                     )}
 
@@ -393,25 +478,65 @@ const CompanyProfile = () => {
 
                             {/* Description & Links */}
                             <div className="grid md:grid-cols-3 gap-6">
-                                <div className="md:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                                    <h3 className="text-lg font-bold text-gray-900 mb-4">About Company</h3>
-                                    {editing ? (
-                                        <textarea
-                                            name="description"
-                                            value={formData.description}
-                                            onChange={handleChange}
-                                            rows="6"
-                                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all"
-                                            placeholder="Tell us about your company..."
-                                        />
-                                    ) : (
-                                        <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">
-                                            {profile?.description || 'No description added yet.'}
-                                        </p>
-                                    )}
+                                <div className="md:col-span-2 space-y-6">
+                                    {/* About Company */}
+                                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                                        <h3 className="text-lg font-bold text-gray-900 mb-4">About Company</h3>
+                                        {editing ? (
+                                            <textarea
+                                                name="description"
+                                                value={formData.description}
+                                                onChange={handleChange}
+                                                rows="6"
+                                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all"
+                                                placeholder="Tell us about your company..."
+                                            />
+                                        ) : (
+                                            <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">
+                                                {profile?.description || 'No description added yet.'}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    {/* Company Video */}
+                                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                            <FiVideo className="text-primary-600" /> Company Video
+                                        </h3>
+                                        {editing ? (
+                                            <div className="space-y-4">
+                                                <FileUpload
+                                                    name="companyVideo"
+                                                    accept="video/*"
+                                                    value={formData.companyVideo}
+                                                    onFileSelect={handleVideoUpload}
+                                                    helperText="MP4, MOV (max 50MB). Keep it under 2 minutes."
+                                                    maxSize={50}
+                                                    isUploading={uploadingVideo}
+                                                    uploadProgress={videoUploadProgress}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <div>
+                                                {profile?.companyVideo ? (
+                                                    <video
+                                                        src={profile.companyVideo}
+                                                        controls
+                                                        className="w-full rounded-xl max-h-[400px] bg-black"
+                                                    />
+                                                ) : (
+                                                    <div className="p-8 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                                                        <FiVideo className="mx-auto h-8 w-8 text-gray-300 mb-2" />
+                                                        <p className="text-gray-500">No company video uploaded</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
 
-                                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                                {/* Online Presence */}
+                                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 h-fit">
                                     <h3 className="text-lg font-bold text-gray-900 mb-4">Online Presence</h3>
                                     {editing ? (
                                         <div className="space-y-4">
@@ -421,6 +546,7 @@ const CompanyProfile = () => {
                                                 value={formData.website}
                                                 onChange={handleChange}
                                                 placeholder="https://yourcompany.com"
+                                                icon={FiGlobe}
                                             />
                                             <Input
                                                 label="LinkedIn"
@@ -428,11 +554,64 @@ const CompanyProfile = () => {
                                                 value={formData.linkedinProfile}
                                                 onChange={handleChange}
                                                 placeholder="https://linkedin.com/company/..."
+                                                icon={FiLinkedin}
                                             />
+                                            <div className="divider text-xs text-gray-400 uppercase tracking-wider font-bold my-2">Social Media</div>
+                                            <Input
+                                                label="Twitter"
+                                                name="twitter"
+                                                value={formData.socialMedia.twitter}
+                                                onChange={handleSocialChange}
+                                                placeholder="https://twitter.com/..."
+                                                icon={FiTwitter}
+                                            />
+                                            <Input
+                                                label="Facebook"
+                                                name="facebook"
+                                                value={formData.socialMedia.facebook}
+                                                onChange={handleSocialChange}
+                                                placeholder="https://facebook.com/..."
+                                                icon={FiFacebook}
+                                            />
+                                            <Input
+                                                label="Instagram"
+                                                name="instagram"
+                                                value={formData.socialMedia.instagram}
+                                                onChange={handleSocialChange}
+                                                placeholder="https://instagram.com/..."
+                                                icon={FiInstagram}
+                                            />
+
+                                            <div className="divider text-xs text-gray-400 uppercase tracking-wider font-bold my-2">Professional Links</div>
+                                            <div className="space-y-2">
+                                                {formData.professionalLinks.map((link, index) => (
+                                                    <div key={index} className="flex gap-2">
+                                                        <input
+                                                            type="url"
+                                                            value={link}
+                                                            onChange={(e) => handleProfessionalLinkChange(index, e.target.value)}
+                                                            placeholder="https://..."
+                                                            className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                                                        />
+                                                        <button
+                                                            onClick={() => handleRemoveProfessionalLink(index)}
+                                                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                                                        >
+                                                            <FiTrash2 className="h-4 w-4" />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                                <button
+                                                    onClick={handleAddProfessionalLink}
+                                                    className="text-sm text-primary-600 font-medium hover:text-primary-700 flex items-center gap-1"
+                                                >
+                                                    + Add Link
+                                                </button>
+                                            </div>
                                         </div>
                                     ) : (
                                         <div className="space-y-3">
-                                            {profile?.website ? (
+                                            {profile?.website && (
                                                 <a
                                                     href={profile.website}
                                                     target="_blank"
@@ -442,9 +621,9 @@ const CompanyProfile = () => {
                                                     <FiGlobe className="h-5 w-5" />
                                                     <span className="font-medium">Visit Website</span>
                                                 </a>
-                                            ) : <p className="text-sm text-gray-400">No website linked</p>}
+                                            )}
 
-                                            {profile?.linkedinProfile ? (
+                                            {profile?.linkedinProfile && (
                                                 <a
                                                     href={profile.linkedinProfile}
                                                     target="_blank"
@@ -454,7 +633,67 @@ const CompanyProfile = () => {
                                                     <FiLinkedin className="h-5 w-5" />
                                                     <span className="font-medium">LinkedIn</span>
                                                 </a>
-                                            ) : <p className="text-sm text-gray-400">No LinkedIn linked</p>}
+                                            )}
+
+                                            {profile?.socialMedia?.twitter && (
+                                                <a
+                                                    href={profile.socialMedia.twitter}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex items-center gap-3 p-3 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-500 transition-colors"
+                                                >
+                                                    <FiTwitter className="h-5 w-5" />
+                                                    <span className="font-medium">Twitter</span>
+                                                </a>
+                                            )}
+
+                                            {profile?.socialMedia?.facebook && (
+                                                <a
+                                                    href={profile.socialMedia.facebook}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex items-center gap-3 p-3 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors"
+                                                >
+                                                    <FiFacebook className="h-5 w-5" />
+                                                    <span className="font-medium">Facebook</span>
+                                                </a>
+                                            )}
+
+                                            {profile?.socialMedia?.instagram && (
+                                                <a
+                                                    href={profile.socialMedia.instagram}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex items-center gap-3 p-3 rounded-xl bg-pink-50 hover:bg-pink-100 text-pink-600 transition-colors"
+                                                >
+                                                    <FiInstagram className="h-5 w-5" />
+                                                    <span className="font-medium">Instagram</span>
+                                                </a>
+                                            )}
+
+                                            {profile?.professionalLinks?.length > 0 && (
+                                                <div className="pt-2 border-t border-gray-100 mt-2">
+                                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Other Links</p>
+                                                    <div className="space-y-2">
+                                                        {profile.professionalLinks.map((link, idx) => (
+                                                            <a
+                                                                key={idx}
+                                                                href={link}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary-600 truncate"
+                                                            >
+                                                                <FiLink className="h-3 w-3 flex-shrink-0" />
+                                                                <span className="truncate">{link}</span>
+                                                            </a>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {!profile?.website && !profile?.linkedinProfile && !profile?.socialMedia?.twitter && !profile?.socialMedia?.facebook && !profile?.socialMedia?.instagram && (!profile?.professionalLinks || profile.professionalLinks.length === 0) && (
+                                                <p className="text-sm text-gray-400">No online presence linked</p>
+                                            )}
                                         </div>
                                     )}
                                 </div>
@@ -476,6 +715,7 @@ const CompanyProfile = () => {
                                                 value={formData.industry}
                                                 onChange={handleChange}
                                                 placeholder="e.g., Technology, Finance"
+                                                icon={FiBriefcase}
                                             />
                                             <div>
                                                 <label className="label text-sm font-bold text-gray-700 mb-1 block">Company Size</label>
@@ -492,6 +732,23 @@ const CompanyProfile = () => {
                                                     ]}
                                                 />
                                             </div>
+                                            <Input
+                                                label="Founded Year"
+                                                name="foundedYear"
+                                                type="number"
+                                                value={formData.foundedYear}
+                                                onChange={handleChange}
+                                                placeholder="2020"
+                                                icon={FiCalendar}
+                                            />
+                                            <Input
+                                                label="Registration Number"
+                                                name="registrationNumber"
+                                                value={formData.registrationNumber}
+                                                onChange={handleChange}
+                                                placeholder="Business Reg. No."
+                                                icon={FiShield}
+                                            />
                                         </>
                                     ) : (
                                         <>
@@ -511,6 +768,24 @@ const CompanyProfile = () => {
                                                 <div>
                                                     <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Size</p>
                                                     <p className="text-gray-900 font-medium">{profile?.companySize || 'Not specified'} employees</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                                                <div className="p-2 bg-orange-100 text-orange-600 rounded-lg">
+                                                    <FiCalendar className="h-5 w-5" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Founded</p>
+                                                    <p className="text-gray-900 font-medium">{profile?.foundedYear || 'Not specified'}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                                                <div className="p-2 bg-green-100 text-green-600 rounded-lg">
+                                                    <FiShield className="h-5 w-5" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Reg. No</p>
+                                                    <p className="text-gray-900 font-medium">{profile?.registrationNumber || 'Not specified'}</p>
                                                 </div>
                                             </div>
                                         </>

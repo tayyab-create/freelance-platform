@@ -163,12 +163,12 @@ const UserApprovalModal = ({ isOpen, onClose, user, profile, onApprove, onReject
                                 {/* Content */}
                                 <div className="px-6 py-6 max-h-[70vh] overflow-y-auto">
                                     {/* Status & History Card */}
-                                    <div className="mb-8 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                                    <div className="mb-8 bg-white rounded-xl border border-gray-100 overflow-hidden">
                                         <div className="p-4 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
                                             <div className="flex items-center gap-3">
                                                 <div className={`p-2 rounded-lg ${user.status === 'approved' ? 'bg-green-100 text-green-600' :
-                                                        user.status === 'rejected' ? 'bg-red-100 text-red-600' :
-                                                            'bg-yellow-100 text-yellow-600'
+                                                    user.status === 'rejected' ? 'bg-red-100 text-red-600' :
+                                                        'bg-yellow-100 text-yellow-600'
                                                     }`}>
                                                     {user.status === 'approved' ? <FiCheck className="w-5 h-5" /> :
                                                         user.status === 'rejected' ? <FiX className="w-5 h-5" /> :
@@ -201,12 +201,12 @@ const UserApprovalModal = ({ isOpen, onClose, user, profile, onApprove, onReject
 
                                                                 {/* Timeline Dot */}
                                                                 <div className={`relative z-10 w-6 h-6 rounded-full flex items-center justify-center border-2 border-white shadow-sm ${item.action === 'approved' ? 'bg-green-100 text-green-600' :
-                                                                        item.action === 'rejected' ? 'bg-red-100 text-red-600' :
-                                                                            'bg-blue-100 text-blue-600'
+                                                                    item.action === 'rejected' ? 'bg-red-100 text-red-600' :
+                                                                        'bg-blue-100 text-blue-600'
                                                                     }`}>
                                                                     <div className={`w-2 h-2 rounded-full ${item.action === 'approved' ? 'bg-green-600' :
-                                                                            item.action === 'rejected' ? 'bg-red-600' :
-                                                                                'bg-blue-600'
+                                                                        item.action === 'rejected' ? 'bg-red-600' :
+                                                                            'bg-blue-600'
                                                                         }`}></div>
                                                                 </div>
 
