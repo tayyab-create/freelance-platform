@@ -15,7 +15,7 @@ import { SiGithub, SiCrunchbase, SiMedium, SiBehance, SiDribbble, SiProducthunt 
 import { FaBuilding } from 'react-icons/fa'
 import { toast } from '../../utils/toast';
 import FileUpload from '../../components/common/FileUpload';
-import { PageHeader, DeleteConfirmationModal, Select, Avatar } from '../../components/shared';
+import { PageHeader, DeleteConfirmationModal, Select, Avatar, CustomVideoPlayer } from '../../components/shared';
 import { getCompanyBreadcrumbs } from '../../utils/breadcrumbUtils';
 import useUndo from '../../hooks/useUndo';
 import InfoCard from '../../components/company/InfoCard';
@@ -654,10 +654,9 @@ const CompanyProfile = () => {
                             ) : (
                                 <>
                                     {profile?.companyVideo ? (
-                                        <video
+                                        <CustomVideoPlayer
                                             src={profile.companyVideo}
-                                            controls
-                                            className="w-full aspect-video bg-slate-100 rounded-xl"
+                                            className="w-full aspect-video rounded-xl shadow-sm"
                                         />
                                     ) : (
                                         <div className="w-full aspect-video bg-slate-100 rounded-xl flex items-center justify-center border border-dashed border-slate-300 group cursor-pointer hover:bg-slate-50 transition-colors">

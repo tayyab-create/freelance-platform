@@ -45,3 +45,7 @@ export { default as SuccessAnimation, InlineSuccessCheck, SuccessToast } from '.
 // Mobile Components
 export { default as BottomSheet, FilterBottomSheet, ActionBottomSheet } from './BottomSheet';
 export { default as SwipeableItem, SwipeableList } from './SwipeableItem';
+
+// Media Components
+export { default as CustomVideoPlayer } from './CustomVideoPlayer';
+export { default as MapView } from './MapView';

@@ -1,5 +1,6 @@
 import React from 'react';
 import { FiMapPin } from 'react-icons/fi';
+import { MapView } from '../shared';
 
 const LocationCard = ({ address, editing = false, onChange, Input }) => {
     if (editing) {
@@ -61,14 +62,9 @@ const LocationCard = ({ address, editing = false, onChange, Input }) => {
                 {address.city && <p className="text-sm text-slate-600">{address.city}{address.state ? `, ${address.state}` : ''} {address.zipCode}</p>}
                 {address.country && <p className="text-sm text-slate-600">{address.country}</p>}
             </div>
-            {/* Mock Map */}
-            <div className="w-full h-32 bg-slate-100 rounded-lg overflow-hidden relative">
-                <div className="absolute inset-0 flex items-center justify-center text-slate-400 text-xs bg-slate-100 border border-slate-200">
-                    <div className="flex flex-col items-center gap-1">
-                        <FiMapPin className="w-6 h-6 text-slate-300" />
-                        Map View
-                    </div>
-                </div>
+            {/* Map View */}
+            <div className="mt-4">
+                <MapView address={address} className="h-40" />
             </div>
         </>
     );
