@@ -9,7 +9,7 @@ import {
     FiEdit2, FiSave, FiX, FiTrash2, FiBriefcase, FiCheckCircle, FiStar,
     FiMapPin, FiGlobe, FiLinkedin, FiUsers, FiMail, FiPhone,
     FiCalendar, FiShield, FiVideo, FiFacebook, FiInstagram, FiTwitter, FiLink, FiAward,
-    FiMessageSquare, FiPlayCircle, FiExternalLink, FiFileText
+    FiMessageSquare, FiPlayCircle, FiExternalLink, FiFileText, FiShare2
 } from 'react-icons/fi';
 import { SiGithub, SiCrunchbase, SiMedium, SiBehance, SiDribbble, SiProducthunt } from 'react-icons/si';
 import { FaBuilding } from 'react-icons/fa'
@@ -630,6 +630,39 @@ const CompanyProfile = () => {
                                 </>
                             )}
                         </div>
+
+                        {/* Social Media Section - Edit Mode Only */}
+                        {editing && (
+                            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                                <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+                                    <FiShare2 className="text-blue-600" />
+                                    Social Media
+                                </h2>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <Input
+                                        label="Twitter"
+                                        name="twitter"
+                                        value={formData.socialMedia.twitter}
+                                        onChange={handleSocialChange}
+                                        placeholder="https://twitter.com/..."
+                                    />
+                                    <Input
+                                        label="Facebook"
+                                        name="facebook"
+                                        value={formData.socialMedia.facebook}
+                                        onChange={handleSocialChange}
+                                        placeholder="https://facebook.com/..."
+                                    />
+                                    <Input
+                                        label="Instagram"
+                                        name="instagram"
+                                        value={formData.socialMedia.instagram}
+                                        onChange={handleSocialChange}
+                                        placeholder="https://instagram.com/..."
+                                    />
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* RIGHT COLUMN (Sidebar Info) */}
@@ -710,30 +743,6 @@ const CompanyProfile = () => {
                                             </div>
                                         ))}
                                     </div>
-                                    <div className="pt-2">
-                                        <label className="text-xs font-bold text-slate-500 uppercase mb-2 block">Social Media</label>
-                                        <Input
-                                            label="Twitter"
-                                            name="twitter"
-                                            value={formData.socialMedia.twitter}
-                                            onChange={handleSocialChange}
-                                            placeholder="https://twitter.com/..."
-                                        />
-                                    </div>
-                                    <Input
-                                        label="Facebook"
-                                        name="facebook"
-                                        value={formData.socialMedia.facebook}
-                                        onChange={handleSocialChange}
-                                        placeholder="https://facebook.com/..."
-                                    />
-                                    <Input
-                                        label="Instagram"
-                                        name="instagram"
-                                        value={formData.socialMedia.instagram}
-                                        onChange={handleSocialChange}
-                                        placeholder="https://instagram.com/..."
-                                    />
                                 </div>
                             ) : (
                                 <div className="space-y-2">
